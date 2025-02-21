@@ -7,13 +7,15 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import org.apache.commons.lang3.ArrayUtils;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.Arrays;
-import java.util.ResourceBundle;
+import java.util.*;
+import java.util.stream.IntStream;
 
 public class PinController implements Initializable {
 
@@ -74,27 +76,60 @@ public class PinController implements Initializable {
 }
 
     public void btn_0(ActionEvent actionEvent) {
+        press(0);
     }
 
     public void btn_next(ActionEvent actionEvent) {
-
+        ArrayUtils.reverse(last);
+        String sceneId = "";
+        if (Objects.deepEquals(last, code)) {
+            System.out.println("Next!");
+            text.setText("Korrekt!");
+            sceneId="admin-view.fxml";
+        } else {
+            text.setText("_ _ _ _");
+            System.out.println(Arrays.toString(last) + "!=" + Arrays.toString(code));
+            Arrays.fill(last, -1);
+            sceneId="stats-view.fxml";
+        }
+        FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource(sceneId));
+        Scene scene = null;
+        try {
+            scene = new Scene(fxmlLoader.load(), 600, 400);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        Main.getInstance().getStage().setScene(scene);
+        Main.getInstance().getStage().show();
     }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         text.setText("_ _ _ _");
         last = new int[4];
+        Arrays.fill(last, -1);
     }
 
     public void press(int press) {
         if (press >= 0 && press <= 9) {
             int[] temp = last.clone();
             temp[0] = press;
-            for (int i = 0; i < last.length-1; i++) {
-                temp[i +1 ] = last[i];
-            }
+            if (last.length - 1 >= 0) System.arraycopy(last, 0, temp, 1, last.length - 1);
             last = temp;
             System.out.println(Arrays.toString(last));
         }
+        display();
+    }
+
+    public void display() {
+        String s ="";
+        for (int i : last) {
+            if (i == -1) {
+                s = s + "_ ";
+            } else {
+                s = s+ "* ";
+            }
+        }
+        text.setText(s);
     }
 }

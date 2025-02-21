@@ -16,6 +16,7 @@ public class Main extends Application {
 
     private static Main instance;
     private String url = "http://127.0.0.1:5000/";
+    private Stage stage;
 
     @Override
     public void start(Stage stage) throws IOException {
@@ -26,9 +27,12 @@ public class Main extends Application {
         stage.setScene(scene);
         stage.show();
         setKost();
+        this.stage = stage;
     }
 
     public void setKost() throws IOException {
+        return;
+        /*
         //TODO: actual implementation
         String json = new CustomRequest(Main.getInstance().getUrl() + "/sweets").execute();
         JSONObject jsonObject = new JSONObject(json);
@@ -39,6 +43,8 @@ public class Main extends Application {
             System.out.println(i);
             btn.setText("Kosten(" + subObj.getString("name") + "):" + subObj.getInt("hours"));
         }
+
+         */
     }
 
     public static void main(String[] args) {
@@ -51,5 +57,9 @@ public class Main extends Application {
 
     public String getUrl() {
         return url;
+    }
+
+    public Stage getStage() {
+        return stage;
     }
 }

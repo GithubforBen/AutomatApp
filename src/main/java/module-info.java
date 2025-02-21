@@ -5,6 +5,7 @@ module de.schnorrenbergers.automat {
     requires org.kordamp.bootstrapfx.core;
     requires jdk.jsobject;
     requires org.json;
+    requires org.apache.commons.lang3;
 
     opens de.schnorrenbergers.automat to javafx.fxml;
     exports de.schnorrenbergers.automat;
