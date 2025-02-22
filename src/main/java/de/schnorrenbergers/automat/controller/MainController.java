@@ -69,7 +69,7 @@ public class MainController implements Initializable {
         FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("pin-view.fxml"));
         Scene scene = null;
         try {
-            scene = new Scene(fxmlLoader.load(), 600, 400);
+            scene = new Scene(fxmlLoader.load(), Main.getInstance().getDimension().getWidth(), Main.getInstance().getDimension().getHeight());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

@@ -20,7 +20,7 @@ import java.util.stream.IntStream;
 public class PinController implements Initializable {
 
     private int[] last;
-    private int[] code = new int[]{1,2,3,4};
+    private final int[] code = new int[]{1,2,3,4};
 
     @FXML
     private Text text;
@@ -66,7 +66,7 @@ public class PinController implements Initializable {
     FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("main-view.fxml"));
     Scene scene = null;
         try {
-        scene = new Scene(fxmlLoader.load(), 600, 400);
+        scene = new Scene(fxmlLoader.load(), Main.getInstance().getDimension().getWidth(), Main.getInstance().getDimension().getHeight());
     } catch (
     IOException e) {
         throw new RuntimeException(e);
@@ -83,7 +83,6 @@ public class PinController implements Initializable {
         ArrayUtils.reverse(last);
         String sceneId = "";
         if (Objects.deepEquals(last, code)) {
-            System.out.println("Next!");
             text.setText("Korrekt!");
             sceneId="admin-view.fxml";
         } else {
@@ -95,7 +94,7 @@ public class PinController implements Initializable {
         FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource(sceneId));
         Scene scene = null;
         try {
-            scene = new Scene(fxmlLoader.load(), 600, 400);
+            scene = new Scene(fxmlLoader.load(), Main.getInstance().getDimension().getWidth(), Main.getInstance().getDimension().getHeight());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -116,7 +115,6 @@ public class PinController implements Initializable {
             temp[0] = press;
             if (last.length - 1 >= 0) System.arraycopy(last, 0, temp, 1, last.length - 1);
             last = temp;
-            System.out.println(Arrays.toString(last));
         }
         display();
     }

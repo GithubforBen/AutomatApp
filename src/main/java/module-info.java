@@ -1,11 +1,11 @@
 module de.schnorrenbergers.automat {
-    requires javafx.controls;
     requires javafx.fxml;
 
     requires org.kordamp.bootstrapfx.core;
     requires jdk.jsobject;
     requires org.json;
     requires org.apache.commons.lang3;
+    requires atlantafx.base;
 
     opens de.schnorrenbergers.automat to javafx.fxml;
     exports de.schnorrenbergers.automat;

@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.chart.*?>
+<?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-
-<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.schnorrenbergers.automat.controller.StatsController">
+<AnchorPane prefHeight="800" prefWidth="480.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.schnorrenbergers.automat.controller.StatsController">
    <children>
-      <PieChart layoutX="32.0" prefHeight="400.0" prefWidth="548.0" fx:id="pie"/>
+      <PieChart fx:id="pie" layoutX="-3.0" prefHeight="314.0" prefWidth="600.0" />
+      <Button layoutY="309.0" mnemonicParsing="false" onAction="#back" prefHeight="91.0" prefWidth="600.0" text="Zurück" />
    </children>
 </AnchorPane>
