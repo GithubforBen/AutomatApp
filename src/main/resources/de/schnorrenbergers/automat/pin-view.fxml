@@ -6,14 +6,14 @@
 
 <AnchorPane prefHeight="800" prefWidth="480.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.schnorrenbergers.automat.controller.PinController">
    <children>
-      <VBox prefHeight="800.0" prefWidth="601.0">
+      <VBox prefHeight="800.0" prefWidth="480.0">
          <children>
-            <Text fx:id="text" strokeType="OUTSIDE" strokeWidth="0.0" text="Text" textAlignment="CENTER" wrappingWidth="601.0">
+            <Text fx:id="text" strokeType="OUTSIDE" strokeWidth="0.0" text="Text" textAlignment="CENTER" wrappingWidth="480.0">
                <font>
                   <Font size="77.0" />
                </font>
             </Text>
-            <GridPane prefHeight="699.0" prefWidth="601.0">
+            <GridPane prefHeight="699.0" prefWidth="480.0">
               <columnConstraints>
                 <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
                 <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />

@@ -6,7 +6,7 @@
 
 <AnchorPane prefHeight="800" prefWidth="480.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.schnorrenbergers.automat.controller.MainController">
    <children>
-      <GridPane layoutY="60.0" prefHeight="740.0" prefWidth="646.0">
+      <GridPane layoutY="60.0" prefHeight="750.0" prefWidth="480.0">
         <columnConstraints>
           <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
           <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
@@ -28,7 +28,7 @@
             <Button fx:id="btn_8" mnemonicParsing="false" onAction="#button8" prefHeight="245.0" prefWidth="355.0" text="8" GridPane.columnIndex="1" GridPane.rowIndex="3" />
          </children>
       </GridPane>
-      <Text fx:id="text" layoutY="52.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Username" wrappingWidth="639.0">
+      <Text fx:id="text" layoutY="52.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Username" wrappingWidth="480.0">
          <font>
             <Font size="48.0" />
          </font></Text>
