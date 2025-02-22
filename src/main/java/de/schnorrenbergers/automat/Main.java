@@ -46,7 +46,7 @@ public class Main extends Application {
         this.stage = stage;
         Application.setUserAgentStylesheet(new PrimerDark().getUserAgentStylesheet());
         load();
-        //setKost();
+        setKost();
     }
 
     public void loadScene(String sceneName) {

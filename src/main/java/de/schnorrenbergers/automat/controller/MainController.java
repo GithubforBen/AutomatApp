@@ -76,6 +76,11 @@ public class MainController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         text.setText("Bitte Karte scannen!");
         MainController.mainController = this;
+        try {
+            Main.getInstance().setKost();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static MainController getMainController() {
