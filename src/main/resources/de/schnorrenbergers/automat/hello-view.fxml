@@ -5,6 +5,6 @@
 
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="800" prefWidth="480.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1">
    <children>
-      <ProgressIndicator layoutX="284.0" layoutY="183.0" prefHeight="35.0" prefWidth="33.0" scaleX="10.0" scaleY="10.0" />
+      <ProgressIndicator layoutX="224.0" layoutY="383.0" prefHeight="35.0" prefWidth="33.0" scaleX="10.0" scaleY="10.0" />
    </children>
 </AnchorPane>

@@ -3,10 +3,28 @@
 <?import javafx.scene.chart.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
 
 <AnchorPane prefHeight="800" prefWidth="480.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.schnorrenbergers.automat.controller.StatsController">
    <children>
-      <PieChart fx:id="pie" layoutX="-3.0" prefHeight="314.0" prefWidth="600.0" />
-      <Button layoutY="309.0" mnemonicParsing="false" onAction="#back" prefHeight="91.0" prefWidth="600.0" text="Zurück" />
+      <VBox prefHeight="800.0" prefWidth="480.0">
+         <children>
+            <Text fx:id="attending" strokeType="OUTSIDE" strokeWidth="0.0" text="Anwesend:">
+               <font>
+                  <Font size="56.0" />
+               </font>
+            </Text>
+            <Text fx:id="gone" strokeType="OUTSIDE" strokeWidth="0.0" text="Abwesend:">
+               <font>
+                  <Font size="56.0" />
+               </font>
+            </Text>
+            <PieChart fx:id="pie" prefHeight="433.0" prefWidth="480.0" title="Verkaufte Süßigkeiten:" />
+            <Button mnemonicParsing="false" onAction="#back" prefHeight="261.0" prefWidth="480.0" text="Zurück">
+               <font>
+                  <Font size="56.0" />
+               </font></Button>
+         </children>
+      </VBox>
    </children>
 </AnchorPane>

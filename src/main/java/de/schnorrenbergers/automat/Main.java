@@ -1,17 +1,11 @@
 package de.schnorrenbergers.automat;
 
 import atlantafx.base.theme.PrimerDark;
-import atlantafx.base.theme.PrimerLight;
-import de.schnorrenbergers.automat.controller.MainController;
-import de.schnorrenbergers.automat.types.CustomRequest;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Dimension2D;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
 import javafx.stage.Stage;
-import netscape.javascript.JSObject;
-import org.json.JSONObject;
 
 import java.io.IOException;
 
