@@ -18,17 +18,7 @@ public class AdminView {
     private boolean alarm = false;
 
     public void back(ActionEvent actionEvent) {
-        Stage stage = ((Stage) ((Button) actionEvent.getSource()).getScene().getWindow());
-        FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("main-view.fxml"));
-        Scene scene = null;
-        try {
-            scene = new Scene(fxmlLoader.load(), Main.getInstance().getDimension().getWidth(), Main.getInstance().getDimension().getHeight());
-        } catch (
-                IOException e) {
-            throw new RuntimeException(e);
-        }
-        stage.setScene(scene);
-        stage.show();
+        Main.getInstance().loadScene("main-view.fxml");
     }
 
     public void alarm(ActionEvent actionEvent) {

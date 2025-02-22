@@ -6,6 +6,7 @@ module de.schnorrenbergers.automat {
     requires org.json;
     requires org.apache.commons.lang3;
     requires atlantafx.base;
+    requires jdk.httpserver;
 
     opens de.schnorrenbergers.automat to javafx.fxml;
     exports de.schnorrenbergers.automat;

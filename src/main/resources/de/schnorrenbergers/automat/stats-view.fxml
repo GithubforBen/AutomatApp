@@ -11,7 +11,7 @@
          <children>
             <Text fx:id="attending" strokeType="OUTSIDE" strokeWidth="0.0" text="Anwesend:">
                <font>
-                  <Font size="56.0" />
+                  <Font size="56.0"/>
                </font>
             </Text>
             <Text fx:id="gone" strokeType="OUTSIDE" strokeWidth="0.0" text="Abwesend:">

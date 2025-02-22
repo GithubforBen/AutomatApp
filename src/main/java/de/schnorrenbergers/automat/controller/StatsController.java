@@ -26,14 +26,6 @@ public class StatsController implements Initializable {
     }
 
     public void back(ActionEvent actionEvent) {
-        FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("main-view.fxml"));
-        Scene scene = null;
-        try {
-            scene = new Scene(fxmlLoader.load(), Main.getInstance().getDimension().getWidth(), Main.getInstance().getDimension().getHeight());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        Main.getInstance().getStage().setScene(scene);
-        Main.getInstance().getStage().show();
+        Main.getInstance().loadScene("main-view.fxml");
     }
 }

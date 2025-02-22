@@ -29,6 +29,10 @@ def dispense():
     else:
         return "error: 235";
 
+@app.route("/ping")
+def ping():
+    return "1"
+
 if __name__ == "__main__":
     app.run()
 

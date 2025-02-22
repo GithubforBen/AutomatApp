@@ -62,17 +62,8 @@ public class PinController implements Initializable {
     }
 
     public void btn_back(ActionEvent actionEvent) {//Loads pin scene
-    Stage stage = ((Stage) ((Button) actionEvent.getSource()).getScene().getWindow());
-    FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("main-view.fxml"));
-    Scene scene = null;
-        try {
-        scene = new Scene(fxmlLoader.load(), Main.getInstance().getDimension().getWidth(), Main.getInstance().getDimension().getHeight());
-    } catch (
-    IOException e) {
-        throw new RuntimeException(e);
-    }
-        stage.setScene(scene);
-        stage.show();
+
+        Main.getInstance().loadScene("main-view.fxml");
 }
 
     public void btn_0(ActionEvent actionEvent) {
