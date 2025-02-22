@@ -2,13 +2,12 @@ import flask;
 
 app = flask.Flask(__name__);
 
-
 @app.route("/sweets")
 def sweets():
-    return {"5": {"name": "Gummi", "hours": 2}, 
+    return {"5": {"name": "Haribo", "hours": 2},
             "4": {"name": "Smarties", "hours": 2,}, 
             "7": {"name": "Stats", "hours": -1}, 
-            "6": {"name": "Pickup", "hours": 2}, 
+            "6": {"name": "Brause", "hours": 2},
             "1": {"name": "Dublo", "hours": 2}, 
             "0": {"name": "Mentos", "hours": 2}, 
             "3": {"name": "Maoam", "hours": 2}, 
@@ -33,6 +32,16 @@ def dispense():
 @app.route("/ping")
 def ping():
     return "1"
+
+@app.route("/fill" methods=["POST"])
+def fill():
+    json = flask.request.json
+    print(json["name"] + ":" + json["amount"])
+    return "Added:" + json["name"] + ":" + json["amount"]
+
+@app.route("/mint")
+def mint():
+    return '{"da": 10, "weg": 100}'
 
 if __name__ == "__main__":
     app.run()

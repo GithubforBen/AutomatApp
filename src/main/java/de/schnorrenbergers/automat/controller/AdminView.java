@@ -14,8 +14,11 @@ import java.io.IOException;
 
 public class AdminView {
     @FXML
+    public Button plus;
+    @FXML
     private Slider slider;
     private boolean alarm = false;
+    private boolean positive = true;
 
     public void back(ActionEvent actionEvent) {
         Main.getInstance().loadScene("main-view.fxml");
@@ -28,5 +31,50 @@ public class AdminView {
             new CustomRequest("alarm_off");
         }
         alarm = !alarm;
+    }
+
+    public void mentos(ActionEvent actionEvent) {
+        fill("mentos");
+    }
+
+    public void haribo(ActionEvent actionEvent) {
+        fill("haribo");
+    }
+
+    public void brause(ActionEvent actionEvent) {
+        fill("brause");
+    }
+
+    public void smarties(ActionEvent actionEvent) {
+        fill("smarties");
+    }
+
+    public void maoam(ActionEvent actionEvent) {
+        fill("maoam");
+    }
+
+    public void fill(String name) {
+        try {
+            System.out.println(new CustomRequest("fill").executeComplex("{\"name\":\"" + name + "\",\"nr\"" + slider.getValue() + "}"));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void plus(ActionEvent actionEvent) {
+        positive = !positive;
+        if (positive) {
+            plus.setText("+");
+        } else  {
+            plus.setText("-");
+        }
+    }
+
+    public void duplo(ActionEvent actionEvent) {
+        fill("duplo");
+    }
+
+    public void kinder(ActionEvent actionEvent) {
+        fill("kinder");
     }
 }

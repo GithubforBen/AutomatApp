@@ -9,16 +9,14 @@
    <children>
       <VBox prefHeight="800.0" prefWidth="480.0">
          <children>
-            <Text fx:id="attending" strokeType="OUTSIDE" strokeWidth="0.0" text="Anwesend:">
-               <font>
-                  <Font size="56.0"/>
-               </font>
-            </Text>
-            <Text fx:id="gone" strokeType="OUTSIDE" strokeWidth="0.0" text="Abwesend:">
-               <font>
-                  <Font size="56.0" />
-               </font>
-            </Text>
+            <BarChart fx:id="chart" title="Schüler*innen">
+              <xAxis>
+                <CategoryAxis side="BOTTOM" />
+              </xAxis>
+              <yAxis>
+                <NumberAxis side="LEFT" />
+              </yAxis>
+            </BarChart>
             <PieChart fx:id="pie" prefHeight="433.0" prefWidth="480.0" title="Verkaufte Süßigkeiten:" />
             <Button mnemonicParsing="false" onAction="#back" prefHeight="261.0" prefWidth="480.0" text="Zurück">
                <font>
