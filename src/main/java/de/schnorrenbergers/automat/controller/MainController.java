@@ -103,11 +103,13 @@ public class MainController implements Initializable {
             JSONObject jsonObject = new JSONObject(new CustomRequest("sweets").execute()).getJSONObject(String.valueOf(number));
             if (Main.getInstance().getLastScan().time.getHour() >= jsonObject.getInt("hours")) {
                 new CustomRequest("dispense").executeComplex("{\"nr\":" + number + "}");
+                Main.getInstance().getStatistic().addOne(number);
             } else {
                 text.setText("Nicht genug Stunden");
             }
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
+            //throw new RuntimeException(e);
         }
     }
 

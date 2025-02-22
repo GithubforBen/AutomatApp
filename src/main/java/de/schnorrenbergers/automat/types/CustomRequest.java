@@ -47,15 +47,17 @@ public class CustomRequest {
         HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
         urlConnection.setRequestMethod("POST");
         urlConnection.setDoOutput(true);
+        urlConnection.setDoInput(true);
+        urlConnection.setRequestProperty("Content-Type", "application/json");
+        urlConnection.setRequestProperty("Accept", "application/json");
         OutputStream outputStream = urlConnection.getOutputStream();
         outputStream.write(data.getBytes());
         outputStream.flush();
         outputStream.close();
-
+        System.out.println(urlConnection.getResponseCode());
         BufferedReader in = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
         String inputLine;
         StringBuffer response = new StringBuffer();
-
         while ((inputLine = in.readLine()) != null) {
             response.append(inputLine);
         }

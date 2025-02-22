@@ -3,6 +3,7 @@ package de.schnorrenbergers.automat;
 import atlantafx.base.theme.PrimerDark;
 import de.schnorrenbergers.automat.controller.MainController;
 import de.schnorrenbergers.automat.server.Server;
+import de.schnorrenbergers.automat.statistic.Statistic;
 import de.schnorrenbergers.automat.types.CustomRequest;
 import de.schnorrenbergers.automat.types.ScannedCard;
 import javafx.application.Application;
@@ -24,17 +25,19 @@ import java.net.URLConnection;
 public class Main extends Application {
 
     private static Main instance;
-    private String url = "http://127.0.0.1:5000/";
+    private String url = "http://127.0.0.1:5000";
     private Stage stage;
     private Dimension2D dimension;
     private Server server;
     private ScannedCard lastScan;
+    private Statistic statistic;
 
     @Override
     public void start(Stage stage) throws IOException, InterruptedException {
         dimension = new Dimension2D(480, 800);
         instance = this;
         if (server == null) server = new Server();
+        statistic = new Statistic();
         FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("hello-view.fxml"));
         Scene scene = new Scene(fxmlLoader.load(), dimension.getWidth(), dimension.getHeight());
         stage.setTitle("Hello!");
@@ -43,7 +46,7 @@ public class Main extends Application {
         this.stage = stage;
         Application.setUserAgentStylesheet(new PrimerDark().getUserAgentStylesheet());
         load();
-        setKost();
+        //setKost();
     }
 
     public void loadScene(String sceneName) {
@@ -122,5 +125,9 @@ public class Main extends Application {
 
     public ScannedCard getLastScan() {
         return lastScan;
+    }
+
+    public Statistic getStatistic() {
+        return statistic;
     }
 }

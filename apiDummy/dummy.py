@@ -24,6 +24,7 @@ def alarm_off():
 
 @app.route("/dispense", methods=["POST"])
 def dispense():
+    print(flask.request.json["nr"])
     if flask.request.json["nr"] in range(0, 8):
         return "success";
     else:
