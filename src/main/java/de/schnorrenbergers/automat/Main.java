@@ -11,6 +11,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.geometry.Dimension2D;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import org.json.JSONObject;
 
@@ -44,9 +45,9 @@ public class Main extends Application {
         stage.setScene(scene);
         stage.show();
         this.stage = stage;
+        //Font.loadFont(Main.class.getResource("/fonts/Russo_One.ttf").toExternalForm(), 10);
         Application.setUserAgentStylesheet(new PrimerDark().getUserAgentStylesheet());
         load();
-        setKost();
     }
 
     public void loadScene(String sceneName) {
