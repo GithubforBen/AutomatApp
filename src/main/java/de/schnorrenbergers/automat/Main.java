@@ -105,6 +105,8 @@ public class Main extends Application {
     }
 
     public void setLastScan(ScannedCard lastScan) {
+        this.lastScan = lastScan;
+        if (lastScan == null) return;
         MainController.getMainController().getText().setText(lastScan.name + ":" + lastScan.time.getHour() + "h");
         new Thread(() -> {
             try {
@@ -116,7 +118,6 @@ public class Main extends Application {
             System.out.println(this.lastScan.toString());
             this.lastScan = null;
         }).start();
-        this.lastScan = lastScan;
     }
 
     public Server getServer() {

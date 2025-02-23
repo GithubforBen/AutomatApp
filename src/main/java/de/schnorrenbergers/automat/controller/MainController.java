@@ -109,6 +109,7 @@ public class MainController implements Initializable {
             if (Main.getInstance().getLastScan().time.getHour() >= jsonObject.getInt("hours")) {
                 new CustomRequest("dispense").executeComplex("{\"nr\":" + number + "}");
                 Main.getInstance().getStatistic().addOne(number);
+                Main.getInstance().setLastScan(null);
             } else {
                 text.setText("Nicht genug Stunden");
             }
