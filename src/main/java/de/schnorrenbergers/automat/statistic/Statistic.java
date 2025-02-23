@@ -2,10 +2,7 @@ package de.schnorrenbergers.automat.statistic;
 
 import org.json.JSONObject;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.util.HashMap;
 
 public class Statistic {
@@ -47,12 +44,11 @@ public class Statistic {
         stats.forEach((key, value) -> {
             obj.put("d:" + key, value);
         });
-        file.deleteOnExit();
-        file.createNewFile();
-        FileWriter writer = new FileWriter(file);
-        writer.write(obj.toString());
-        writer.flush();
-        writer.close();
+        PrintWriter printWriter = new PrintWriter(file);
+        printWriter.print("");
+        printWriter.print(obj.toString());
+        printWriter.flush();
+        printWriter.close();
     }
 
     public void addOne(int sweet) {
