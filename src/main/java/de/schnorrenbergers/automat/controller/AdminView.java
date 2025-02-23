@@ -25,10 +25,14 @@ public class AdminView {
     }
 
     public void alarm(ActionEvent actionEvent) {
-        if (alarm) {
-            new CustomRequest("alarm_on");
-        } else  {
-            new CustomRequest("alarm_off");
+        try {
+            if (alarm) {
+                new CustomRequest("alarm_on").execute();
+            } else  {
+                new CustomRequest("alarm_off").execute();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         alarm = !alarm;
     }
@@ -55,7 +59,8 @@ public class AdminView {
 
     public void fill(String name) {
         try {
-            System.out.println(new CustomRequest("fill").executeComplex("{\"name\":\"" + name + "\",\"nr\"" + slider.getValue() + "}"));
+            if (positive) System.out.println(new CustomRequest("fill").executeComplex("{\"name\":\"" + name + "\",\"nr\":" + slider.getValue() + "}"));
+            if (!positive) System.out.println(new CustomRequest("fill").executeComplex("{\"name\":\"" + name + "\",\"nr\":" + slider.getValue() * -1 + "}"));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

@@ -18,6 +18,7 @@ public class Statistic {
             for (int i = 0; i < 8; i++) {
                 stats.put(i, 0);
             }
+            save();
             return;
         }
         FileReader fileReader = new FileReader(file);

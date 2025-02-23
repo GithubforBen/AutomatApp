@@ -38,15 +38,17 @@ public class StatsController implements Initializable {
         }
         pie.setData(pieData);
         pie.setAnimated(true);
+        JSONObject object;
         try {
-            JSONObject object = new JSONObject(new CustomRequest("mint").execute());
+            object = new JSONObject(new CustomRequest("mint").execute());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        ObservableList<XYChart.Data> chartData = chart.getData();
-        chartData.clear();
-        chartData.add(new XYChart.Data<>("Anwesend", jsonObject.getInt("da")));
-        chartData.add(new XYChart.Data<>("Abwesend", jsonObject.getInt("weg")));
+        XYChart.Series chartData = new XYChart.Series();
+        chart.getData().clear();
+        chartData.getData().add(new XYChart.Data<>("Anwesend", object.getInt("da")));
+        chartData.getData().add(new XYChart.Data<>("Abwesend", object.getInt("weg")));
+        chart.getData().addAll(chartData);
     }
 
     public void back(ActionEvent actionEvent) {
