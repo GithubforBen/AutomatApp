@@ -11,17 +11,10 @@ import javafx.fxml.FXMLLoader;
 import javafx.geometry.Dimension2D;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLConnection;
 
 public class Main extends Application {
 
@@ -32,6 +25,7 @@ public class Main extends Application {
     private Server server;
     private ScannedCard lastScan;
     private Statistic statistic;
+    private int logoutTime = 10;
 
     @Override
     public void start(Stage stage) throws IOException, InterruptedException {
@@ -48,6 +42,8 @@ public class Main extends Application {
         //Font.loadFont(Main.class.getResource("/fonts/Russo_One.ttf").toExternalForm(), 10);
         Application.setUserAgentStylesheet(new PrimerDark().getUserAgentStylesheet());
         load();
+        new CustomRequest("ping").execute();
+        logoutTime = ((Integer) statistic.getSetting("logout"));
     }
 
     public void loadScene(String sceneName) {
@@ -107,18 +103,26 @@ public class Main extends Application {
 
     public void setLastScan(ScannedCard lastScan) {
         this.lastScan = lastScan;
+        updateDisplay();
         if (lastScan == null) return;
-        MainController.getMainController().getText().setText(lastScan.name + ":" + lastScan.time.getHour() + "h");
         new Thread(() -> {
             try {
-                Thread.sleep(1000*10);
+                Thread.sleep(1000L * logoutTime);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
-            MainController.getMainController().getText().setText("Bitte Karte Scannen");
+            updateDisplay();
             System.out.println(this.lastScan.toString());
             this.lastScan = null;
         }).start();
+    }
+
+    private void updateDisplay() {
+        if (lastScan == null) {
+            MainController.getMainController().getText().setText("Bitte Karte Scannen");
+            return;
+        }
+        MainController.getMainController().getText().setText(lastScan.name + ":" + lastScan.time.getHour() + "h");
     }
 
     public Server getServer() {
@@ -131,5 +135,13 @@ public class Main extends Application {
 
     public Statistic getStatistic() {
         return statistic;
+    }
+
+    public int getLogoutTime() {
+        return logoutTime;
+    }
+
+    public void setLogoutTime(int logoutTime) {
+        this.logoutTime = logoutTime;
     }
 }

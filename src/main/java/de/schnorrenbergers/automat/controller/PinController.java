@@ -21,6 +21,7 @@ public class PinController implements Initializable {
 
     private int[] last;
     private final int[] code = new int[]{1,2,3,4};
+    private final int[] settings = new int[]{3,3,3,3};
 
     @FXML
     private Text text;
@@ -76,21 +77,16 @@ public class PinController implements Initializable {
         if (Objects.deepEquals(last, code)) {
             text.setText("Korrekt!");
             sceneId="admin-view.fxml";
+        } else if (Objects.deepEquals(last, settings)) {
+            text.setText("Korrekt!");
+            sceneId="settings-view.fxml";
         } else {
             text.setText("_ _ _ _");
             System.out.println(Arrays.toString(last) + "!=" + Arrays.toString(code));
             Arrays.fill(last, -1);
             sceneId="stats-view.fxml";
         }
-        FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource(sceneId));
-        Scene scene = null;
-        try {
-            scene = new Scene(fxmlLoader.load(), Main.getInstance().getDimension().getWidth(), Main.getInstance().getDimension().getHeight());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        Main.getInstance().getStage().setScene(scene);
-        Main.getInstance().getStage().show();
+        Main.getInstance().loadScene(sceneId);
     }
 
     @Override

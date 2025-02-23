@@ -40,7 +40,7 @@ def fill():
 
 @app.route("/mint")
 def mint():
-    return {"da": 10, "weg": 100}
+    return {"da": 100, "weg": 150}
 
 if __name__ == "__main__":
     app.run()

@@ -6,7 +6,7 @@
 
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="800" prefWidth="480.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.schnorrenbergers.automat.controller.HelloController">
    <children>
-      <SplitPane dividerPositions="0.6967418546365914" orientation="VERTICAL" prefHeight="800.0" prefWidth="480.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+      <SplitPane fx:id="pane" dividerPositions="0.6967418546365914" orientation="VERTICAL" prefHeight="800.0" prefWidth="480.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
         <items>
           <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
                <children>
