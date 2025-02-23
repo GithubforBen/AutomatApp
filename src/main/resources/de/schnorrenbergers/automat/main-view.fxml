@@ -20,8 +20,11 @@
          <children>
             <Button fx:id="btn_1" graphicTextGap="0.0" mnemonicParsing="false" onAction="#button1" prefHeight="194.0" prefWidth="324.0" text="1" />
             <Button fx:id="btn_2" mnemonicParsing="false" onAction="#button2" prefHeight="198.0" prefWidth="329.0" text="2" GridPane.columnIndex="1" />
-            <Button fx:id="btn_3" mnemonicParsing="false" onAction="#button3" prefHeight="215.0" prefWidth="341.0" text="3" GridPane.rowIndex="1" />
-            <Button fx:id="btn_4" mnemonicParsing="false" onAction="#button4" prefHeight="238.0" prefWidth="354.0" text="4" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+            <Button fx:id="btn_3" mnemonicParsing="false" onAction="#button3" prefHeight="187.0" prefWidth="240.0" text="3" GridPane.rowIndex="1" />
+            <Button fx:id="btn_4" mnemonicParsing="false" onAction="#button4" prefHeight="187.0" prefWidth="240.0" text="4" GridPane.columnIndex="1" GridPane.rowIndex="1">
+               <font>
+                  <Font size="40.0" />
+               </font></Button>
             <Button fx:id="btn_5" mnemonicParsing="false" onAction="#button5" prefHeight="258.0" prefWidth="396.0" text="5" GridPane.rowIndex="2" />
             <Button fx:id="btn_6" mnemonicParsing="false" onAction="#button6" prefHeight="242.0" prefWidth="375.0" text="6" GridPane.columnIndex="1" GridPane.rowIndex="2" />
             <Button fx:id="btn_7" mnemonicParsing="false" onAction="#button7" prefHeight="284.0" prefWidth="392.0" text="7" GridPane.rowIndex="3" />

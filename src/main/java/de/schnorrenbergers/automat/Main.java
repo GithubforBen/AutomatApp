@@ -111,9 +111,8 @@ public class Main extends Application {
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
-            updateDisplay();
-            System.out.println(this.lastScan.toString());
             this.lastScan = null;
+            updateDisplay();
         }).start();
     }
 
