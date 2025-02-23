@@ -37,7 +37,7 @@ public class Statistic {
         settings = obj.getJSONObject("settings");
         for (int i = 0; i < obj.getInt("length"); i++) {
             stats.put(i, obj.getInt("d:" + i));
-        }
+        }//
     }
 
     public Object getSetting(String adress) {

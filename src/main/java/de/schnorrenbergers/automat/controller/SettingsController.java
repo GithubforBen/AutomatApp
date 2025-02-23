@@ -15,10 +15,10 @@ public class SettingsController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         slider_logout.valueProperty().addListener((observable, oldValue, newValue) -> {
-            display.setText(Main.getInstance().getLogoutTime() + "→" + ((int) slider_logout.valueProperty().get()));
+            display();
         });
         slider_logout.setValue(Main.getInstance().getLogoutTime());
-        display.setText(Main.getInstance().getLogoutTime() + "→" + ((int) slider_logout.valueProperty().get()));
+        display();
     }
 
     @FXML
@@ -44,12 +44,16 @@ public class SettingsController implements Initializable {
 
     public void Ok(ActionEvent actionEvent) {
         Main.getInstance().setLogoutTime(((int) slider_logout.getValue()));
-        slider_logout.setValue(Main.getInstance().getLogoutTime());
+        display();
         try {
             Main.getInstance().getStatistic().save();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+    
+    public void display() {
+        display.setText(Main.getInstance().getLogoutTime() + "→" + ((int) slider_logout.valueProperty().get()));
     }
 
     public void resetStats(ActionEvent actionEvent) {
