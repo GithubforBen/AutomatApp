@@ -3,7 +3,10 @@ package de.schnorrenbergers.automat.statistic;
 import de.schnorrenbergers.automat.Main;
 import org.json.JSONObject;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.function.BiConsumer;
 
@@ -11,6 +14,7 @@ public class Statistic {
     File file = new File("./stats.json");
     HashMap<Integer, Integer> stats = new HashMap<>();
     JSONObject settings;
+
     public Statistic() throws IOException {
         if (!file.exists()) {
             file.getParentFile().mkdirs();
@@ -48,7 +52,8 @@ public class Statistic {
         try {
             settings.get(adress);
             settings.remove(adress);
-        } catch (Exception _) {}
+        } catch (Exception _) {
+        }
         settings.put(adress, value);
         return true;
     }
@@ -86,9 +91,9 @@ public class Statistic {
     public void addOne(int sweet) {
         Integer orDefault = stats.getOrDefault(sweet, -1);
         if (orDefault == -1) {
-             stats.put(sweet, 1);
+            stats.put(sweet, 1);
         } else {
-            stats.replace(sweet, orDefault+1);
+            stats.replace(sweet, orDefault + 1);
         }
         try {
             save();

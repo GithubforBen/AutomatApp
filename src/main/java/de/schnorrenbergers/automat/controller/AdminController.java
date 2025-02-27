@@ -25,7 +25,7 @@ public class AdminController {
         try {
             if (alarm) {
                 new CustomRequest("alarm_on").execute();
-            } else  {
+            } else {
                 new CustomRequest("alarm_off").execute();
             }
         } catch (Exception e) {
@@ -56,8 +56,10 @@ public class AdminController {
 
     public void fill(String name) {
         try {
-            if (positive) System.out.println(new CustomRequest("fill").executeComplex("{\"name\":\"" + name + "\",\"nr\":" + slider.getValue() + "}"));
-            if (!positive) System.out.println(new CustomRequest("fill").executeComplex("{\"name\":\"" + name + "\",\"nr\":" + slider.getValue() * -1 + "}"));
+            if (positive)
+                System.out.println(new CustomRequest("fill").executeComplex("{\"name\":\"" + name + "\",\"nr\":" + slider.getValue() + "}"));
+            if (!positive)
+                System.out.println(new CustomRequest("fill").executeComplex("{\"name\":\"" + name + "\",\"nr\":" + slider.getValue() * -1 + "}"));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -67,7 +69,7 @@ public class AdminController {
         positive = !positive;
         if (positive) {
             plus.setText("+");
-        } else  {
+        } else {
             plus.setText("-");
         }
     }

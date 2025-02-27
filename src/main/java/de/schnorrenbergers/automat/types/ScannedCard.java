@@ -16,6 +16,6 @@ public class ScannedCard {
     }
 
     public String toString() {
-        return "{\"name\":\""+name+"\",\"time\":"+timeSec+",\"byteAdress\":" + Arrays.toString(byteAdress)+"}";
+        return "{\"name\":\"" + name + "\",\"time\":" + timeSec + ",\"byteAdress\":" + Arrays.toString(byteAdress) + "}";
     }
 }

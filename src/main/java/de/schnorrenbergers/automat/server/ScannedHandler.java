@@ -23,13 +23,15 @@ public class ScannedHandler implements HttpHandler {
             buf.append((char) b);
         }
         JSONObject json = new JSONObject(buf.toString());
-        List<Integer>  byteAdresses = new ArrayList<>();
+        List<Integer> byteAdresses = new ArrayList<>();
         for (Object rfid : json.getJSONArray("rfid")) {
             byteAdresses.add(Integer.parseInt(rfid.toString()));
         }
-        int[] arr  = new int[byteAdresses.size()];
-        for (int i = 0; i < byteAdresses.size(); i++) {arr[i] = byteAdresses.get(i);}
-        Main.getInstance().setLastScan(new ScannedCard(json.getInt("time"), json.getString("name"),arr));
+        int[] arr = new int[byteAdresses.size()];
+        for (int i = 0; i < byteAdresses.size(); i++) {
+            arr[i] = byteAdresses.get(i);
+        }
+        Main.getInstance().setLastScan(new ScannedCard(json.getInt("time"), json.getString("name"), arr));
         br.close();
         isr.close();
         exchange.sendResponseHeaders(200, buf.toString().length());

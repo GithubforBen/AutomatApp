@@ -9,12 +9,19 @@ import de.schnorrenbergers.automat.types.ScannedCard;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Dimension2D;
+import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ContentDisplay;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.Border;
+import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.Objects;
 
 public class Main extends Application {
 
@@ -39,6 +46,7 @@ public class Main extends Application {
         stage.setScene(scene);
         stage.show();
         this.stage = stage;
+        stage.setFullScreenExitHint("");
         //Font.loadFont(Main.class.getResource("/fonts/Russo_One.ttf").toExternalForm(), 10);
         Application.setUserAgentStylesheet(new PrimerDark().getUserAgentStylesheet());
         load();
@@ -47,6 +55,7 @@ public class Main extends Application {
     }
 
     public void loadScene(String sceneName) {
+        boolean fullScreen = stage.isFullScreen();
         FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource(sceneName));
         Scene scene = null;
         try {
@@ -55,7 +64,9 @@ public class Main extends Application {
                 IOException e) {
             throw new RuntimeException(e);
         }
+        stage.setFullScreen(fullScreen);
         stage.setScene(scene);
+        stage.setFullScreen(fullScreen);
         stage.show();
     }
 
@@ -70,15 +81,54 @@ public class Main extends Application {
     public void setKost() throws IOException {
         //TODO: actual implementation
         String json = new CustomRequest("sweets").execute();
-        if (json == null) {return;}
+        if (json == null) {
+            return;
+        }
         JSONObject jsonObject = new JSONObject(json);
         for (int i = 0; i < MainController.getMainController().getBtns().length; i++) {
             Button btn = (Button) MainController.getMainController().getBtns()[i];
             JSONObject subObj = jsonObject.getJSONObject(String.valueOf(i));
             System.out.println(subObj);
             System.out.println(i);
-            btn.setText("Kosten(" + subObj.getString("name") + "):" + subObj.getInt("hours"));
+
+            btn.setContentDisplay(ContentDisplay.RIGHT);
+            btn.setFont(new Font(40));
+            btn.setText(subObj.getInt("hours") + ":");
+            ImageView imageView = new ImageView(getImage(i));
+            imageView.setFitHeight(187);
+            imageView.setFitWidth(200);
+            btn.setPadding(Insets.EMPTY);
+            btn.setBorder(Border.EMPTY);
+            btn.setGraphic(imageView);
+            if (i == 7) btn.setText("");
         }
+    }
+
+    private Image getImage(int id) {
+        switch (id) {
+            case 0 -> {
+                return new Image(Objects.requireNonNull(getClass().getResourceAsStream("/image/mentos_0.png")));
+            }
+            case 1 -> {
+                return new Image(Objects.requireNonNull(getClass().getResourceAsStream("/image/duplo_1.png")));
+            }
+            case 2 -> {
+                return new Image(Objects.requireNonNull(getClass().getResourceAsStream("/image/kinder_2.png")));
+            }
+            case 3 -> {
+                return new Image(Objects.requireNonNull(getClass().getResourceAsStream("/image/mauam_3.png")));
+            }
+            case 4 -> {
+                return new Image(Objects.requireNonNull(getClass().getResourceAsStream("/image/smarties_4.png")));
+            }
+            case 5 -> {
+                return new Image(Objects.requireNonNull(getClass().getResourceAsStream("/image/haribo_5.png")));
+            }
+            case 6 -> {
+                return new Image(Objects.requireNonNull(getClass().getResourceAsStream("/image/brause_6.png")));
+            }
+        }
+        return new Image(Objects.requireNonNull(getClass().getResourceAsStream("/image/Logo.png")));
     }
 
     public static void main(String[] args) {

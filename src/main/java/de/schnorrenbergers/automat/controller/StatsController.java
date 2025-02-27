@@ -5,13 +5,10 @@ import de.schnorrenbergers.automat.types.CustomRequest;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.Scene;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.PieChart;
 import javafx.scene.chart.XYChart;
-import javafx.scene.text.Text;
 import org.json.JSONObject;
 
 import java.io.IOException;

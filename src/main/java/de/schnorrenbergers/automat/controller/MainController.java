@@ -4,14 +4,11 @@ import de.schnorrenbergers.automat.Main;
 import de.schnorrenbergers.automat.types.CustomRequest;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.image.ImageView;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
 import javafx.scene.text.Text;
-import javafx.stage.Stage;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -21,6 +18,8 @@ import java.util.ResourceBundle;
 public class MainController implements Initializable {
 
     private static MainController mainController;
+    @FXML
+    public ImageView image;
     @FXML
     private Button btn_1;
     @FXML
@@ -92,11 +91,11 @@ public class MainController implements Initializable {
     }
 
     public void click(int number) {
-        if (Main.getInstance().getLastScan() ==  null) {
+        if (Main.getInstance().getLastScan() == null) {
             text.setFill(Color.RED);
             new Thread(() -> {
                 try {
-                    Thread.sleep(1000*2);
+                    Thread.sleep(1000 * 2);
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }

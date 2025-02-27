@@ -5,24 +5,26 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<AnchorPane prefHeight="800" prefWidth="480.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.schnorrenbergers.automat.controller.StatsController">
-   <children>
-      <VBox prefHeight="800.0" prefWidth="480.0">
-         <children>
-            <BarChart fx:id="chart" legendVisible="false" title="Schüler*innen">
-              <xAxis>
-                <CategoryAxis side="BOTTOM" />
-              </xAxis>
-              <yAxis>
-                <NumberAxis side="LEFT" />
-              </yAxis>
-            </BarChart>
-            <PieChart fx:id="pie" prefHeight="433.0" prefWidth="480.0" title="Verkaufte Süßigkeiten:" />
-            <Button mnemonicParsing="false" onAction="#back" prefHeight="261.0" prefWidth="480.0" text="Zurück">
-               <font>
-                  <Font size="56.0" />
-               </font></Button>
-         </children>
-      </VBox>
-   </children>
+<AnchorPane prefHeight="800" prefWidth="480.0" xmlns="http://javafx.com/javafx/17.0.12"
+            xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.schnorrenbergers.automat.controller.StatsController">
+    <children>
+        <VBox prefHeight="800.0" prefWidth="480.0">
+            <children>
+                <BarChart fx:id="chart" legendVisible="false" title="Schüler*innen">
+                    <xAxis>
+                        <CategoryAxis side="BOTTOM"/>
+                    </xAxis>
+                    <yAxis>
+                        <NumberAxis side="LEFT"/>
+                    </yAxis>
+                </BarChart>
+                <PieChart fx:id="pie" prefHeight="433.0" prefWidth="480.0" title="Verkaufte Süßigkeiten:"/>
+                <Button mnemonicParsing="false" onAction="#back" prefHeight="261.0" prefWidth="480.0" text="Zurück">
+                    <font>
+                        <Font size="56.0"/>
+                    </font>
+                </Button>
+            </children>
+        </VBox>
+    </children>
 </AnchorPane>
