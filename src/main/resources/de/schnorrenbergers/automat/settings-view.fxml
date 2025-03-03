@@ -13,8 +13,9 @@
             </columnConstraints>
             <rowConstraints>
                 <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                <RowConstraints maxHeight="265.0" minHeight="10.0" prefHeight="265.0" vgrow="SOMETIMES" />
+                <RowConstraints maxHeight="194.0" minHeight="10.0" prefHeight="135.0" vgrow="SOMETIMES" />
+            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
             </rowConstraints>
             <children>
                 <Button mnemonicParsing="false" onAction="#fullscreen" prefHeight="345.0" prefWidth="297.0" text="Fullscreen">
@@ -22,12 +23,12 @@
                         <Font size="35.0" />
                     </font>
                 </Button>
-                <Button mnemonicParsing="false" onAction="#exit" prefHeight="453.0" prefWidth="479.0" text="Stop" GridPane.columnIndex="1">
+                <Button mnemonicParsing="false" onAction="#exit" prefHeight="453.0" prefWidth="479.0" text="Stop" GridPane.rowIndex="2">
                     <font>
                         <Font size="35.0" />
                     </font>
                 </Button>
-                <Button mnemonicParsing="false" onAction="#back" prefHeight="455.0" prefWidth="371.0" text="&lt;-" GridPane.rowIndex="2">
+                <Button mnemonicParsing="false" onAction="#back" prefHeight="455.0" prefWidth="371.0" text="&lt;-" GridPane.rowIndex="3">
                     <font>
                         <Font size="35.0" />
                     </font>
@@ -68,7 +69,7 @@
                         </GridPane>
                     </children>
                 </AnchorPane>
-                <Button mnemonicParsing="false" onAction="#resetStats" prefHeight="278.0" prefWidth="275.0" text="Statistik Zurücksetzen" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                <Button mnemonicParsing="false" onAction="#resetStats" prefHeight="278.0" prefWidth="275.0" text="Statistik Zurücksetzen" GridPane.columnIndex="1">
                     <font>
                         <Font size="19.0" />
                     </font>
@@ -78,6 +79,20 @@
                         <Font size="25.0" />
                     </font>
                 </Button>
+            <VBox GridPane.columnIndex="1" GridPane.rowIndex="1">
+               <children>
+                  <CheckBox fx:id="availability" mnemonicParsing="false" prefHeight="46.0" prefWidth="240.0" text="Verfügbarkeit überprüfen">
+                     <font>
+                        <Font size="16.0" />
+                     </font>
+                  </CheckBox>
+                      <CheckBox fx:id="checkTime" mnemonicParsing="false" prefHeight="46.0" prefWidth="240.0" text="Stundenanzahl überprüfen">
+                          <font>
+                              <Font size="16.0" />
+                          </font>
+                  </CheckBox>
+               </children>
+            </VBox>
             </children>
         </GridPane>
     </children>

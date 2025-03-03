@@ -105,7 +105,8 @@ public class MainController implements Initializable {
         }
         try {
             JSONObject jsonObject = new JSONObject(new CustomRequest("sweets").execute()).getJSONObject(String.valueOf(number));
-            if (Main.getInstance().getLastScan().time.getHour() >= jsonObject.getInt("hours")) {
+
+            if (Main.getInstance().getLastScan().time.getHour() >= jsonObject.getInt("hours") || Main.getInstance().getLastScan().time.getHour() == Integer.MIN_VALUE || !((Boolean) Main.getInstance().getStatistic().getSettingOrDefault("checkTime", true))) {
                 new CustomRequest("dispense").executeComplex("{\"nr\":" + number + "}");
                 Main.getInstance().getStatistic().addOne(number);
                 Main.getInstance().setLastScan(null);

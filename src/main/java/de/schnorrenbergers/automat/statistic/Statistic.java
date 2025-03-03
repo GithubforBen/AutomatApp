@@ -48,6 +48,14 @@ public class Statistic {
         return settings.get(adress);
     }
 
+    public Object getSettingOrDefault(String adress, Object defaultValue) {
+        try {
+            return getSetting(adress);
+        } catch (Exception e) {
+            return defaultValue;
+        }
+    }
+
     public boolean setSetting(String adress, Object value) {
         try {
             settings.get(adress);

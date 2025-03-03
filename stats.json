@@ -1,1 +1,17 @@
-{"d:7":0,"d:6":1,"settings":{"logout":5,"notNull":0},"length":8,"d:1":0,"d:0":4,"d:3":1,"d:2":2,"d:5":0,"d:4":0}
+{
+  "d:7": 0,
+  "d:6": 1,
+  "settings": {
+    "logout": 60,
+    "checkTime": true,
+    "notNull": 0,
+    "availability": true
+  },
+  "length": 8,
+  "d:1": 0,
+  "d:0": 5,
+  "d:3": 1,
+  "d:2": 2,
+  "d:5": 0,
+  "d:4": 0
+}

@@ -5,6 +5,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Slider;
 import javafx.scene.text.Text;
 
@@ -15,6 +16,10 @@ import java.util.ResourceBundle;
 public class SettingsController implements Initializable {
     @FXML
     public Button shut;
+    @FXML
+    public CheckBox availability;
+    @FXML
+    public CheckBox checkTime;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -23,6 +28,19 @@ public class SettingsController implements Initializable {
         });
         slider_logout.setValue(Main.getInstance().getLogoutTime());
         display();
+        availability.setSelected(Main.getInstance().isCheckAvailability());
+        availability.setOnAction((ActionEvent event) -> {
+            Main.getInstance().setCheckAvailability(availability.isSelected());
+            try {
+                Main.getInstance().getStatistic().save();
+            } catch (IOException _) {
+
+            }
+        });
+        checkTime.setSelected(((Boolean) Main.getInstance().getStatistic().getSettingOrDefault("checkTime", true)));
+        checkTime.setOnAction((ActionEvent event) -> {
+            Main.getInstance().getStatistic().setSetting("checkTime", checkTime.isSelected());
+        });
     }
 
     @FXML
@@ -36,6 +54,10 @@ public class SettingsController implements Initializable {
     }
 
     public void exit(ActionEvent actionEvent) {
+        try {
+            Main.getInstance().getStatistic().save();
+        } catch (IOException _) {
+        }
         System.exit(0);
     }
 
@@ -67,6 +89,11 @@ public class SettingsController implements Initializable {
 
     public void shutdown(ActionEvent actionEvent) {
         ProcessBuilder processBuilder = new ProcessBuilder();
+        try {
+            Main.getInstance().getStatistic().save();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         if (shut.getText().equals("Herunterfahren")) {
             processBuilder.command("shutdown");
             new Thread(() -> {

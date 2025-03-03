@@ -13,8 +13,7 @@ import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContentDisplay;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
+import javafx.scene.image.*;
 import javafx.scene.layout.Border;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
@@ -33,9 +32,12 @@ public class Main extends Application {
     private ScannedCard lastScan;
     private Statistic statistic;
     private int logoutTime = 10;
+    private boolean alarm = false;
+    private boolean checkAvailability;
 
     @Override
     public void start(Stage stage) throws IOException, InterruptedException {
+        System.out.println(Integer.MIN_VALUE);
         dimension = new Dimension2D(480, 800);
         instance = this;
         if (server == null) server = new Server();
@@ -49,9 +51,10 @@ public class Main extends Application {
         stage.setFullScreenExitHint("");
         //Font.loadFont(Main.class.getResource("/fonts/Russo_One.ttf").toExternalForm(), 10);
         Application.setUserAgentStylesheet(new PrimerDark().getUserAgentStylesheet());
+        logoutTime = ((Integer) statistic.getSetting("logout"));
+        checkAvailability = (boolean) statistic.getSettingOrDefault("availability", false);
         load();
         new CustomRequest("ping").execute();
-        logoutTime = ((Integer) statistic.getSetting("logout"));
     }
 
     public void loadScene(String sceneName) {
@@ -76,11 +79,19 @@ public class Main extends Application {
         stage.setTitle("Hello!");
         stage.setScene(scene);
         stage.show();
+        new CustomRequest("alarm_off").execute();
     }
 
     public void setKost() throws IOException {
-        //TODO: actual implementation
-        String json = new CustomRequest("sweets").execute();
+        if (checkAvailability) {
+            kost("sweetsDa");
+            return;
+        }
+        kost("sweets");
+    }
+
+    private void kost(String url) throws IOException {
+        String json = new CustomRequest(url).execute();
         if (json == null) {
             return;
         }
@@ -94,7 +105,12 @@ public class Main extends Application {
             btn.setContentDisplay(ContentDisplay.RIGHT);
             btn.setFont(new Font(40));
             btn.setText(subObj.getInt("hours") + ":");
-            ImageView imageView = new ImageView(getImage(i));
+            Image image = new Image(Objects.requireNonNull(getClass().getResourceAsStream(getImage(i))));
+            if (checkAvailability && !subObj.getBoolean("available")) {
+                image = convertToGrayscale(image);
+                btn.setDisable(true);
+            }
+            ImageView imageView = new ImageView(image);
             imageView.setFitHeight(187);
             imageView.setFitWidth(200);
             btn.setPadding(Insets.EMPTY);
@@ -104,31 +120,17 @@ public class Main extends Application {
         }
     }
 
-    private Image getImage(int id) {
-        switch (id) {
-            case 0 -> {
-                return new Image(Objects.requireNonNull(getClass().getResourceAsStream("/image/mentos_0.png")));
-            }
-            case 1 -> {
-                return new Image(Objects.requireNonNull(getClass().getResourceAsStream("/image/duplo_1.png")));
-            }
-            case 2 -> {
-                return new Image(Objects.requireNonNull(getClass().getResourceAsStream("/image/kinder_2.png")));
-            }
-            case 3 -> {
-                return new Image(Objects.requireNonNull(getClass().getResourceAsStream("/image/mauam_3.png")));
-            }
-            case 4 -> {
-                return new Image(Objects.requireNonNull(getClass().getResourceAsStream("/image/smarties_4.png")));
-            }
-            case 5 -> {
-                return new Image(Objects.requireNonNull(getClass().getResourceAsStream("/image/haribo_5.png")));
-            }
-            case 6 -> {
-                return new Image(Objects.requireNonNull(getClass().getResourceAsStream("/image/brause_6.png")));
-            }
-        }
-        return new Image(Objects.requireNonNull(getClass().getResourceAsStream("/image/Logo.png")));
+    private String getImage(int id) {
+        return switch (id) {
+            case 0 -> "/image/mentos_0.png";
+            case 1 -> "/image/duplo_1.png";
+            case 2 -> "/image/kinder_2.png";
+            case 3 -> "/image/mauam_3.png";
+            case 4 -> "/image/smarties_4.png";
+            case 5 -> "/image/haribo_5.png";
+            case 6 -> "/image/brause_6.png";
+            default -> "/image/Logo.png";
+        };
     }
 
     public static void main(String[] args) {
@@ -149,6 +151,28 @@ public class Main extends Application {
 
     public Dimension2D getDimension() {
         return dimension;
+    }
+
+    private Image convertToGrayscale(Image image) {
+        int width = (int) image.getWidth();
+        int height = (int) image.getHeight();
+
+        WritableImage grayscaleImage = new WritableImage(width, height);
+        PixelReader pixelReader = image.getPixelReader();
+        PixelWriter pixelWriter = grayscaleImage.getPixelWriter();
+
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                int argb = pixelReader.getArgb(x, y);
+                int r = (argb >> 16) & 0xFF;
+                int g = (argb >> 8) & 0xFF;
+                int b = argb & 0xFF;
+                int gray = (int) (0.299 * r + 0.587 * g + 0.114 * b);
+                int grayArgb = (0xFF << 24) | (gray << 16) | (gray << 8) | gray;
+                pixelWriter.setArgb(x, y, grayArgb);
+            }
+        }
+        return grayscaleImage;
     }
 
     public void setLastScan(ScannedCard lastScan) {
@@ -192,5 +216,22 @@ public class Main extends Application {
 
     public void setLogoutTime(int logoutTime) {
         this.logoutTime = logoutTime;
+    }
+
+    public boolean isAlarm() {
+        return alarm;
+    }
+
+    public void setAlarm(boolean alarm) {
+        this.alarm = alarm;
+    }
+
+    public boolean isCheckAvailability() {
+        return checkAvailability;
+    }
+
+    public void setCheckAvailability(boolean checkAvailability) {
+        this.checkAvailability = checkAvailability;
+        statistic.setSetting("availability", checkAvailability);
     }
 }

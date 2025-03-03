@@ -4,17 +4,37 @@ import de.schnorrenbergers.automat.Main;
 import de.schnorrenbergers.automat.types.CustomRequest;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.Slider;
+import javafx.scene.paint.Color;
 
 import java.io.IOException;
+import java.net.URL;
+import java.util.ResourceBundle;
 
-public class AdminController {
+public class AdminController implements Initializable {
+    @FXML
+    public Button alarmBTN;
+
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
+        setAlarmBTNColor();
+    }
+
+    private void setAlarmBTNColor() {
+        boolean alarm = Main.getInstance().isAlarm();
+        if (alarm) {
+            alarmBTN.setTextFill(Color.GREEN);
+        } else {
+            alarmBTN.setTextFill(Color.RED);
+        }
+    }
+
     @FXML
     public Button plus;
     @FXML
     private Slider slider;
-    private boolean alarm = false;
     private boolean positive = true;
 
     public void back(ActionEvent actionEvent) {
@@ -22,6 +42,7 @@ public class AdminController {
     }
 
     public void alarm(ActionEvent actionEvent) {
+        boolean alarm = Main.getInstance().isAlarm();
         try {
             if (alarm) {
                 new CustomRequest("alarm_on").execute();
@@ -31,7 +52,8 @@ public class AdminController {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        alarm = !alarm;
+        Main.getInstance().setAlarm(!alarm);
+        setAlarmBTNColor();
     }
 
     public void mentos(ActionEvent actionEvent) {

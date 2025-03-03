@@ -42,6 +42,18 @@ def fill():
 def mint():
     return {"da": 100, "weg": 150}
 
+#muss nicht ist nur von meiner seite implemmentiert
+@app.route("/sweetsDa")
+def sweetsDa():
+    return {"5": {"name": "Haribo", "hours": 2, "available": True},
+            "4": {"name": "Smarties", "hours": 2, "available": True},
+            "7": {"name": "Stats", "hours": -1, "available": True},#must be true
+            "6": {"name": "Brause", "hours": 2, "available": False},
+            "1": {"name": "Dublo", "hours": 2, "available": False},
+            "0": {"name": "Mentos", "hours": 2, "available": True},
+            "3": {"name": "Maoam", "hours": 2, "available": True},
+            "2": {"name": "Kinder", "hours": 2, "available": True}}
+
 if __name__ == "__main__":
     app.run()
 
