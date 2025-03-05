@@ -1,28 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.*?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ProgressIndicator?>
+<?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.text.*?>
-
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="800" prefWidth="480.0" xmlns="http://javafx.com/javafx/17.0.12" fx:controller="de.schnorrenbergers.automat.controller.HelloController" xmlns:fx="http://javafx.com/fxml/1">
-   <children>
-      <SplitPane dividerPositions="0.6967418546365914" orientation="VERTICAL" prefHeight="800.0" prefWidth="480.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-        <items>
-          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
-               <children>
-                  <ProgressIndicator layoutX="211.0" layoutY="224.0" prefHeight="120.0" prefWidth="154.0" scaleX="7.0" scaleY="7.0" AnchorPane.leftAnchor="211.0" />
-               </children>
-            </AnchorPane>
-          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
-               <children>
-                  <Button mnemonicParsing="false" onAction="#reconnect" prefHeight="239.0" prefWidth="478.0" text="Neu Verbinden">
-                     <font>
-                        <Font size="53.0" />
-                     </font>
-                  </Button>
-               </children>
-            </AnchorPane>
-        </items>
-      </SplitPane>
-   </children>
+<?import javafx.scene.text.Font?>
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="800"
+            prefWidth="480.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="de.schnorrenbergers.automat.controller.HelloController">
+    <children>
+        <SplitPane fx:id="pane" dividerPositions="0.6967418546365914" orientation="VERTICAL" prefHeight="800.0"
+                   prefWidth="480.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                   AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <items>
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
+                    <children>
+                        <ProgressIndicator layoutX="211.0" layoutY="224.0" prefHeight="120.0" prefWidth="154.0"
+                                           scaleX="7.0" scaleY="7.0" AnchorPane.leftAnchor="211.0"/>
+                    </children>
+                </AnchorPane>
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
+                    <children>
+                        <Button mnemonicParsing="false" onAction="#reconnect" prefHeight="239.0" prefWidth="478.0"
+                                text="Neu Verbinden">
+                            <font>
+                                <Font size="53.0"/>
+                            </font>
+                        </Button>
+                    </children>
+                </AnchorPane>
+            </items>
+        </SplitPane>
+    </children>
 </AnchorPane>

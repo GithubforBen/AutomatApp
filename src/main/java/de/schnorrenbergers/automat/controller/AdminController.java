@@ -4,20 +4,37 @@ import de.schnorrenbergers.automat.Main;
 import de.schnorrenbergers.automat.types.CustomRequest;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Scene;
+import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.Slider;
-import javafx.stage.Stage;
+import javafx.scene.paint.Color;
 
 import java.io.IOException;
+import java.net.URL;
+import java.util.ResourceBundle;
 
-public class AdminView {
+public class AdminController implements Initializable {
+    @FXML
+    public Button alarmBTN;
+
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
+        setAlarmBTNColor();
+    }
+
+    private void setAlarmBTNColor() {
+        boolean alarm = Main.getInstance().isAlarm();
+        if (alarm) {
+            alarmBTN.setTextFill(Color.GREEN);
+        } else {
+            alarmBTN.setTextFill(Color.RED);
+        }
+    }
+
     @FXML
     public Button plus;
     @FXML
     private Slider slider;
-    private boolean alarm = false;
     private boolean positive = true;
 
     public void back(ActionEvent actionEvent) {
@@ -25,12 +42,18 @@ public class AdminView {
     }
 
     public void alarm(ActionEvent actionEvent) {
-        if (alarm) {
-            new CustomRequest("alarm_on");
-        } else  {
-            new CustomRequest("alarm_off");
+        boolean alarm = Main.getInstance().isAlarm();
+        try {
+            if (alarm) {
+                new CustomRequest("alarm_on").execute();
+            } else {
+                new CustomRequest("alarm_off").execute();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        alarm = !alarm;
+        Main.getInstance().setAlarm(!alarm);
+        setAlarmBTNColor();
     }
 
     public void mentos(ActionEvent actionEvent) {
@@ -55,7 +78,10 @@ public class AdminView {
 
     public void fill(String name) {
         try {
-            System.out.println(new CustomRequest("fill").executeComplex("{\"name\":\"" + name + "\",\"nr\"" + slider.getValue() + "}"));
+            if (positive)
+                System.out.println(new CustomRequest("fill").executeComplex("{\"name\":\"" + name + "\",\"nr\":" + slider.getValue() + "}"));
+            if (!positive)
+                System.out.println(new CustomRequest("fill").executeComplex("{\"name\":\"" + name + "\",\"nr\":" + slider.getValue() * -1 + "}"));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -65,7 +91,7 @@ public class AdminView {
         positive = !positive;
         if (positive) {
             plus.setText("+");
-        } else  {
+        } else {
             plus.setText("-");
         }
     }

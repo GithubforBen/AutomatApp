@@ -10,4 +10,4 @@ def scanned(id: list[int]):
     print(r.text)
 
 #time in seconds
-scanned({"name": "Ben Schnorri","time": 3600*2,"rfid": [99, 179, 107, 0, 187]});
+scanned({"name": "Ben Schnorri","time": 3600*2,"rfid": [99, 179, 107, 0, 187]});#if time is equal to -2147483648 sweets will be dispensed

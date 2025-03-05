@@ -3,24 +3,20 @@ package de.schnorrenbergers.automat.controller;
 import de.schnorrenbergers.automat.Main;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.text.Font;
 import javafx.scene.text.Text;
-import javafx.stage.Stage;
 import org.apache.commons.lang3.ArrayUtils;
 
-import java.io.IOException;
 import java.net.URL;
-import java.util.*;
-import java.util.stream.IntStream;
+import java.util.Arrays;
+import java.util.Objects;
+import java.util.ResourceBundle;
 
 public class PinController implements Initializable {
 
     private int[] last;
-    private final int[] code = new int[]{1,2,3,4};
+    private final int[] code = new int[]{1, 2, 3, 4};
+    private final int[] settings = new int[]{3, 3, 3, 3};
 
     @FXML
     private Text text;
@@ -64,7 +60,7 @@ public class PinController implements Initializable {
     public void btn_back(ActionEvent actionEvent) {//Loads pin scene
 
         Main.getInstance().loadScene("main-view.fxml");
-}
+    }
 
     public void btn_0(ActionEvent actionEvent) {
         press(0);
@@ -75,22 +71,17 @@ public class PinController implements Initializable {
         String sceneId = "";
         if (Objects.deepEquals(last, code)) {
             text.setText("Korrekt!");
-            sceneId="admin-view.fxml";
+            sceneId = "admin-view.fxml";
+        } else if (Objects.deepEquals(last, settings)) {
+            text.setText("Korrekt!");
+            sceneId = "settings-view.fxml";
         } else {
             text.setText("_ _ _ _");
             System.out.println(Arrays.toString(last) + "!=" + Arrays.toString(code));
             Arrays.fill(last, -1);
-            sceneId="stats-view.fxml";
+            sceneId = "stats-view.fxml";
         }
-        FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource(sceneId));
-        Scene scene = null;
-        try {
-            scene = new Scene(fxmlLoader.load(), Main.getInstance().getDimension().getWidth(), Main.getInstance().getDimension().getHeight());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        Main.getInstance().getStage().setScene(scene);
-        Main.getInstance().getStage().show();
+        Main.getInstance().loadScene(sceneId);
     }
 
     @Override
@@ -111,12 +102,12 @@ public class PinController implements Initializable {
     }
 
     public void display() {
-        String s ="";
+        String s = "";
         for (int i : last) {
             if (i == -1) {
                 s = s + "_ ";
             } else {
-                s = s+ "* ";
+                s = s + "* ";
             }
         }
         text.setText(s);

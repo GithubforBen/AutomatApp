@@ -1,11 +1,6 @@
 package de.schnorrenbergers.automat.types;
 
 import de.schnorrenbergers.automat.Main;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.stage.Stage;
-import javafx.util.Duration;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -13,36 +8,43 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLConnection;
 
 public class CustomRequest {
     String urlString;
+
     public CustomRequest(String url) {
         this.urlString = Main.getInstance().getUrl() + "/" + url;
     }
 
     public String execute() throws IOException {
-                try {
-                    URL url = new URL( Main.getInstance().getUrl() + "/ping");
-                    url.openConnection();
-                    BufferedReader br = new BufferedReader(new InputStreamReader(url.openStream()));
-                    StringBuilder sb = new StringBuilder();
-                    br.lines().forEach(sb::append);
-                    br.close();
-                } catch (Exception e) {
-                    Main.getInstance().loadScene("hello-view.fxml");
-                    return null;
-                }
+        if (!isOnline()) return null;
         URL url = new URL(urlString);
         url.openConnection();
         BufferedReader br = new BufferedReader(new InputStreamReader(url.openStream()));
         StringBuilder sb = new StringBuilder();
         br.lines().forEach(sb::append);
         br.close();
+        System.out.println(urlString + ":" + sb.toString());
         return sb.toString();
     }
 
+    public boolean isOnline() {
+        try {
+            URL url = new URL(Main.getInstance().getUrl() + "/ping");
+            url.openConnection();
+            BufferedReader br = new BufferedReader(new InputStreamReader(url.openStream()));
+            StringBuilder sb = new StringBuilder();
+            br.lines().forEach(sb::append);
+            br.close();
+        } catch (Exception e) {
+            Main.getInstance().loadScene("hello-view.fxml");
+            return false;
+        }
+        return true;
+    }
+
     public String executeComplex(String data) throws IOException {
+        if (!isOnline()) return null;
         URL url = new URL(urlString);
         HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
         urlConnection.setRequestMethod("POST");

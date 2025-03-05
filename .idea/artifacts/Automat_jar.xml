@@ -3,18 +3,68 @@
     <output-path>$PROJECT_DIR$/out/artifacts/Automat_jar</output-path>
     <root id="archive" name="Automat.jar">
       <element id="module-output" name="Automat" />
-      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/openjfx/javafx-controls/23.0.2/javafx-controls-23.0.2.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/json/json/20250107/json-20250107.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/kordamp/bootstrapfx/bootstrapfx-core/0.4.0/bootstrapfx-core-0.4.0.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/openjfx/javafx-controls/23.0.2/javafx-controls-23.0.2-win.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/openjfx/javafx-graphics/23.0.2/javafx-graphics-23.0.2.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/openjfx/javafx-fxml/23.0.2/javafx-fxml-23.0.2-win.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/openjfx/javafx-graphics/23.0.2/javafx-graphics-23.0.2-linux.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/openjfx/javafx-base/23.0.2/javafx-base-23.0.2.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/apache/commons/commons-lang3/3.17.0/commons-lang3-3.17.0.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/openjfx/javafx-fxml/23.0.2/javafx-fxml-23.0.2.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/openjfx/javafx-base/23.0.2/javafx-base-23.0.2-win.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/openjfx/javafx-graphics/23.0.2/javafx-graphics-23.0.2-win.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/openjfx/javafx-fxml/23.0.2/javafx-fxml-23.0.2-linux.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/openjfx/javafx-controls/23.0.2/javafx-controls-23.0.2.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/openjfx/javafx-controls/23.0.2/javafx-controls-23.0.2-linux.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/openjfx/javafx-base/23.0.2/javafx-base-23.0.2-linux.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$MAVEN_REPOSITORY$/io/github/mkpaz/atlantafx-base/2.0.1/atlantafx-base-2.0.1.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/openjfx/javafx-base/23.0.2/javafx-base-23.0.2.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/json/json/20250107/json-20250107.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/kordamp/bootstrapfx/bootstrapfx-core/0.4.0/bootstrapfx-core-0.4.0.jar" path-in-jar="/" />
+      <element id="library" level="project" name="Maven: io.github.mkpaz:atlantafx-base:2.0.1" />
+      <element id="library" level="project" name="Maven: org.apache.commons:commons-lang3:3.17.0" />
+      <element id="library" level="project" name="Maven: org.apiguardian:apiguardian-api:1.1.2" />
+      <element id="library" level="project" name="Maven: org.json:json:20250107" />
+      <element id="library" level="project" name="Maven: org.junit.jupiter:junit-jupiter-api:5.10.2" />
+      <element id="library" level="project" name="Maven: org.junit.jupiter:junit-jupiter-engine:5.10.2" />
+      <element id="library" level="project" name="Maven: org.junit.platform:junit-platform-commons:1.10.2" />
+      <element id="library" level="project" name="Maven: org.junit.platform:junit-platform-engine:1.10.2" />
+      <element id="library" level="project" name="Maven: org.kordamp.bootstrapfx:bootstrapfx-core:0.4.0" />
+      <element id="library" level="project" name="Maven: org.openjfx:javafx-base:23.0.2" />
+      <element id="library" level="project" name="Maven: org.openjfx:javafx-base:linux:23.0.2" />
+      <element id="library" level="project" name="Maven: org.openjfx:javafx-controls:23.0.2" />
+      <element id="library" level="project" name="Maven: org.openjfx:javafx-controls:linux:23.0.2" />
+      <element id="library" level="project" name="Maven: org.openjfx:javafx-fxml:23.0.2" />
+      <element id="library" level="project" name="Maven: org.openjfx:javafx-fxml:linux:23.0.2" />
+      <element id="library" level="project" name="Maven: org.openjfx:javafx-graphics:23.0.2" />
+      <element id="library" level="project" name="Maven: org.openjfx:javafx-graphics:linux:23.0.2" />
+      <element id="library" level="project" name="Maven: org.opentest4j:opentest4j:1.3.0" />
+      <element id="file-copy" path="$USER_HOME$/Downloads/openjfx-23.0.2_linux-aarch64_bin-sdk/javafx-sdk-23.0.2/lib/javafx-swt.jar" />
+      <element id="file-copy" path="$USER_HOME$/Downloads/openjfx-23.0.2_linux-aarch64_bin-sdk/javafx-sdk-23.0.2/lib/javafx.base.jar" />
+      <element id="file-copy" path="$USER_HOME$/Downloads/openjfx-23.0.2_linux-aarch64_bin-sdk/javafx-sdk-23.0.2/lib/javafx.controls.jar" />
+      <element id="file-copy" path="$USER_HOME$/Downloads/openjfx-23.0.2_linux-aarch64_bin-sdk/javafx-sdk-23.0.2/lib/javafx.fxml.jar" />
+      <element id="file-copy" path="$USER_HOME$/Downloads/openjfx-23.0.2_linux-aarch64_bin-sdk/javafx-sdk-23.0.2/lib/javafx.graphics.jar" />
+      <element id="file-copy" path="$USER_HOME$/Downloads/openjfx-23.0.2_linux-aarch64_bin-sdk/javafx-sdk-23.0.2/lib/javafx.media.jar" />
+      <element id="file-copy" path="$USER_HOME$/Downloads/openjfx-23.0.2_linux-aarch64_bin-sdk/javafx-sdk-23.0.2/lib/javafx.properties" />
+      <element id="file-copy" path="$USER_HOME$/Downloads/openjfx-23.0.2_linux-aarch64_bin-sdk/javafx-sdk-23.0.2/lib/javafx.swing.jar" />
+      <element id="file-copy" path="$USER_HOME$/Downloads/openjfx-23.0.2_linux-aarch64_bin-sdk/javafx-sdk-23.0.2/lib/javafx.web.jar" />
+      <element id="file-copy" path="$USER_HOME$/Downloads/openjfx-23.0.2_linux-aarch64_bin-sdk/javafx-sdk-23.0.2/lib/libavplugin-54.so" />
+      <element id="file-copy" path="$USER_HOME$/Downloads/openjfx-23.0.2_linux-aarch64_bin-sdk/javafx-sdk-23.0.2/lib/libavplugin-56.so" />
+      <element id="file-copy" path="$USER_HOME$/Downloads/openjfx-23.0.2_linux-aarch64_bin-sdk/javafx-sdk-23.0.2/lib/libavplugin-57.so" />
+      <element id="file-copy" path="$USER_HOME$/Downloads/openjfx-23.0.2_linux-aarch64_bin-sdk/javafx-sdk-23.0.2/lib/libavplugin-ffmpeg-56.so" />
+      <element id="file-copy" path="$USER_HOME$/Downloads/openjfx-23.0.2_linux-aarch64_bin-sdk/javafx-sdk-23.0.2/lib/libavplugin-ffmpeg-57.so" />
+      <element id="file-copy" path="$USER_HOME$/Downloads/openjfx-23.0.2_linux-aarch64_bin-sdk/javafx-sdk-23.0.2/lib/libavplugin-ffmpeg-58.so" />
+      <element id="file-copy" path="$USER_HOME$/Downloads/openjfx-23.0.2_linux-aarch64_bin-sdk/javafx-sdk-23.0.2/lib/libavplugin-ffmpeg-59.so" />
+      <element id="file-copy" path="$USER_HOME$/Downloads/openjfx-23.0.2_linux-aarch64_bin-sdk/javafx-sdk-23.0.2/lib/libavplugin-ffmpeg-60.so" />
+      <element id="file-copy" path="$USER_HOME$/Downloads/openjfx-23.0.2_linux-aarch64_bin-sdk/javafx-sdk-23.0.2/lib/libavplugin-ffmpeg-61.so" />
+      <element id="file-copy" path="$USER_HOME$/Downloads/openjfx-23.0.2_linux-aarch64_bin-sdk/javafx-sdk-23.0.2/lib/libdecora_sse.so" />
+      <element id="file-copy" path="$USER_HOME$/Downloads/openjfx-23.0.2_linux-aarch64_bin-sdk/javafx-sdk-23.0.2/lib/libfxplugins.so" />
+      <element id="file-copy" path="$USER_HOME$/Downloads/openjfx-23.0.2_linux-aarch64_bin-sdk/javafx-sdk-23.0.2/lib/libglass.so" />
+      <element id="file-copy" path="$USER_HOME$/Downloads/openjfx-23.0.2_linux-aarch64_bin-sdk/javafx-sdk-23.0.2/lib/libglassgtk3.so" />
+      <element id="file-copy" path="$USER_HOME$/Downloads/openjfx-23.0.2_linux-aarch64_bin-sdk/javafx-sdk-23.0.2/lib/libgstreamer-lite.so" />
+      <element id="file-copy" path="$USER_HOME$/Downloads/openjfx-23.0.2_linux-aarch64_bin-sdk/javafx-sdk-23.0.2/lib/libjavafx_font.so" />
+      <element id="file-copy" path="$USER_HOME$/Downloads/openjfx-23.0.2_linux-aarch64_bin-sdk/javafx-sdk-23.0.2/lib/libjavafx_font_freetype.so" />
+      <element id="file-copy" path="$USER_HOME$/Downloads/openjfx-23.0.2_linux-aarch64_bin-sdk/javafx-sdk-23.0.2/lib/libjavafx_font_pango.so" />
+      <element id="file-copy" path="$USER_HOME$/Downloads/openjfx-23.0.2_linux-aarch64_bin-sdk/javafx-sdk-23.0.2/lib/libjavafx_iio.so" />
+      <element id="file-copy" path="$USER_HOME$/Downloads/openjfx-23.0.2_linux-aarch64_bin-sdk/javafx-sdk-23.0.2/lib/libjfxmedia.so" />
+      <element id="file-copy" path="$USER_HOME$/Downloads/openjfx-23.0.2_linux-aarch64_bin-sdk/javafx-sdk-23.0.2/lib/libjfxwebkit.so" />
+      <element id="file-copy" path="$USER_HOME$/Downloads/openjfx-23.0.2_linux-aarch64_bin-sdk/javafx-sdk-23.0.2/lib/libprism_common.so" />
+      <element id="file-copy" path="$USER_HOME$/Downloads/openjfx-23.0.2_linux-aarch64_bin-sdk/javafx-sdk-23.0.2/lib/libprism_es2.so" />
+      <element id="file-copy" path="$USER_HOME$/Downloads/openjfx-23.0.2_linux-aarch64_bin-sdk/javafx-sdk-23.0.2/lib/libprism_sw.so" />
     </root>
   </artifact>
 </component>

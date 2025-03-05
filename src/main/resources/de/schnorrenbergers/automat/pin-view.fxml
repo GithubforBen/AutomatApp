@@ -2,49 +2,63 @@
 
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.text.*?>
-
-<AnchorPane prefHeight="800" prefWidth="480.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.schnorrenbergers.automat.controller.PinController">
-   <children>
-      <VBox prefHeight="800.0" prefWidth="480.0">
-         <children>
-            <Text fx:id="text" strokeType="OUTSIDE" strokeWidth="0.0" text="Text" textAlignment="CENTER" wrappingWidth="480.0">
-               <font>
-                  <Font size="77.0" />
-               </font>
-            </Text>
-            <GridPane prefHeight="699.0" prefWidth="480.0">
-              <columnConstraints>
-                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-              </columnConstraints>
-              <rowConstraints>
-                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-              </rowConstraints>
-               <children>
-                  <Button mnemonicParsing="false" onAction="#btn_1" prefHeight="208.0" prefWidth="201.0" text="1" />
-                  <Button mnemonicParsing="false" onAction="#btn_2" prefHeight="197.0" prefWidth="200.0" text="2" GridPane.columnIndex="1" />
-                  <Button mnemonicParsing="false" onAction="#btn_3" prefHeight="214.0" prefWidth="200.0" text="3" GridPane.columnIndex="2" />
-                  <Button mnemonicParsing="false" onAction="#btn_4" prefHeight="220.0" prefWidth="201.0" text="4" GridPane.rowIndex="1" />
-                  <Button mnemonicParsing="false" onAction="#btn_5" prefHeight="201.0" prefWidth="200.0" text="5" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                  <Button mnemonicParsing="false" onAction="#btn_6" prefHeight="212.0" prefWidth="200.0" text="6" GridPane.columnIndex="2" GridPane.rowIndex="1" />
-                  <Button mnemonicParsing="false" onAction="#btn_7" prefHeight="204.0" prefWidth="201.0" text="7" GridPane.rowIndex="2" />
-                  <Button mnemonicParsing="false" onAction="#btn_8" prefHeight="248.0" prefWidth="200.0" text="8" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                  <Button mnemonicParsing="false" onAction="#btn_9" prefHeight="261.0" prefWidth="200.0" text="9" GridPane.columnIndex="2" GridPane.rowIndex="2" />
-                  <Button mnemonicParsing="false" onAction="#btn_back" prefHeight="190.0" prefWidth="201.0" text="&lt;-" GridPane.rowIndex="3" />
-                  <Button mnemonicParsing="false" onAction="#btn_0" prefHeight="277.0" prefWidth="200.0" text="0" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-                  <Button mnemonicParsing="false" onAction="#btn_next" prefHeight="215.0" prefWidth="200.0" text="✓" textFill="#12da23" GridPane.columnIndex="2" GridPane.rowIndex="3">
-                     <font>
-                        <Font size="40.0" />
-                     </font>
-                  </Button>
-               </children>
-            </GridPane>
-         </children>
-      </VBox>
-   </children>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+<AnchorPane prefHeight="800" prefWidth="480.0" xmlns="http://javafx.com/javafx/17.0.12"
+            xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.schnorrenbergers.automat.controller.PinController">
+    <children>
+        <VBox prefHeight="800.0" prefWidth="480.0">
+            <children>
+                <Text fx:id="text" strokeType="OUTSIDE" strokeWidth="0.0" text="Text" textAlignment="CENTER"
+                      wrappingWidth="480.0">
+                    <font>
+                        <Font size="77.0"/>
+                    </font>
+                </Text>
+                <GridPane prefHeight="699.0" prefWidth="480.0">
+                    <columnConstraints>
+                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0"/>
+                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0"/>
+                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0"/>
+                    </columnConstraints>
+                    <rowConstraints>
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
+                    </rowConstraints>
+                    <children>
+                        <Button mnemonicParsing="false" onAction="#btn_1" prefHeight="208.0" prefWidth="201.0"
+                                text="1"/>
+                        <Button mnemonicParsing="false" onAction="#btn_2" prefHeight="197.0" prefWidth="200.0" text="2"
+                                GridPane.columnIndex="1"/>
+                        <Button mnemonicParsing="false" onAction="#btn_3" prefHeight="214.0" prefWidth="200.0" text="3"
+                                GridPane.columnIndex="2"/>
+                        <Button mnemonicParsing="false" onAction="#btn_4" prefHeight="220.0" prefWidth="201.0" text="4"
+                                GridPane.rowIndex="1"/>
+                        <Button mnemonicParsing="false" onAction="#btn_5" prefHeight="201.0" prefWidth="200.0" text="5"
+                                GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+                        <Button mnemonicParsing="false" onAction="#btn_6" prefHeight="212.0" prefWidth="200.0" text="6"
+                                GridPane.columnIndex="2" GridPane.rowIndex="1"/>
+                        <Button mnemonicParsing="false" onAction="#btn_7" prefHeight="204.0" prefWidth="201.0" text="7"
+                                GridPane.rowIndex="2"/>
+                        <Button mnemonicParsing="false" onAction="#btn_8" prefHeight="248.0" prefWidth="200.0" text="8"
+                                GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+                        <Button mnemonicParsing="false" onAction="#btn_9" prefHeight="261.0" prefWidth="200.0" text="9"
+                                GridPane.columnIndex="2" GridPane.rowIndex="2"/>
+                        <Button mnemonicParsing="false" onAction="#btn_back" prefHeight="190.0" prefWidth="201.0"
+                                text="&lt;-" GridPane.rowIndex="3"/>
+                        <Button mnemonicParsing="false" onAction="#btn_0" prefHeight="277.0" prefWidth="200.0" text="0"
+                                GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+                        <Button mnemonicParsing="false" onAction="#btn_next" prefHeight="215.0" prefWidth="200.0"
+                                text="✓" textFill="#12da23" GridPane.columnIndex="2" GridPane.rowIndex="3">
+                            <font>
+                                <Font size="40.0"/>
+                            </font>
+                        </Button>
+                    </children>
+                </GridPane>
+            </children>
+        </VBox>
+    </children>
 </AnchorPane>
