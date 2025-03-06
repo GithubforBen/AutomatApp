@@ -20,6 +20,8 @@ public class SettingsController implements Initializable {
     public CheckBox availability;
     @FXML
     public CheckBox checkTime;
+    @FXML
+    public CheckBox screensaver;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -40,6 +42,20 @@ public class SettingsController implements Initializable {
         checkTime.setSelected(((Boolean) Main.getInstance().getStatistic().getSettingOrDefault("checkTime", true)));
         checkTime.setOnAction((ActionEvent event) -> {
             Main.getInstance().getStatistic().setSetting("checkTime", checkTime.isSelected());
+            try {
+                Main.getInstance().getStatistic().save();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
+        screensaver.setSelected(Main.getInstance().getScreenSaver().isDoSaver());
+        screensaver.setOnAction((ActionEvent event) -> {
+            Main.getInstance().getScreenSaver().setDoSaver(screensaver.isSelected());
+            try {
+                Main.getInstance().getStatistic().save();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         });
     }
 

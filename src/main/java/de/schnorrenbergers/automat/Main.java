@@ -6,6 +6,7 @@ import de.schnorrenbergers.automat.server.Server;
 import de.schnorrenbergers.automat.statistic.Statistic;
 import de.schnorrenbergers.automat.types.CustomRequest;
 import de.schnorrenbergers.automat.types.ScannedCard;
+import de.schnorrenbergers.automat.types.ScreenSaver;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Dimension2D;
@@ -34,14 +35,15 @@ public class Main extends Application {
     private int logoutTime = 10;
     private boolean alarm = false;
     private boolean checkAvailability;
+    private ScreenSaver screenSaver;
 
     @Override
     public void start(Stage stage) throws IOException, InterruptedException {
-        System.out.println(Integer.MIN_VALUE);
-        dimension = new Dimension2D(480, 800);
         instance = this;
-        if (server == null) server = new Server();
         statistic = new Statistic();
+        dimension = new Dimension2D(480, 800);
+        if (server == null) server = new Server();
+        screenSaver = new ScreenSaver();
         FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("hello-view.fxml"));
         Scene scene = new Scene(fxmlLoader.load(), dimension.getWidth(), dimension.getHeight());
         stage.setTitle("Hello!");
@@ -53,8 +55,29 @@ public class Main extends Application {
         Application.setUserAgentStylesheet(new PrimerDark().getUserAgentStylesheet());
         logoutTime = ((Integer) statistic.getSetting("logout"));
         checkAvailability = (boolean) statistic.getSettingOrDefault("availability", false);
-        load();
         new CustomRequest("ping").execute();
+        checkForStuff();
+        load();
+    }
+
+    public void checkForStuff() {
+        new Thread(() -> {
+            System.out.println("Checking for stuff");
+            try {
+                while (true) {
+                    Thread.sleep(40);
+                    if (Main.getInstance().getStage().getTitle().equals("schoner")) continue;
+                    boolean saver = Main.getInstance().getScreenSaver().isSaver();
+                    System.out.println(saver);
+                    if (saver) {
+                        System.out.println("loading");
+                        loadScene("screenSaver.fxml");
+                        System.out.println("loading");
+                    }
+                }
+            } catch (Exception ex) {
+            }
+        }).start();
     }
 
     public void loadScene(String sceneName) {
@@ -69,6 +92,7 @@ public class Main extends Application {
         }
         stage.setFullScreen(fullScreen);
         stage.setScene(scene);
+        Main.getInstance().getStage().setTitle("Hello :)");
         stage.setFullScreen(fullScreen);
         stage.show();
     }
@@ -233,5 +257,9 @@ public class Main extends Application {
     public void setCheckAvailability(boolean checkAvailability) {
         this.checkAvailability = checkAvailability;
         statistic.setSetting("availability", checkAvailability);
+    }
+
+    public ScreenSaver getScreenSaver() {
+        return screenSaver;
     }
 }
