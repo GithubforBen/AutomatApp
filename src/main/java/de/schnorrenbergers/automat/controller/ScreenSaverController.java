@@ -15,7 +15,6 @@ public class ScreenSaverController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        Main.getInstance().getStage().setTitle("schoner");
         new Thread(() -> {
             try {
                 while (true) {
@@ -25,8 +24,10 @@ public class ScreenSaverController implements Initializable {
                     Thread.sleep(40);
                 }
             } catch (Exception ex) {
+                ex.printStackTrace();
             }
-        });//.start();
+            Main.getInstance().getScreenSaver().setSaver(false);
+        }).start();//.start();
     }
 
     public void display() throws InterruptedException {
@@ -60,8 +61,8 @@ public class ScreenSaverController implements Initializable {
             lol.setLength(Math.abs(i));
             Thread.sleep(40);
             if (!Main.getInstance().getScreenSaver().isSaver()) {
-                Main.getInstance().getStage().setTitle("Hello :)");
-                break;
+                Main.getInstance().getScreenSaver().setSaver(false);
+                return;
             }
         }
     }

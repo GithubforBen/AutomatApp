@@ -8,6 +8,7 @@ import de.schnorrenbergers.automat.types.CustomRequest;
 import de.schnorrenbergers.automat.types.ScannedCard;
 import de.schnorrenbergers.automat.types.ScreenSaver;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Dimension2D;
 import javafx.geometry.Insets;
@@ -62,21 +63,26 @@ public class Main extends Application {
 
     public void checkForStuff() {
         new Thread(() -> {
-            System.out.println("Checking for stuff");
             try {
                 while (true) {
-                    Thread.sleep(40);
-                    if (Main.getInstance().getStage().getTitle().equals("schoner")) continue;
+                    Thread.sleep(400);
                     boolean saver = Main.getInstance().getScreenSaver().isSaver();
                     System.out.println(saver);
-                    if (saver) {
-                        System.out.println("loading");
-                        loadScene("screenSaver.fxml");
-                        System.out.println("loading");
+                    if (saver && !Main.getInstance().getScreenSaver().isSaverr()) {
+                        Runnable runnable = new Runnable() {
+                            @Override
+                            public void run() {
+                                loadScene("screenSaver.fxml");
+                            }
+                        };
+                        Platform.runLater(runnable);
+                        Main.getInstance().getScreenSaver().setSaver(true);
                     }
                 }
             } catch (Exception ex) {
+                ex.printStackTrace();
             }
+            checkForStuff();
         }).start();
     }
 
@@ -92,7 +98,6 @@ public class Main extends Application {
         }
         stage.setFullScreen(fullScreen);
         stage.setScene(scene);
-        Main.getInstance().getStage().setTitle("Hello :)");
         stage.setFullScreen(fullScreen);
         stage.show();
     }

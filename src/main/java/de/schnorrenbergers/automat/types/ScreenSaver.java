@@ -6,8 +6,9 @@ import java.util.Date;
 
 public class ScreenSaver {
     private long lastMove;
-    private boolean permanent;
+    private boolean permanent = false;
     private boolean doSaver;
+    private boolean isSaverr = false;
 
     public ScreenSaver() {
         lastMove = System.currentTimeMillis() - (10L * 60000);
@@ -17,14 +18,11 @@ public class ScreenSaver {
     public boolean isSaver() {
         Date date = new Date();
         if (!doSaver) {
-            System.out.println("kein schoner");
             return false;
         }
         if (date.getHours() >= 14-1 && date.getHours() <= 17-1) {
-            System.out.println("keine zeit:" + date.getHours());
             return false;
         }
-        System.out.println("Nope:" +  lastMove + "/" + System.currentTimeMillis() + "/" + (lastMove+(10L * 60000) <= System.currentTimeMillis() || permanent));
         return (lastMove+(10L * 60000) <= System.currentTimeMillis() || permanent);
     }
 
@@ -43,5 +41,13 @@ public class ScreenSaver {
     public void setDoSaver(boolean doSaver) {
         this.doSaver = doSaver;
         Main.getInstance().getStatistic().setSetting("doSaver", doSaver);
+    }
+
+    public void setSaver(boolean saverr) {
+        isSaverr = saverr;
+    }
+
+    public boolean isSaverr() {
+        return isSaverr;
     }
 }
