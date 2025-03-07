@@ -18,4 +18,20 @@ public class ScannedCard {
     public String toString() {
         return "{\"name\":\"" + name + "\",\"time\":" + timeSec + ",\"byteAdress\":" + Arrays.toString(byteAdress) + "}";
     }
+
+    public String getName() {
+        return name;
+    }
+
+    public int getTimeSec() {
+        return timeSec;
+    }
+
+    public Time getTime() {
+        return time;
+    }
+
+    public int[] getByteAdress() {
+        return byteAdress;
+    }
 }

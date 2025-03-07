@@ -13,6 +13,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.ResourceBundle;
 
 public class MainController implements Initializable {
@@ -110,8 +111,10 @@ public class MainController implements Initializable {
         try {
             JSONObject jsonObject = new JSONObject(new CustomRequest("sweets").execute()).getJSONObject(String.valueOf(number));
 
-            if (Main.getInstance().getLastScan().time.getHour() >= jsonObject.getInt("hours") || Main.getInstance().getLastScan().time.getHour() == Integer.MIN_VALUE || !((Boolean) Main.getInstance().getStatistic().getSettingOrDefault("checkTime", true))) {
-                new CustomRequest("dispense").executeComplex("{\"nr\":" + number + "}");
+            if (Main.getInstance().getLastScan().time.getHour() >= jsonObject.getInt("hours")
+                    || Main.getInstance().getLastScan().time.getHour() == Integer.MIN_VALUE
+                    || !((Boolean) Main.getInstance().getStatistic().getSettingOrDefault("checkTime", true))) {
+                new CustomRequest("dispense").executeComplex("{\"nr\":" + number + ",\"cost\":" + jsonObject.getInt("hours")+ ",\"usr\":" + Arrays.toString(Main.getInstance().getLastScan().getByteAdress()) + "}");
                 Main.getInstance().getStatistic().addOne(number);
                 Main.getInstance().setLastScan(null);
             } else {
