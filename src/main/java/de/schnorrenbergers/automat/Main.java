@@ -67,7 +67,6 @@ public class Main extends Application {
                 while (true) {
                     Thread.sleep(400);
                     boolean saver = Main.getInstance().getScreenSaver().isSaver();
-                    System.out.println(saver);
                     if (saver && !Main.getInstance().getScreenSaver().isSaverr()) {
                         Runnable runnable = new Runnable() {
                             @Override
@@ -128,8 +127,6 @@ public class Main extends Application {
         for (int i = 0; i < MainController.getMainController().getBtns().length; i++) {
             Button btn = (Button) MainController.getMainController().getBtns()[i];
             JSONObject subObj = jsonObject.getJSONObject(String.valueOf(i));
-            System.out.println(subObj);
-            System.out.println(i);
 
             btn.setContentDisplay(ContentDisplay.RIGHT);
             btn.setFont(new Font(40));

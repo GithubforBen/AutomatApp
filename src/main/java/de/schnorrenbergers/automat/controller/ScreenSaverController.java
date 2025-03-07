@@ -1,6 +1,7 @@
 package de.schnorrenbergers.automat.controller;
 
 import de.schnorrenbergers.automat.Main;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -27,6 +28,7 @@ public class ScreenSaverController implements Initializable {
                 ex.printStackTrace();
             }
             Main.getInstance().getScreenSaver().setSaver(false);
+            loadDefault();
         }).start();//.start();
     }
 
@@ -59,12 +61,24 @@ public class ScreenSaverController implements Initializable {
             }
             lol.setFill(Color.rgb(Math.abs(r), Math.abs(g), Math.abs(b)));
             lol.setLength(Math.abs(i));
+            lol.setRotate(j);
             Thread.sleep(40);
             if (!Main.getInstance().getScreenSaver().isSaver()) {
                 Main.getInstance().getScreenSaver().setSaver(false);
+                loadDefault();
                 return;
             }
         }
+    }
+
+    public void loadDefault() {
+        Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                Main.getInstance().loadScene("main-view.fxml");
+            }
+        };
+        Platform.runLater(runnable);
     }
 
     @FXML
@@ -72,6 +86,5 @@ public class ScreenSaverController implements Initializable {
 
     public void btn(ActionEvent actionEvent) {
         Main.getInstance().getScreenSaver().setLastMove(System.currentTimeMillis());
-        System.out.println("Nerd");
     }
 }

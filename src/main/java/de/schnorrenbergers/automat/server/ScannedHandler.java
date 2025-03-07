@@ -37,5 +37,6 @@ public class ScannedHandler implements HttpHandler {
         exchange.sendResponseHeaders(200, buf.toString().length());
         exchange.getResponseBody().write(buf.toString().getBytes());
         exchange.getResponseBody().close();
+        Main.getInstance().getScreenSaver().setLastMove(System.currentTimeMillis());
     }
 }

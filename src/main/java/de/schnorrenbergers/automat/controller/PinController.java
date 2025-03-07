@@ -77,11 +77,11 @@ public class PinController implements Initializable {
             sceneId = "settings-view.fxml";
         } else {
             text.setText("_ _ _ _");
-            System.out.println(Arrays.toString(last) + "!=" + Arrays.toString(code));
             Arrays.fill(last, -1);
             sceneId = "stats-view.fxml";
         }
         Main.getInstance().loadScene(sceneId);
+        Main.getInstance().getScreenSaver().setLastMove(System.currentTimeMillis());
     }
 
     @Override
@@ -98,6 +98,7 @@ public class PinController implements Initializable {
             if (last.length - 1 >= 0) System.arraycopy(last, 0, temp, 1, last.length - 1);
             last = temp;
         }
+        Main.getInstance().getScreenSaver().setLastMove(System.currentTimeMillis());
         display();
     }
 

@@ -24,7 +24,6 @@ public class CustomRequest {
         StringBuilder sb = new StringBuilder();
         br.lines().forEach(sb::append);
         br.close();
-        System.out.println(urlString + ":" + sb.toString());
         return sb.toString();
     }
 
@@ -56,7 +55,6 @@ public class CustomRequest {
         outputStream.write(data.getBytes());
         outputStream.flush();
         outputStream.close();
-        System.out.println(urlConnection.getResponseCode());
         BufferedReader in = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
         String inputLine;
         StringBuffer response = new StringBuffer();

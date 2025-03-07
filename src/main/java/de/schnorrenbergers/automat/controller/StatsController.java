@@ -50,5 +50,6 @@ public class StatsController implements Initializable {
 
     public void back(ActionEvent actionEvent) {
         Main.getInstance().loadScene("main-view.fxml");
+        Main.getInstance().getScreenSaver().setLastMove(System.currentTimeMillis());
     }
 }

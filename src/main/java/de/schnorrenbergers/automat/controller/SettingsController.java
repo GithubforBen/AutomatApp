@@ -67,6 +67,7 @@ public class SettingsController implements Initializable {
     public void fullscreen(ActionEvent actionEvent) {
         Main.getInstance().getStage().setFullScreen(!Main.getInstance().getStage().isFullScreen());
         Main.getInstance().getStage().show();
+        Main.getInstance().getScreenSaver().setLastMove(System.currentTimeMillis());
     }
 
     public void exit(ActionEvent actionEvent) {
@@ -74,15 +75,18 @@ public class SettingsController implements Initializable {
             Main.getInstance().getStatistic().save();
         } catch (IOException _) {
         }
+        Main.getInstance().getScreenSaver().setLastMove(System.currentTimeMillis());
         System.exit(0);
     }
 
     public void back(ActionEvent actionEvent) {
         Main.getInstance().loadScene("main-view.fxml");
+        Main.getInstance().getScreenSaver().setLastMove(System.currentTimeMillis());
     }
 
     public void cancel(ActionEvent actionEvent) {
         slider_logout.setValue(Main.getInstance().getLogoutTime());
+        Main.getInstance().getScreenSaver().setLastMove(System.currentTimeMillis());
     }
 
     public void Ok(ActionEvent actionEvent) {
@@ -93,14 +97,17 @@ public class SettingsController implements Initializable {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+        Main.getInstance().getScreenSaver().setLastMove(System.currentTimeMillis());
     }
 
     public void display() {
         display.setText(Main.getInstance().getLogoutTime() + "→" + ((int) slider_logout.valueProperty().get()));
+        Main.getInstance().getScreenSaver().setLastMove(System.currentTimeMillis());
     }
 
     public void resetStats(ActionEvent actionEvent) {
         Main.getInstance().getStatistic().resetStats();
+        Main.getInstance().getScreenSaver().setLastMove(System.currentTimeMillis());
     }
 
     public void shutdown(ActionEvent actionEvent) {
@@ -130,5 +137,6 @@ public class SettingsController implements Initializable {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+        Main.getInstance().getScreenSaver().setLastMove(System.currentTimeMillis());
     }
 }

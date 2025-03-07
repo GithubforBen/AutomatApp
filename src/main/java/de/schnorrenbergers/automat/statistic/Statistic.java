@@ -36,7 +36,6 @@ public class Statistic {
             stringBuilder.append((char) b);
         }
         fileReader.close();
-        System.out.println(stringBuilder.toString());
         JSONObject obj = new JSONObject(stringBuilder.toString());
         settings = obj.getJSONObject("settings");
         for (int i = 0; i < obj.getInt("length"); i++) {

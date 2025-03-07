@@ -68,15 +68,18 @@ public class MainController implements Initializable {
     }
 
     public void button8(ActionEvent actionEvent) {//Loads pin scene
+        Main.getInstance().getScreenSaver().setLastMove(System.currentTimeMillis());
         Main.getInstance().loadScene("pin-view.fxml");
     }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        Main.getInstance().getScreenSaver().setLastMove(System.currentTimeMillis());
         text.setText("Bitte Karte scannen!");
         MainController.mainController = this;
         try {
             Main.getInstance().setKost();
+
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -91,6 +94,7 @@ public class MainController implements Initializable {
     }
 
     public void click(int number) {
+        Main.getInstance().getScreenSaver().setLastMove(System.currentTimeMillis());
         if (Main.getInstance().getLastScan() == null) {
             text.setFill(Color.RED);
             new Thread(() -> {

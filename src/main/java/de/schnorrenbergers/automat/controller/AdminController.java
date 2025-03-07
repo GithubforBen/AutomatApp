@@ -29,6 +29,7 @@ public class AdminController implements Initializable {
         } else {
             alarmBTN.setTextFill(Color.RED);
         }
+        Main.getInstance().getScreenSaver().setLastMove(System.currentTimeMillis());
     }
 
     @FXML
@@ -39,6 +40,7 @@ public class AdminController implements Initializable {
 
     public void back(ActionEvent actionEvent) {
         Main.getInstance().loadScene("main-view.fxml");
+        Main.getInstance().getScreenSaver().setLastMove(System.currentTimeMillis());
     }
 
     public void alarm(ActionEvent actionEvent) {
@@ -54,6 +56,7 @@ public class AdminController implements Initializable {
         }
         Main.getInstance().setAlarm(!alarm);
         setAlarmBTNColor();
+        Main.getInstance().getScreenSaver().setLastMove(System.currentTimeMillis());
     }
 
     public void mentos(ActionEvent actionEvent) {
@@ -77,17 +80,19 @@ public class AdminController implements Initializable {
     }
 
     public void fill(String name) {
+        Main.getInstance().getScreenSaver().setLastMove(System.currentTimeMillis());
         try {
             if (positive)
-                System.out.println(new CustomRequest("fill").executeComplex("{\"name\":\"" + name + "\",\"nr\":" + slider.getValue() + "}"));
+                new CustomRequest("fill").executeComplex("{\"name\":\"" + name + "\",\"nr\":" + slider.getValue() + "}");
             if (!positive)
-                System.out.println(new CustomRequest("fill").executeComplex("{\"name\":\"" + name + "\",\"nr\":" + slider.getValue() * -1 + "}"));
+                new CustomRequest("fill").executeComplex("{\"name\":\"" + name + "\",\"nr\":" + slider.getValue() * -1 + "}");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
     public void plus(ActionEvent actionEvent) {
+        Main.getInstance().getScreenSaver().setLastMove(System.currentTimeMillis());
         positive = !positive;
         if (positive) {
             plus.setText("+");

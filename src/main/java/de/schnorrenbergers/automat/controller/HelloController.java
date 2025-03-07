@@ -31,5 +31,6 @@ public class HelloController implements Initializable {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
+        Main.getInstance().getScreenSaver().setLastMove(System.currentTimeMillis());
     }
 }
