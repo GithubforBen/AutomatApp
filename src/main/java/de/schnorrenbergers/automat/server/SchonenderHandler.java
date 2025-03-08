@@ -12,9 +12,10 @@ public class SchonenderHandler implements HttpHandler {
         String s = "Ist deutschland ein Freies Land? Ich denke ja eigentlich schon. " +
                 "Deshalb nehme ich Drogen." +
                 "- David der Glänzende";
-        exchange.sendResponseHeaders(200, s.length());
+        exchange.sendResponseHeaders(200, s.getBytes().length);
         exchange.getResponseBody().write(s.getBytes());
         exchange.getResponseBody().close();
         Main.getInstance().getScreenSaver().setLastMove(0);
+        System.out.println("Emo");
     }
 }

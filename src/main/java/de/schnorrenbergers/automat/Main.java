@@ -17,6 +17,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.image.*;
 import javafx.scene.layout.Border;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import org.json.JSONObject;
@@ -218,10 +219,10 @@ public class Main extends Application {
 
     private void updateDisplay() {
         if (lastScan == null) {
-            MainController.getMainController().getText().setText("Bitte Karte Scannen");
+            MainController.getMainController().setText("Bitte Karte Scannen", Color.WHITE, true);
             return;
         }
-        MainController.getMainController().getText().setText(lastScan.name + ":" + lastScan.time.getHour() + "h");
+        MainController.getMainController().setText(lastScan.name + ":" + (int) lastScan.time.getHour() + "h", Color.WHITE, true);
     }
 
     public Server getServer() {

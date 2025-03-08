@@ -4,9 +4,13 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.shape.*?>
 
-<AnchorPane prefHeight="800.0" prefWidth="480.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.schnorrenbergers.automat.controller.ScreenSaverController">
-   <children>
-      <Arc fx:id="lol" fill="DODGERBLUE" layoutX="240.0" layoutY="400.0" length="270.0" radiusX="50.0" radiusY="50.0" scaleX="2.5" scaleY="2.5" startAngle="-151.0" stroke="BLACK" strokeType="INSIDE" type="ROUND" />
-      <Button mnemonicParsing="false" onAction="#btn" opacity="0.0" prefHeight="800.0" prefWidth="480.0" text="Button" />
-   </children>
+<AnchorPane prefHeight="800.0" prefWidth="480.0" xmlns="http://javafx.com/javafx/17.0.12"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="de.schnorrenbergers.automat.controller.ScreenSaverController">
+    <children>
+        <Arc fx:id="lol" fill="DODGERBLUE" layoutX="240.0" layoutY="400.0" length="270.0" radiusX="50.0" radiusY="50.0"
+             scaleX="2.5" scaleY="2.5" startAngle="-151.0" stroke="BLACK" strokeType="INSIDE" type="ROUND"/>
+        <Button mnemonicParsing="false" onAction="#btn" opacity="0.0" prefHeight="800.0" prefWidth="480.0"
+                text="Button"/>
+    </children>
 </AnchorPane>

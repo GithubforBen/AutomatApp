@@ -2,12 +2,16 @@ package de.schnorrenbergers.automat.controller;
 
 import de.schnorrenbergers.automat.Main;
 import de.schnorrenbergers.automat.types.CustomRequest;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
+import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import org.json.JSONObject;
 
@@ -38,7 +42,7 @@ public class MainController implements Initializable {
     @FXML
     private Button btn_8;
     @FXML
-    private Text text;
+    private Label text;
 
     public void button1(ActionEvent actionEvent) {
         click(0);
@@ -76,14 +80,14 @@ public class MainController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         Main.getInstance().getScreenSaver().setLastMove(System.currentTimeMillis());
-        text.setText("Bitte Karte scannen!");
+        setText("Bitte Karte scannen", Color.WHITE, true);
         MainController.mainController = this;
         try {
             Main.getInstance().setKost();
-
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+        text.setWrapText(true);
     }
 
     public static MainController getMainController() {
@@ -97,14 +101,14 @@ public class MainController implements Initializable {
     public void click(int number) {
         Main.getInstance().getScreenSaver().setLastMove(System.currentTimeMillis());
         if (Main.getInstance().getLastScan() == null) {
-            text.setFill(Color.RED);
+            setText("Bitte Karte Scannen", Color.RED, true);
             new Thread(() -> {
                 try {
                     Thread.sleep(1000 * 2);
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
-                text.setFill(Color.WHITE);
+                setText("Bitte Karte Scannen", Color.WHITE, true);
             }).start();
             return;
         }
@@ -114,11 +118,11 @@ public class MainController implements Initializable {
             if (Main.getInstance().getLastScan().time.getHour() >= jsonObject.getInt("hours")
                     || Main.getInstance().getLastScan().time.getHour() == Integer.MIN_VALUE
                     || !((Boolean) Main.getInstance().getStatistic().getSettingOrDefault("checkTime", true))) {
-                new CustomRequest("dispense").executeComplex("{\"nr\":" + number + ",\"cost\":" + jsonObject.getInt("hours")+ ",\"usr\":" + Arrays.toString(Main.getInstance().getLastScan().getByteAdress()) + "}");
+                new CustomRequest("dispense").executeComplex("{\"nr\":" + number + ",\"cost\":" + jsonObject.getInt("hours") + ",\"usr\":" + Arrays.toString(Main.getInstance().getLastScan().getByteAdress()) + "}");
                 Main.getInstance().getStatistic().addOne(number);
                 Main.getInstance().setLastScan(null);
             } else {
-                text.setText("Nicht genug Stunden");
+                setText("Nicht genug Stunden", Color.RED, true);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -126,7 +130,29 @@ public class MainController implements Initializable {
         }
     }
 
-    public Text getText() {
-        return text;
+    //is allowed to be null
+    public void setText(String s, Paint paint, boolean first) {
+        System.out.println("." + s + ".");
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                if (s != null) {
+                    text.setText("");
+                    text.setText(s);
+                    double fontSize = text.getFont().getSize();
+                    if (first) fontSize = 48;
+                    text.setFont(new Font(fontSize));
+                    System.out.println("/" + text.getWidth() + "/" + fontSize);
+                    text.widthProperty().addListener((observable, oldValue, newValue) -> {
+                        if (newValue.doubleValue() > 480) {
+                            double fontSizee = text.getFont().getSize() - 0.5;
+                            text.setFont(new Font(fontSizee));
+                            System.out.println(text.getWidth() + "/" + fontSizee);
+                        }
+                    });
+                }
+                if (paint != null) text.setTextFill(paint);
+            }
+        });
     }
 }

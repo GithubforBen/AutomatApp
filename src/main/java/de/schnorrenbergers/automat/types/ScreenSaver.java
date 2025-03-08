@@ -11,19 +11,20 @@ public class ScreenSaver {
     private boolean isSaverr = false;
 
     public ScreenSaver() {
-        lastMove = System.currentTimeMillis() - (10L * 60000);
+        //lastMove = 0;
         setDoSaver((Boolean) Main.getInstance().getStatistic().getSettingOrDefault("doSaver", true));
     }
 
     public boolean isSaver() {
         Date date = new Date();
+        if (permanent) return true;
         if (!doSaver) {
             return false;
         }
         if (date.getHours() >= 14-1 && date.getHours() <= 17-1) {
             return false;
         }
-        return (lastMove+(10L * 60000) <= System.currentTimeMillis() || permanent);
+        return (lastMove+(10L * 60000) <= System.currentTimeMillis());
     }
 
     public long getLastMove() {
