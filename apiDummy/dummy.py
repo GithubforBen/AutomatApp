@@ -29,6 +29,11 @@ def dispense():
     else:
         return "error: 235";
 
+@app.route("/re-enable")
+def reEnable():
+    print(flask.request.json["name"])
+    return "Added:" + flask.request.json["name"]
+
 @app.route("/ping")
 def ping():
     return "1"

@@ -36,7 +36,7 @@ public class AdminController implements Initializable {
     public Button plus;
     @FXML
     private Slider slider;
-    private boolean positive = true;
+    private int positive = 3; //pos->0;neg->1;re-enable->2
 
     public void back(ActionEvent actionEvent) {
         Main.getInstance().loadScene("main-view.fxml");
@@ -82,22 +82,29 @@ public class AdminController implements Initializable {
     public void fill(String name) {
         Main.getInstance().getScreenSaver().setLastMove(System.currentTimeMillis());
         try {
-            if (positive)
+            if (positive == 0)
                 new CustomRequest("fill").executeComplex("{\"name\":\"" + name + "\",\"nr\":" + slider.getValue() + "}");
-            if (!positive)
+            if (positive == 1)
                 new CustomRequest("fill").executeComplex("{\"name\":\"" + name + "\",\"nr\":" + slider.getValue() * -1 + "}");
+            if (positive == 2)
+                new CustomRequest("re-enable").executeComplex("{\"name\":\"" + name + "\"}");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
     public void plus(ActionEvent actionEvent) {
+        System.out.println("plus " + positive);
         Main.getInstance().getScreenSaver().setLastMove(System.currentTimeMillis());
-        positive = !positive;
-        if (positive) {
+        if (positive == 0) {
             plus.setText("+");
-        } else {
+            positive += 1;
+        } else if (positive == 1) {
             plus.setText("-");
+            positive += 1;
+        } else {
+            positive = 0;
+            plus.setText("Reaktivieren");
         }
     }
 
