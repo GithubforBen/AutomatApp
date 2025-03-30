@@ -43,28 +43,6 @@ public class Statistic {
         }
     }
 
-    public Object getSetting(String adress) {
-        return settings.get(adress);
-    }
-
-    public Object getSettingOrDefault(String adress, Object defaultValue) {
-        try {
-            return getSetting(adress);
-        } catch (Exception e) {
-            return defaultValue;
-        }
-    }
-
-    public boolean setSetting(String adress, Object value) {
-        try {
-            settings.get(adress);
-            settings.remove(adress);
-        } catch (Exception _) {
-        }
-        settings.put(adress, value);
-        return true;
-    }
-
     public int getStat(int i) {
         return stats.get(i);
     }
@@ -81,7 +59,7 @@ public class Statistic {
     }
 
     public void save() throws IOException {
-        setSetting("logout", Main.getInstance().getLogoutTime());
+        Main.getInstance().getSettings().setSetting("logout", String.valueOf(Main.getInstance().getLogoutTime()));
         JSONObject obj = new JSONObject();
         obj.put("length", stats.size());
         stats.forEach((key, value) -> {

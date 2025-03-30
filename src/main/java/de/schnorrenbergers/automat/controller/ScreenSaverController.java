@@ -33,7 +33,6 @@ public class ScreenSaverController implements Initializable {
     }
 
     public void display() throws InterruptedException {
-        int start = 0;
         int r = new Random().nextInt(255);
         int g = new Random().nextInt(255);
         int b = new Random().nextInt(255);
@@ -59,9 +58,9 @@ public class ScreenSaverController implements Initializable {
             } else {
                 i++;
             }
-            lol.setFill(Color.rgb(Math.abs(r), Math.abs(g), Math.abs(b)));
-            lol.setLength(Math.abs(i));
-            lol.setRotate(j);
+            arc.setFill(Color.rgb(Math.abs(r), Math.abs(g), Math.abs(b)));
+            arc.setLength(Math.abs(i));
+            arc.setRotate(j);
             Thread.sleep(40);
             if (!Main.getInstance().getScreenSaver().isSaver()) {
                 Main.getInstance().getScreenSaver().setSaver(false);
@@ -82,7 +81,7 @@ public class ScreenSaverController implements Initializable {
     }
 
     @FXML
-    public Arc lol;
+    public Arc arc;
 
     public void btn(ActionEvent actionEvent) {
         Main.getInstance().getScreenSaver().setLastMove(System.currentTimeMillis());

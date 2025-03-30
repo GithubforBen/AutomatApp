@@ -12,7 +12,7 @@ public class ScreenSaver {
 
     public ScreenSaver() {
         //lastMove = 0;
-        setDoSaver((Boolean) Main.getInstance().getStatistic().getSettingOrDefault("doSaver", true));
+        setDoSaver(Boolean.parseBoolean(Main.getInstance().getSettings().getSettingOrDefault("doSaver", String.valueOf(true))));
     }
 
     public boolean isSaver() {
@@ -41,7 +41,7 @@ public class ScreenSaver {
 
     public void setDoSaver(boolean doSaver) {
         this.doSaver = doSaver;
-        Main.getInstance().getStatistic().setSetting("doSaver", doSaver);
+        Main.getInstance().getSettings().setSetting("doSaver", String.valueOf(doSaver));
     }
 
     public void setSaver(boolean saverr) {

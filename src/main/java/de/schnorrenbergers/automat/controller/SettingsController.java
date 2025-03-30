@@ -39,9 +39,9 @@ public class SettingsController implements Initializable {
 
             }
         });
-        checkTime.setSelected(((Boolean) Main.getInstance().getStatistic().getSettingOrDefault("checkTime", true)));
+        checkTime.setSelected(Boolean.parseBoolean(Main.getInstance().getSettings().getSettingOrDefault("checkTime", "true")));
         checkTime.setOnAction((ActionEvent event) -> {
-            Main.getInstance().getStatistic().setSetting("checkTime", checkTime.isSelected());
+            Main.getInstance().getSettings().setSetting("checkTime", String.valueOf(checkTime.isSelected()));
             try {
                 Main.getInstance().getStatistic().save();
             } catch (IOException e) {

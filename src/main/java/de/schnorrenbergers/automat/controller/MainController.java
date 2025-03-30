@@ -116,7 +116,7 @@ public class MainController implements Initializable {
 
             if (Main.getInstance().getLastScan().time.getHour() >= jsonObject.getInt("hours")
                     || Main.getInstance().getLastScan().time.getHour() == Integer.MIN_VALUE
-                    || !((Boolean) Main.getInstance().getStatistic().getSettingOrDefault("checkTime", true))) {
+                    || !Boolean.parseBoolean(Main.getInstance().getSettings().getSettingOrDefault("checkTime", String.valueOf(true)))) {
                 new CustomRequest("dispense").executeComplex("{\"nr\":" + number + ",\"cost\":" + jsonObject.getInt("hours") + ",\"usr\":" + Arrays.toString(Main.getInstance().getLastScan().getByteAdress()) + "}");
                 Main.getInstance().getStatistic().addOne(number);
                 Main.getInstance().setLastScan(null);
@@ -131,7 +131,6 @@ public class MainController implements Initializable {
 
     //is allowed to be null
     public void setText(String s, Paint paint, boolean first) {
-        System.out.println("." + s + ".");
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
@@ -141,12 +140,10 @@ public class MainController implements Initializable {
                     double fontSize = text.getFont().getSize();
                     if (first) fontSize = 48;
                     text.setFont(new Font(fontSize));
-                    System.out.println("/" + text.getWidth() + "/" + fontSize);
                     text.widthProperty().addListener((observable, oldValue, newValue) -> {
                         if (newValue.doubleValue() > 480) {
                             double fontSizee = text.getFont().getSize() - 0.5;
                             text.setFont(new Font(fontSizee));
-                            System.out.println(text.getWidth() + "/" + fontSizee);
                         }
                     });
                 }

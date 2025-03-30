@@ -1,4 +1,4 @@
-package de.schnorrenbergers.automat.server;
+package de.schnorrenbergers.automat.server.handler;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;

@@ -94,7 +94,6 @@ public class AdminController implements Initializable {
     }
 
     public void plus(ActionEvent actionEvent) {
-        System.out.println("plus " + positive);
         Main.getInstance().getScreenSaver().setLastMove(System.currentTimeMillis());
         if (positive == 0) {
             plus.setText("+");

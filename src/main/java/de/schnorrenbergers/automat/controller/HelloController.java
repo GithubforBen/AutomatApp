@@ -8,6 +8,7 @@ import javafx.scene.control.SplitPane;
 
 import java.io.IOException;
 import java.net.URL;
+import java.sql.SQLException;
 import java.util.ResourceBundle;
 
 public class HelloController implements Initializable {
@@ -26,9 +27,7 @@ public class HelloController implements Initializable {
     public void reconnect(ActionEvent actionEvent) {
         try {
             Main.getInstance().start(Main.getInstance().getStage());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } catch (InterruptedException e) {
+        } catch (IOException | InterruptedException | SQLException | ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
         Main.getInstance().getScreenSaver().setLastMove(System.currentTimeMillis());

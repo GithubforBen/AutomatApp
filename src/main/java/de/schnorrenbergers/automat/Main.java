@@ -2,11 +2,13 @@ package de.schnorrenbergers.automat;
 
 import atlantafx.base.theme.PrimerDark;
 import de.schnorrenbergers.automat.controller.MainController;
+import de.schnorrenbergers.automat.database.Database;
 import de.schnorrenbergers.automat.server.Server;
 import de.schnorrenbergers.automat.statistic.Statistic;
 import de.schnorrenbergers.automat.types.CustomRequest;
 import de.schnorrenbergers.automat.types.ScannedCard;
 import de.schnorrenbergers.automat.types.ScreenSaver;
+import de.schnorrenbergers.automat.utils.Settings;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
@@ -23,6 +25,7 @@ import javafx.stage.Stage;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.Objects;
 
 public class Main extends Application {
@@ -38,14 +41,26 @@ public class Main extends Application {
     private boolean alarm = false;
     private boolean checkAvailability;
     private ScreenSaver screenSaver;
+    private Database database;
+    private Settings settings;
 
-    @Override
-    public void start(Stage stage) throws IOException, InterruptedException {
+    private void initialise() throws IOException, SQLException, ClassNotFoundException {
         instance = this;
         statistic = new Statistic();
+        database = new Database();
+        settings = new Settings();
         dimension = new Dimension2D(480, 800);
         if (server == null) server = new Server();
         screenSaver = new ScreenSaver();
+        try {logoutTime = Integer.parseInt((settings.getSetting("logout")));} catch (Exception e) {logoutTime = 10;}
+        checkAvailability = Boolean.parseBoolean(settings.getSettingOrDefault("availability", String.valueOf(false)));
+
+        settings.setSetting("test", "test");
+    }
+
+    @Override
+    public void start(Stage stage) throws IOException, InterruptedException, SQLException, ClassNotFoundException {
+        initialise();
         FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("hello-view.fxml"));
         Scene scene = new Scene(fxmlLoader.load(), dimension.getWidth(), dimension.getHeight());
         stage.setTitle("Hello!");
@@ -53,13 +68,10 @@ public class Main extends Application {
         stage.show();
         this.stage = stage;
         stage.setFullScreenExitHint("");
-        //Font.loadFont(Main.class.getResource("/fonts/Russo_One.ttf").toExternalForm(), 10);
         Application.setUserAgentStylesheet(new PrimerDark().getUserAgentStylesheet());
-        logoutTime = ((Integer) statistic.getSetting("logout"));
-        checkAvailability = (boolean) statistic.getSettingOrDefault("availability", false);
-        new CustomRequest("ping").execute();
         checkForStuff();
         load();
+        new CustomRequest("ping").execute();
     }
 
     public void checkForStuff() {
@@ -69,12 +81,7 @@ public class Main extends Application {
                     Thread.sleep(400);
                     boolean saver = Main.getInstance().getScreenSaver().isSaver();
                     if (saver && !Main.getInstance().getScreenSaver().isSaverr()) {
-                        Runnable runnable = new Runnable() {
-                            @Override
-                            public void run() {
-                                loadScene("screenSaver.fxml");
-                            }
-                        };
+                        Runnable runnable = () -> loadScene("screenSaver.fxml");
                         Platform.runLater(runnable);
                         Main.getInstance().getScreenSaver().setSaver(true);
                     }
@@ -160,26 +167,6 @@ public class Main extends Application {
         };
     }
 
-    public static void main(String[] args) {
-        launch();
-    }
-
-    public static Main getInstance() {
-        return instance;
-    }
-
-    public String getUrl() {
-        return url;
-    }
-
-    public Stage getStage() {
-        return stage;
-    }
-
-    public Dimension2D getDimension() {
-        return dimension;
-    }
-
     private Image convertToGrayscale(Image image) {
         int width = (int) image.getWidth();
         int height = (int) image.getHeight();
@@ -225,6 +212,32 @@ public class Main extends Application {
         MainController.getMainController().setText(lastScan.name + ":" + (int) lastScan.time.getHour() + "h", Color.WHITE, true);
     }
 
+
+    public void setCheckAvailability(boolean checkAvailability) {
+        this.checkAvailability = checkAvailability;
+        settings.setSetting("availability", String.valueOf(checkAvailability));
+    }
+
+    public static void main(String[] args) {
+        launch();
+    }
+
+    public static Main getInstance() {
+        return instance;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public Stage getStage() {
+        return stage;
+    }
+
+    public Dimension2D getDimension() {
+        return dimension;
+    }
+
     public Server getServer() {
         return server;
     }
@@ -257,12 +270,15 @@ public class Main extends Application {
         return checkAvailability;
     }
 
-    public void setCheckAvailability(boolean checkAvailability) {
-        this.checkAvailability = checkAvailability;
-        statistic.setSetting("availability", checkAvailability);
-    }
-
     public ScreenSaver getScreenSaver() {
         return screenSaver;
+    }
+
+    public Database getDatabase() {
+        return database;
+    }
+
+    public Settings getSettings() {
+        return settings;
     }
 }
