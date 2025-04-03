@@ -9,14 +9,26 @@ import java.util.List;
 
 public class Settings {
 
+    /**
+    * Finds a setting.
+    * @param address  The address associated with the setting
+     * @return The setting
+     * @deprecated  Use {@link #getSettingOrDefault(String, String)}
+     **/
     @Deprecated
-    public String getSetting(String adress) {
+    public String getSetting(String address) {
         Session session = Main.getInstance().getDatabase().getSessionFactory().openSession();
-        List<Setting> resultList = session.createSelectionQuery("from Setting s where s.key = :adress", Setting.class).setParameter("adress", adress).getResultList();
+        List<Setting> resultList = session.createSelectionQuery("from Setting s where s.key = :adress", Setting.class).setParameter("address", address).getResultList();
         session.close();
         return resultList.getFirst().getValue();
     }
 
+    /**
+     * Returns a setting.
+     * @param adress The address associated with the setting
+     * @param defaultValue This value will be returned if the setting wasn't found
+     * @return The setting
+     */
     public String getSettingOrDefault(String adress, String defaultValue) {
         Session session = Main.getInstance().getDatabase().getSessionFactory().openSession();
         List<Setting> resultList = session.createSelectionQuery("from Setting s where s.key = :adress", Setting.class).setParameter("adress", adress).getResultList();
@@ -25,22 +37,29 @@ public class Settings {
         return resultList.getFirst().getValue();
     }
 
-    public boolean setSetting(String adress, String value) {
+    /**
+     * Sets a setting
+     * @param address The address where the setting should be saved.
+     * @param value The Value of the setting.
+     * @return true if a setting was replaced; false if the setting is new
+     */
+    public boolean setSetting(String address, String value) {
         SessionFactory sessionFactory = Main.getInstance().getDatabase().getSessionFactory();
         try {
             sessionFactory.inTransaction(session -> {
-                List<Setting> resultList = session.createSelectionQuery("from Setting where key = :adress", Setting.class).setParameter("adress", adress).getResultList();
+                List<Setting> resultList = session.createSelectionQuery("from Setting where key = :adress", Setting.class).setParameter("address", address).getResultList();
                 int size = resultList.size();
                 if (size == 0) {
-                    throw new RuntimeException("No setting found for adress " + adress);
+                    throw new RuntimeException("No setting found for address " + address);
                 }
                 session.remove(resultList.getFirst());
-                session.persist(new Setting(adress, value));
+                session.persist(new Setting(address, value));
             });
         } catch (Exception e) {
             sessionFactory.inTransaction(session -> {
-                session.persist(new Setting(adress, value));
+                session.persist(new Setting(address, value));
             });
+            return false;
         }
         return true;
     }

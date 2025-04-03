@@ -2,6 +2,11 @@ package de.schnorrenbergers.automat.database.types;
 
 import jakarta.persistence.*;
 
+/**
+ * Used as a type for storing Settings.
+ * key: used to identify setting
+ * value: the value of the setting
+ */
 @Entity
 @Table(name = "settings")
 public class Setting {

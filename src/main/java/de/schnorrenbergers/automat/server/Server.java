@@ -1,9 +1,7 @@
 package de.schnorrenbergers.automat.server;
 
 import com.sun.net.httpserver.HttpServer;
-import de.schnorrenbergers.automat.server.handler.IndexHandler;
-import de.schnorrenbergers.automat.server.handler.ScannedHandler;
-import de.schnorrenbergers.automat.server.handler.SchonenderHandler;
+import de.schnorrenbergers.automat.server.handler.*;
 
 import java.io.IOException;
 import java.net.Inet4Address;
@@ -19,6 +17,11 @@ public class Server {
         server.createContext("/scanned", new ScannedHandler());
         server.createContext("/energetics", new SchonenderHandler());
         server.createContext("/", new IndexHandler());
+        server.createContext("/addTeacher", new AddTeatcherHandler());
+        server.createContext("/addUser", new AddUserHandler());
+        server.createContext("/genders", new GenderHandler());
+        server.createContext("/allUsers", new GetAllUsersHandler());
+        server.createContext("/allTeachers", new GetAllTeatchersHandler());
         server.setExecutor(threadPoolExecutor);
         server.start();
         System.out.println("Server started on port " + server.getAddress().getPort() + " ip" + Inet4Address.getLocalHost().getHostAddress());

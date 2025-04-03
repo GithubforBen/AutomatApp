@@ -1,5 +1,6 @@
 package de.schnorrenbergers.automat.database.types;
 
+import de.schnorrenbergers.automat.database.types.types.StatisticType;
 import jakarta.persistence.*;
 
 @Entity
@@ -24,5 +25,9 @@ public class Statistic {
         this.data = data;
         this.type = type;
         this.timestamp = System.currentTimeMillis();
+    }
+
+    public Statistic() {
+
     }
 }

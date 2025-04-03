@@ -3,6 +3,11 @@ package de.schnorrenbergers.automat;
 import atlantafx.base.theme.PrimerDark;
 import de.schnorrenbergers.automat.controller.MainController;
 import de.schnorrenbergers.automat.database.Database;
+import de.schnorrenbergers.automat.database.types.Kurs;
+import de.schnorrenbergers.automat.database.types.User;
+import de.schnorrenbergers.automat.database.types.types.Day;
+import de.schnorrenbergers.automat.database.types.types.Gender;
+import de.schnorrenbergers.automat.database.types.types.Wohnort;
 import de.schnorrenbergers.automat.server.Server;
 import de.schnorrenbergers.automat.statistic.Statistic;
 import de.schnorrenbergers.automat.types.CustomRequest;
@@ -27,6 +32,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 public class Main extends Application {
 
@@ -44,6 +50,12 @@ public class Main extends Application {
     private Database database;
     private Settings settings;
 
+    /**
+     * Used to Initialise all objects.
+     * @throws IOException Programm wont work.
+     * @throws SQLException Programm wont work.
+     * @throws ClassNotFoundException Programm wont work.
+     */
     private void initialise() throws IOException, SQLException, ClassNotFoundException {
         instance = this;
         statistic = new Statistic();
@@ -53,11 +65,35 @@ public class Main extends Application {
         if (server == null) server = new Server();
         screenSaver = new ScreenSaver();
         try {logoutTime = Integer.parseInt((settings.getSetting("logout")));} catch (Exception e) {logoutTime = 10;}
-        checkAvailability = Boolean.parseBoolean(settings.getSettingOrDefault("availability", String.valueOf(false)));
+        checkAvailability = Boolean.parseBoolean(settings.getSettingOrDefault("availability", String.valueOf(false)));/*
+        database.getSessionFactory().inTransaction(session -> {
+            session.createSelectionQuery("from User u", User.class).getResultList().forEach((x) -> {
+                System.out.println(x.toString());
+            });
+        });
 
-        settings.setSetting("test", "test");
+        database.getSessionFactory().inTransaction(session -> {
+            Kurs kurs = new Kurs("Test", "Paul", Day.DONNERSTAG);
+            session.persist(kurs);
+            Wohnort wohnort = new Wohnort(1, " ", "sad", 48, "germany");
+            session.persist(wohnort);
+            session.persist(new User("Ben", "Schnorrenberger", new int[]{0,1,2,3}, Gender.DUAL_GENDER, 10, wohnort, new Kurs[]{kurs}));
+        });
+
+ */
     }
 
+    /**
+     *
+     * @param stage the primary stage for this application, onto which
+     * the application scene can be set.
+     * Applications may create other stages, if needed, but they will not be
+     * primary stages.
+     * @throws IOException Inherited form {@link #initialise()}
+     * @throws InterruptedException Inherited form {@link #initialise()}
+     * @throws SQLException Programm wont work.
+     * @throws ClassNotFoundException Inherited form {@link #initialise()}
+     */
     @Override
     public void start(Stage stage) throws IOException, InterruptedException, SQLException, ClassNotFoundException {
         initialise();

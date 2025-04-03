@@ -6,12 +6,14 @@
 </head>
 <body>
 <p><b>Documentation:</b></p>
+Before adding a user a course must be added. Before adding a Course a Teacher must be added.
 <table style="width:100%">
     <tr>
         <th>Route</th>
         <th>Usage</th>
         <th>Input</th>
         <th>Output</th>
+        <th>Notes</th>
         <th>Example</th>
     </tr>
     <tr>
@@ -19,12 +21,191 @@
         <th>get this documentation</th>
         <th>None</th>
         <th>this html</th>
+        <th>None</th>
         <th><a href="./index.html" class="button">/</a></th>
+    </tr>
+    <tr>
+        <th>/addTeacher</th>
+        <th>Adds the teacher.</th>
+        <th>
+            <p>JSON Object:</p>
+        {
+            "firstName": "John",
+            "lastName": "Doe",
+            "email": "john.doe@gmail.com",
+            "password": "123456",
+            "level": "NORMAL", //NORMAL OR ADMIN
+            "birthday": "234567890",
+            "gender": "MALE",//use route /genders for full list
+            "rfid" : [100, 100, 100, 100],
+            "address": {
+                "nr": 8,
+                "street": "Albert-Einstein-Ding",
+                "city": "Groß Gerau",
+                "zip": "12345",
+                "country": "Germany"
+                }
+            }
+        </th>
+        <th>
+            Courses are Present in the data, but Teachers are set via Kurs modify.
+            If a teacher is in a course he is a Member.
+            Inherited from User.
+        </th>
+        <th>
+            <p><b>Can't serialize String(400):</b></p>
+            The following sting isn't a json object!
+            {string}
+            <p><b>Information missing(400):</b></p>
+            Can't parse JSON object!
+            {error message}
+            <p><b>Success(200):</b></p>
+            Successfully added teacher
+        </th>
+        <th><button onclick="getTeacher()" class="button">/addTeacher</button></th>
+    </tr>
+
+    <tr>
+        <th>/genders</th>
+        <th>Get all usable Genders.</th>
+        <th>None</th>
+        <th>Gender {newLine}</th>
+        <th>None</th>
+        <th><a href="/genders" class="button">/genders</a></th>
+    </tr>
+
+    <tr>
+        <th>/addUser</th>
+        <th>Adds the user.</th>
+        <th>
+            <p>JSON Object:</p>
+            {
+            "firstName": "John",
+            "lastName": "Doe",
+            "kurse": [
+                {
+                    "name": "IT",
+                    "tutor": "lelek",
+                    "day":  "MONTAG"
+                }
+            ],
+            "birthday": "234567890",
+            "gender": "MALE",//use route /genders for full list
+            "rfid" : [100, 100, 100, 100],
+            "address": {
+                "nr": 8,
+                "street": "Albert-Einstein-Ding",
+                "city": "Groß Gerau",
+                "zip": "12345",
+                "country": "Germany"
+            }
+            }
+        </th>
+        <th>
+            None
+        </th>
+        <th>
+            <p><b>Can't serialize String(400):</b></p>
+            The following sting isn't a json object!
+            {string}
+            <p><b>Information missing(400):</b></p>
+            Can't parse JSON object!
+            {error message}
+            <p><b>Success(200):</b></p>
+            Successfully added teacher
+        </th>
+        <th><button onclick="addUser()" class="button">/addUser</button></th>
+    </tr>
+
+    <tr>
+        <th>/allUsers</th>
+        <th>get a list containing all users</th>
+        <th>None</th>
+        <th></th>
+        <th>None</th>
+        <th><a href="/allUsers" class="button">/allUsers</a></th>
+    </tr>
+
+    <tr>
+        <th>/allTeachers</th>
+        <th>get a list containing all Teachers</th>
+        <th>None</th>
+        <th></th>
+        <th>None</th>
+        <th><a href="/allTeachers" class="button">/allUsers</a></th>
     </tr>
 </table>
 </body>
 </html>
 
+<script>
+    function getTeacher() {
+        //use route /genders for full list
+        fetch('./addTeacher', {
+            method: 'POST',
+            body: JSON.stringify(
+                {
+                'firstName': 'John',
+                'lastName': 'Doe',
+                'email': 'john.doe@gmail.com',
+                'password': '123456',
+                'birthday': '234567890',
+                'level': 'NORMAL',
+                'gender': 'MALE',
+                'rfid' : [100, 100, 100, 100],
+                'address': {
+                    'nr': 8,
+                    'street': 'Albert-Einstein-Ding',
+                    'city': 'Groß Gerau',
+                    'zip': '12345',
+                    'country': 'Germany'
+                    }
+                }
+            ),
+            headers: {
+                'Content-type': 'application/json; charset=UTF-8'
+            }
+        }).then(response => {
+            console.log(response);
+            return response.toString();
+        });
+    }
+    function addUser() {
+        //use route /genders for full list
+        fetch('./addUser', {
+            method: 'POST',
+            body: JSON.stringify(
+                {
+                    "firstName": "John",
+                    "lastName": "Doe",
+                    "kurse": [
+                        {
+                            "name": "IT",
+                            "tutor": "lelek",
+                            "day":  "MONTAG"
+                        }
+                    ],
+                    "birthday": "234567890",
+                    "gender": "MALE",//use route /genders for full list
+                    "rfid" : [100, 100, 100, 100],
+                    "address": {
+                        "nr": 8,
+                        "street": "Albert-Einstein-Ding",
+                        "city": "Groß Gerau",
+                        "zip": "12345",
+                        "country": "Germany"
+                    }
+                }
+            ),
+            headers: {
+                'Content-type': 'application/json; charset=UTF-8'
+            }
+        }).then(response => {
+            console.log(response);
+            return response.toString();
+        });
+    }
+</script>
 <style>
     table, th, tr {
         border-color: black;

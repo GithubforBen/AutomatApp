@@ -18,4 +18,5 @@ module de.schnorrenbergers.automat {
     opens de.schnorrenbergers.automat.controller to javafx.fxml;
     opens de.schnorrenbergers.automat.database.types to org.hibernate.orm.core, jakarta.persistence, java.base;
     exports de.schnorrenbergers.automat.types to org.hibernate.orm.core, jakarta.persistence, java.base;
+    opens de.schnorrenbergers.automat.database.types.types to jakarta.persistence, java.base, org.hibernate.orm.core;
 }
