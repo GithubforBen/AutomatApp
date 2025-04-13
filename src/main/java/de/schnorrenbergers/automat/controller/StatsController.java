@@ -31,7 +31,7 @@ public class StatsController implements Initializable {
             throw new RuntimeException(e);
         }
         for (int i = 0; i < 7; i++) {
-            pieData.add(new PieChart.Data(jsonObject.getJSONObject("" + i).getString("name"), Main.getInstance().getStatistic().getStat(i)));
+            //TODO: use new Statistic instead of pieData.add(new PieChart.Data(jsonObject.getJSONObject("" + i).getString("name"), Main.getInstance().getStatistic().getStat(i)));
         }
         pie.setData(pieData);
         pie.setAnimated(true);

@@ -42,7 +42,6 @@ public class Main extends Application {
     private Dimension2D dimension;
     private Server server;
     private ScannedCard lastScan;
-    private Statistic statistic;
     private int logoutTime = 10;
     private boolean alarm = false;
     private boolean checkAvailability;
@@ -58,7 +57,6 @@ public class Main extends Application {
      */
     private void initialise() throws IOException, SQLException, ClassNotFoundException {
         instance = this;
-        statistic = new Statistic();
         database = new Database();
         settings = new Settings();
         dimension = new Dimension2D(480, 800);
@@ -280,10 +278,6 @@ public class Main extends Application {
 
     public ScannedCard getLastScan() {
         return lastScan;
-    }
-
-    public Statistic getStatistic() {
-        return statistic;
     }
 
     public int getLogoutTime() {

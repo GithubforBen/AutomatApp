@@ -118,7 +118,7 @@ public class MainController implements Initializable {
                     || Main.getInstance().getLastScan().time.getHour() == Integer.MIN_VALUE
                     || !Boolean.parseBoolean(Main.getInstance().getSettings().getSettingOrDefault("checkTime", String.valueOf(true)))) {
                 new CustomRequest("dispense").executeComplex("{\"nr\":" + number + ",\"cost\":" + jsonObject.getInt("hours") + ",\"usr\":" + Arrays.toString(Main.getInstance().getLastScan().getByteAdress()) + "}");
-                Main.getInstance().getStatistic().addOne(number);
+                //TODO: use new Statistic instead of Main.getInstance().getStatistic().addOne(number);
                 Main.getInstance().setLastScan(null);
             } else {
                 setText("Nicht genug Stunden", Color.RED, true);

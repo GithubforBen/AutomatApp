@@ -33,29 +33,17 @@ public class SettingsController implements Initializable {
         availability.setSelected(Main.getInstance().isCheckAvailability());
         availability.setOnAction((ActionEvent event) -> {
             Main.getInstance().setCheckAvailability(availability.isSelected());
-            try {
-                Main.getInstance().getStatistic().save();
-            } catch (IOException _) {
-
-            }
+            //TODO: use new Statistic instead of Main.getInstance().getStatistic().save();
         });
         checkTime.setSelected(Boolean.parseBoolean(Main.getInstance().getSettings().getSettingOrDefault("checkTime", "true")));
         checkTime.setOnAction((ActionEvent event) -> {
             Main.getInstance().getSettings().setSetting("checkTime", String.valueOf(checkTime.isSelected()));
-            try {
-                Main.getInstance().getStatistic().save();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+            //TODO: use new Statistic instead of Main.getInstance().getStatistic().save();
         });
         screensaver.setSelected(Main.getInstance().getScreenSaver().isDoSaver());
         screensaver.setOnAction((ActionEvent event) -> {
             Main.getInstance().getScreenSaver().setDoSaver(screensaver.isSelected());
-            try {
-                Main.getInstance().getStatistic().save();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+            //TODO: use new Statistic instead of Main.getInstance().getStatistic().save();
         });
     }
 
@@ -71,10 +59,7 @@ public class SettingsController implements Initializable {
     }
 
     public void exit(ActionEvent actionEvent) {
-        try {
-            Main.getInstance().getStatistic().save();
-        } catch (IOException _) {
-        }
+        //TODO: use new Statistic instead of Main.getInstance().getStatistic().save();
         Main.getInstance().getScreenSaver().setLastMove(System.currentTimeMillis());
         System.exit(0);
     }
@@ -92,11 +77,7 @@ public class SettingsController implements Initializable {
     public void Ok(ActionEvent actionEvent) {
         Main.getInstance().setLogoutTime(((int) slider_logout.getValue()));
         display();
-        try {
-            Main.getInstance().getStatistic().save();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        //TODO: use new Statistic instead of Main.getInstance().getStatistic().save();
         Main.getInstance().getScreenSaver().setLastMove(System.currentTimeMillis());
     }
 
@@ -106,17 +87,13 @@ public class SettingsController implements Initializable {
     }
 
     public void resetStats(ActionEvent actionEvent) {
-        Main.getInstance().getStatistic().resetStats();
+        //TODO: use new Statistic instead of Main.getInstance().getStatistic().resetStats();
         Main.getInstance().getScreenSaver().setLastMove(System.currentTimeMillis());
     }
 
     public void shutdown(ActionEvent actionEvent) {
         ProcessBuilder processBuilder = new ProcessBuilder();
-        try {
-            Main.getInstance().getStatistic().save();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        //TODO: use new Statistic instead of Main.getInstance().getStatistic().save();
         if (shut.getText().equals("Herunterfahren")) {
             processBuilder.command("shutdown");
             new Thread(() -> {
