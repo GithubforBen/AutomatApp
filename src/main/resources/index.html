@@ -132,7 +132,7 @@ Before adding a user a course must be added. Before adding a Course a Teacher mu
         <th>None</th>
         <th></th>
         <th>None</th>
-        <th><a href="/allTeachers" class="button">/allUsers</a></th>
+        <th><a href="/allTeachers" class="button">/allTeachers</a></th>
     </tr>
 </table>
 </body>
@@ -167,6 +167,7 @@ Before adding a user a course must be added. Before adding a Course a Teacher mu
             }
         }).then(response => {
             console.log(response);
+            window.location.href = response.toString();
             return response.toString();
         });
     }

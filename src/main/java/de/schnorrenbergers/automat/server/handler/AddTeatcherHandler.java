@@ -69,6 +69,7 @@ public class AddTeatcherHandler implements HttpHandler {
      }
 
     private void respond(HttpExchange exchange, String answer, int code) throws IOException {
+        System.out.println(answer);
         exchange.sendResponseHeaders(code, answer.length());
         exchange.getResponseBody().write(answer.getBytes());
         exchange.getResponseBody().close();
