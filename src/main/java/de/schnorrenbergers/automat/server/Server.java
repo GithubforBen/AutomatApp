@@ -18,8 +18,10 @@ public class Server {
         server.createContext("/energetics", new SchonenderHandler());
         server.createContext("/", new IndexHandler());
         server.createContext("/addTeacher", new AddTeatcherHandler());
-        server.createContext("/addUser", new AddUserHandler());
+        server.createContext("/addCourse", new AddCourseHandler());
+        server.createContext("/addStudent", new AddStudentHandler());
         server.createContext("/genders", new GenderHandler());
+        server.createContext("/days", new DayHandler());
         server.createContext("/allUsers", new GetAllUsersHandler());
         server.createContext("/allTeachers", new GetAllTeatchersHandler());
         server.setExecutor(threadPoolExecutor);

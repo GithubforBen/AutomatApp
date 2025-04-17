@@ -3,19 +3,24 @@ package de.schnorrenbergers.automat.database.types;
 import de.schnorrenbergers.automat.database.types.types.Day;
 import jakarta.persistence.*;
 
+import java.util.List;
+
 @Entity
 public class Kurs {
     @Id
     @GeneratedValue
     private Long id;
 
+    @Column(name = "name")
     private String name;
-    private String tutor;
+
+    @ManyToMany
+    private List<Teacher> tutor;
 
     @Enumerated(EnumType.STRING)
     private Day day;
 
-    public Kurs(String name, String tutor, Day day) {
+    public Kurs(String name, List<Teacher> tutor, Day day) {
         this.name = name;
         this.tutor = tutor;
         this.day = day;
@@ -36,7 +41,7 @@ public class Kurs {
         return "Kurs{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
-                ", tutor='" + tutor + '\'' +
+                ", tutor=" + tutor +
                 ", day=" + day +
                 '}';
     }

@@ -8,7 +8,6 @@ import java.sql.Date;
 import java.util.List;
 
 @Entity
-@Table(name = "teatcher")
 public class Teacher extends User {
 
     @Column(name = "mail")
@@ -20,14 +19,8 @@ public class Teacher extends User {
     @Enumerated(EnumType.STRING)
     private Level level;
 
-    public Teacher(String firstName, String lastName, int[] rfid, Gender gender, Date age, Wohnort wohnort, Kurs[] kurse, String email, String password, Level level) {
-        super(firstName, lastName, rfid, gender, age, wohnort, kurse);
-        this.email = email;
-        this.password = password;
-    }
-
-    public Teacher(String firstName, String lastName, int[] rfid, Gender gender, Date age, Wohnort wohnort, List<Kurs> kurse, String email, String password, Level level) {
-        super(firstName, lastName, rfid, gender, age, wohnort, kurse);
+    public Teacher(String firstName, String lastName, int[] rfid, Gender gender, Date age, Wohnort wohnort, String email, String password, Level level) {
+        super(firstName, lastName, rfid, gender, age, wohnort);
         this.email = email;
         this.password = password;
     }

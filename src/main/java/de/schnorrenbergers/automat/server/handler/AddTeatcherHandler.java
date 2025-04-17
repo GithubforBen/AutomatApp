@@ -2,6 +2,7 @@ package de.schnorrenbergers.automat.server.handler;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+import de.schnorrenbergers.automat.Main;
 import de.schnorrenbergers.automat.database.types.Kurs;
 import de.schnorrenbergers.automat.database.types.Teacher;
 import de.schnorrenbergers.automat.database.types.types.Gender;
@@ -54,12 +55,15 @@ public class AddTeatcherHandler implements HttpHandler {
                     Gender.valueOf(jsonObject.getString("gender")),
                     new Date(jsonObject.getLong("birthday")),
                     wohnort,
-                    new Kurs[]{},
                     jsonObject.getString("email"),
                     jsonObject.getString("password"),
                     Level.valueOf(jsonObject.getString("level"))
             );
             System.out.println(teacher.toString());
+            Main.getInstance().getDatabase().getSessionFactory().inTransaction(session -> {
+                session.persist(teacher);
+                session.flush();
+            });
             respond(exchange, "Successfully added teacher", 200);
         } catch (Exception e) {
             respond(exchange, "Can't parse JSON object!\n" + e.getMessage(), 400);
@@ -70,7 +74,7 @@ public class AddTeatcherHandler implements HttpHandler {
 
     private void respond(HttpExchange exchange, String answer, int code) throws IOException {
         System.out.println(answer);
-        exchange.sendResponseHeaders(code, answer.length());
+        exchange.sendResponseHeaders(code, answer.getBytes().length);
         exchange.getResponseBody().write(answer.getBytes());
         exchange.getResponseBody().close();
     }

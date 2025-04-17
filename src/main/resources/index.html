@@ -49,7 +49,6 @@ Before adding a user a course must be added. Before adding a Course a Teacher mu
         </th>
         <th>
             Courses are Present in the data, but Teachers are set via Kurs modify.
-            If a teacher is in a course he is a Member.
             Inherited from User.
         </th>
         <th>
@@ -62,7 +61,33 @@ Before adding a user a course must be added. Before adding a Course a Teacher mu
             <p><b>Success(200):</b></p>
             Successfully added teacher
         </th>
-        <th><button onclick="getTeacher()" class="button">/addTeacher</button></th>
+        <th><button onclick="addTeacher()" class="button">/addTeacher</button></th>
+    </tr>
+    <tr>
+        <th>/addCourse</th>
+        <th>Adds a Course.</th>
+        <th>
+            <p>JSON Object:</p>
+            {
+            "name": "John",
+            "tutor": ["1"],//List with id's
+            "day": "MONTAG"//Full list: /days
+            }
+        </th>
+        <th>
+            The Tutor must have
+        </th>
+        <th>
+            <p><b>Can't serialize String(400):</b></p>
+            The following sting isn't a json object!
+            {string}
+            <p><b>Information missing(400):</b></p>
+            Can't parse JSON object!
+            {error message}
+            <p><b>Success(200):</b></p>
+            Successfully added curse
+        </th>
+        <th><button onclick="addCourse()" class="button">/addTeacher</button></th>
     </tr>
 
     <tr>
@@ -75,7 +100,16 @@ Before adding a user a course must be added. Before adding a Course a Teacher mu
     </tr>
 
     <tr>
-        <th>/addUser</th>
+        <th>/days</th>
+        <th>Get all usable Days.</th>
+        <th>None</th>
+        <th>Day {newLine}</th>
+        <th>None</th>
+        <th><a href="/days" class="button">/days</a></th>
+    </tr>
+
+    <tr>
+        <th>/addStudent</th>
         <th>Adds the user.</th>
         <th>
             <p>JSON Object:</p>
@@ -114,7 +148,7 @@ Before adding a user a course must be added. Before adding a Course a Teacher mu
             <p><b>Success(200):</b></p>
             Successfully added teacher
         </th>
-        <th><button onclick="addUser()" class="button">/addUser</button></th>
+        <th><button onclick="addStudent()" class="button">/addUser</button></th>
     </tr>
 
     <tr>
@@ -139,7 +173,7 @@ Before adding a user a course must be added. Before adding a Course a Teacher mu
 </html>
 
 <script>
-    function getTeacher() {
+    function addTeacher() {
         //use route /genders for full list
         fetch('./addTeacher', {
             method: 'POST',
@@ -171,9 +205,10 @@ Before adding a user a course must be added. Before adding a Course a Teacher mu
             return response.toString();
         });
     }
-    function addUser() {
+
+    function addStudent() {
         //use route /genders for full list
-        fetch('./addUser', {
+        fetch('./addStudent', {
             method: 'POST',
             body: JSON.stringify(
                 {
@@ -196,6 +231,26 @@ Before adding a user a course must be added. Before adding a Course a Teacher mu
                         "zip": "12345",
                         "country": "Germany"
                     }
+                }
+            ),
+            headers: {
+                'Content-type': 'application/json; charset=UTF-8'
+            }
+        }).then(response => {
+            console.log(response);
+            return response.toString();
+        });
+    }
+
+    function addCourse() {
+        //use route /genders for full list
+        fetch('./addCourse', {
+            method: 'POST',
+            body: JSON.stringify(
+                {
+                    "name": "John",
+                    "tutor": ["1"],//List with id's
+                    "day": "MONTAG"//Full list: /days
                 }
             ),
             headers: {

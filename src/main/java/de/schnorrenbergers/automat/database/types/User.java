@@ -36,28 +36,13 @@ public class User {
     @OneToOne
     private Wohnort wohnort;
 
-    @ManyToMany
-    private List<Kurs> kurse;
-
-    public User(String firstName, String lastName, int[] rfid, Gender gender, Date birthday, Wohnort wohnort, Kurs[] kurse) {
+    public User(String firstName, String lastName, int[] rfid, Gender gender, Date birthday, Wohnort wohnort) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.rfid = rfid;
         this.gender = gender;
         this.birthday = birthday;
         this.wohnort = wohnort;
-        this.kurse = new ArrayList<>();
-        this.kurse.addAll(Arrays.stream(kurse).toList());
-    }
-
-    public User(String firstName, String lastName, int[] rfid, Gender gender, Date birthday, Wohnort wohnort, List<Kurs> kurse) {
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.rfid = rfid;
-        this.gender = gender;
-        this.birthday = birthday;
-        this.wohnort = wohnort;
-        this.kurse = kurse;
     }
 
     public User() {}
@@ -126,9 +111,8 @@ public class User {
                 ", lastName='" + lastName + '\'' +
                 ", rfid=" + Arrays.toString(rfid) +
                 ", gender=" + gender +
-                ", age=" + birthday +
+                ", birthday=" + birthday +
                 ", wohnort=" + wohnort +
-                ", kurse=" + Arrays.toString(kurse.toArray()) +
                 '}';
     }
 

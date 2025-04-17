@@ -1,9 +1,6 @@
 package de.schnorrenbergers.automat.database;
 
-import de.schnorrenbergers.automat.database.types.Kurs;
-import de.schnorrenbergers.automat.database.types.Setting;
-import de.schnorrenbergers.automat.database.types.Statistic;
-import de.schnorrenbergers.automat.database.types.User;
+import de.schnorrenbergers.automat.database.types.*;
 import de.schnorrenbergers.automat.database.types.types.Wohnort;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -21,6 +18,8 @@ public class Database {
                 .addAnnotatedClass(Kurs.class)
                 .addAnnotatedClass(Wohnort.class)
                 .addAnnotatedClass(Statistic.class)
+                .addAnnotatedClass(Student.class)
+                .addAnnotatedClass(Teacher.class)
                 .buildSessionFactory();
     }
 
