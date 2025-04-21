@@ -3,6 +3,7 @@ package de.schnorrenbergers.automat;
 import atlantafx.base.theme.PrimerDark;
 import de.schnorrenbergers.automat.controller.MainController;
 import de.schnorrenbergers.automat.database.Database;
+import de.schnorrenbergers.automat.database.StatisticHandler;
 import de.schnorrenbergers.automat.database.types.Kurs;
 import de.schnorrenbergers.automat.database.types.User;
 import de.schnorrenbergers.automat.database.types.types.Day;
@@ -48,6 +49,7 @@ public class Main extends Application {
     private ScreenSaver screenSaver;
     private Database database;
     private Settings settings;
+    private StatisticHandler handler;
 
     /**
      * Used to Initialise all objects.
@@ -62,7 +64,8 @@ public class Main extends Application {
         dimension = new Dimension2D(480, 800);
         if (server == null) server = new Server();
         screenSaver = new ScreenSaver();
-        try {logoutTime = Integer.parseInt((settings.getSetting("logout")));} catch (Exception e) {logoutTime = 10;}
+        handler = new StatisticHandler();
+        try {logoutTime = Integer.parseInt((settings.getSetting("logout")));} catch (Exception e) {logoutTime = 10;}//TODO use new settings system
         checkAvailability = Boolean.parseBoolean(settings.getSettingOrDefault("availability", String.valueOf(false)));/*
         database.getSessionFactory().inTransaction(session -> {
             session.createSelectionQuery("from User u", User.class).getResultList().forEach((x) -> {
@@ -310,5 +313,9 @@ public class Main extends Application {
 
     public Settings getSettings() {
         return settings;
+    }
+
+    public StatisticHandler getHandler() {
+        return handler;
     }
 }

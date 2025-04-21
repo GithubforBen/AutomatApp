@@ -61,6 +61,7 @@ public class AddTeatcherHandler implements HttpHandler {
             );
             System.out.println(teacher.toString());
             Main.getInstance().getDatabase().getSessionFactory().inTransaction(session -> {
+                session.persist(wohnort);
                 session.persist(teacher);
                 session.flush();
             });
