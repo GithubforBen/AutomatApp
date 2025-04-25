@@ -11,7 +11,6 @@ import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,10 +43,26 @@ public class AddCourseHandler implements HttpHandler {
                 session.persist(kurs);
                 session.flush();
             });
+            Main.getInstance().getDatabase().getSessionFactory().inTransaction(session -> {
+                System.out.println(1);
+                List<Kurs> resultList = session.createSelectionQuery("from Kurs k where k.name = :name AND k.day = :day", Kurs.class)
+                        .setParameter("name", kurs.getName())
+                        .setParameter("day", kurs.getDay()).getResultList();
+
+                resultList.stream().forEach(System.out::println);
+                if (resultList.size() != 1) throw new RuntimeException("The Course already exists!");
+                try {
+                    System.out.println("Created course: " + resultList.getFirst().toString());
+                    respond(exchange, "Successfully added course: " + resultList.getFirst().toString(), 200);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            });
         } catch (JSONException e) {
-            respond(exchange, "The following sting isn't a json object!\n" + builder.toString(), 400);
+            respond(exchange, "The following sting isn't a json object!\n" + builder, 400);
             return;
         }
+        System.out.println(3);
     }
 
     private void respond(HttpExchange exchange, String answer, int code) throws IOException {

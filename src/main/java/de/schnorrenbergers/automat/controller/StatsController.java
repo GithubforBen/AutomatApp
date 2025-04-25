@@ -1,6 +1,8 @@
 package de.schnorrenbergers.automat.controller;
 
 import de.schnorrenbergers.automat.Main;
+import de.schnorrenbergers.automat.database.StatisticHandler;
+import de.schnorrenbergers.automat.database.types.Statistic;
 import de.schnorrenbergers.automat.types.CustomRequest;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -9,10 +11,12 @@ import javafx.fxml.Initializable;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.PieChart;
 import javafx.scene.chart.XYChart;
+import org.hibernate.Session;
 import org.json.JSONObject;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.List;
 import java.util.ResourceBundle;
 
 public class StatsController implements Initializable {
@@ -31,12 +35,18 @@ public class StatsController implements Initializable {
             throw new RuntimeException(e);
         }
         for (int i = 0; i < 7; i++) {
-            //TODO: use new Statistic instead of pieData.add(new PieChart.Data(jsonObject.getJSONObject("" + i).getString("name"), Main.getInstance().getStatistic().getStat(i)));
+            Session session = Main.getInstance().getDatabase().getSessionFactory().openSession();
+            List<Statistic> sq = session.createSelectionQuery("from Statistic stat where stat.data in :sq AND type == 'SWEET_DISPENSE'", Statistic.class)
+                    .setParameter("sq", "type=" + i).getResultList();
+            session.close();
+            pieData.add(new PieChart.Data(new StatisticHandler().getFromId(i), sq.size()));
+            //TODO: test
         }
         pie.setData(pieData);
         pie.setAnimated(true);
         JSONObject object;
         try {
+            //TODO: get attending students
             object = new JSONObject(new CustomRequest("mint").execute());
         } catch (IOException e) {
             throw new RuntimeException(e);

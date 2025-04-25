@@ -1,6 +1,7 @@
 package de.schnorrenbergers.automat.controller;
 
 import de.schnorrenbergers.automat.Main;
+import de.schnorrenbergers.automat.database.types.Statistic;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -33,17 +34,14 @@ public class SettingsController implements Initializable {
         availability.setSelected(Main.getInstance().isCheckAvailability());
         availability.setOnAction((ActionEvent event) -> {
             Main.getInstance().setCheckAvailability(availability.isSelected());
-            //TODO: use new Statistic instead of Main.getInstance().getStatistic().save();
         });
         checkTime.setSelected(Boolean.parseBoolean(Main.getInstance().getSettings().getSettingOrDefault("checkTime", "true")));
         checkTime.setOnAction((ActionEvent event) -> {
             Main.getInstance().getSettings().setSetting("checkTime", String.valueOf(checkTime.isSelected()));
-            //TODO: use new Statistic instead of Main.getInstance().getStatistic().save();
         });
         screensaver.setSelected(Main.getInstance().getScreenSaver().isDoSaver());
         screensaver.setOnAction((ActionEvent event) -> {
             Main.getInstance().getScreenSaver().setDoSaver(screensaver.isSelected());
-            //TODO: use new Statistic instead of Main.getInstance().getStatistic().save();
         });
     }
 
@@ -59,7 +57,6 @@ public class SettingsController implements Initializable {
     }
 
     public void exit(ActionEvent actionEvent) {
-        //TODO: use new Statistic instead of Main.getInstance().getStatistic().save();
         Main.getInstance().getScreenSaver().setLastMove(System.currentTimeMillis());
         System.exit(0);
     }
@@ -77,7 +74,6 @@ public class SettingsController implements Initializable {
     public void Ok(ActionEvent actionEvent) {
         Main.getInstance().setLogoutTime(((int) slider_logout.getValue()));
         display();
-        //TODO: use new Statistic instead of Main.getInstance().getStatistic().save();
         Main.getInstance().getScreenSaver().setLastMove(System.currentTimeMillis());
     }
 
@@ -87,13 +83,16 @@ public class SettingsController implements Initializable {
     }
 
     public void resetStats(ActionEvent actionEvent) {
-        //TODO: use new Statistic instead of Main.getInstance().getStatistic().resetStats();
+        //TODO: Test drop database imitate
         Main.getInstance().getScreenSaver().setLastMove(System.currentTimeMillis());
+        Main.getInstance().getDatabase().getSessionFactory().inTransaction(session -> {
+            session.createSelectionQuery("select Statistic s", Statistic.class).getResultList().forEach(session::remove);
+            session.flush();
+        });
     }
 
     public void shutdown(ActionEvent actionEvent) {
         ProcessBuilder processBuilder = new ProcessBuilder();
-        //TODO: use new Statistic instead of Main.getInstance().getStatistic().save();
         if (shut.getText().equals("Herunterfahren")) {
             processBuilder.command("shutdown");
             new Thread(() -> {

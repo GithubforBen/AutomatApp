@@ -4,7 +4,6 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import de.schnorrenbergers.automat.Main;
 import de.schnorrenbergers.automat.database.types.Teacher;
-import de.schnorrenbergers.automat.database.types.User;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -13,7 +12,7 @@ import java.util.List;
 public class GetAllTeatchersHandler implements HttpHandler {
     @Override
     public void handle(HttpExchange exchange) throws IOException {
-        List<User> users = new ArrayList<>();
+        List<Teacher> users = new ArrayList<>();
         Main.getInstance().getDatabase().getSessionFactory().inTransaction(session -> {
             users.addAll(session.createSelectionQuery("from Teacher t", Teacher.class).getResultList());
         });

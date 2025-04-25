@@ -2,6 +2,12 @@ package de.schnorrenbergers.automat.types;
 
 import java.util.Arrays;
 
+/**
+ * This is used for storing a card which was scanned.
+ * Represents a scanned card with details such as a name, the time in seconds since a specific event,
+ * the formatted time, and a byte address array.
+ * This class provides methods to access these properties and offers a string representation of the card's information.
+ */
 public class ScannedCard {
     public String name;
     public int timeSec;

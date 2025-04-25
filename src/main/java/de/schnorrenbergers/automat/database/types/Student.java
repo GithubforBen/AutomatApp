@@ -4,7 +4,7 @@ import de.schnorrenbergers.automat.database.types.types.Gender;
 import de.schnorrenbergers.automat.database.types.types.Wohnort;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToMany;
-import jakarta.persistence.Table;
+import org.json.JSONObject;
 
 import java.sql.Date;
 import java.util.List;
@@ -18,6 +18,11 @@ public class Student extends User{
     public Student(String firstName, String lastName, int[] rfid, Gender gender, Date birthday, Wohnort wohnort, List<Kurs> kurse) {
         super(firstName, lastName, rfid, gender, birthday, wohnort);
         this.kurse = kurse;
+    }
+
+    public Student(String firstName, String lastName, int[] rfid, Gender gender, Date birthday, Wohnort wohnort, Kurs[] kurse) {
+        super(firstName, lastName, rfid, gender, birthday, wohnort);
+        this.kurse = List.of(kurse);
     }
 
     public Student() {
@@ -36,5 +41,12 @@ public class Student extends User{
         return "Student{" +
                 "kurse=" + kurse +
                 '}';
+    }
+
+    @Override
+    public String toJSONString() {
+        JSONObject jsonObject = new JSONObject(super.toJSONString());
+        jsonObject.put("kurse", kurse);
+        return jsonObject.toString();
     }
 }

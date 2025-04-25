@@ -16,8 +16,7 @@ public class Setting {
     @GeneratedValue
     private long id;
 
-
-    @Column(name = "key")
+    @Column(name = "key", unique = true, nullable = false)
     private String key;
 
     @Column(name = "value")

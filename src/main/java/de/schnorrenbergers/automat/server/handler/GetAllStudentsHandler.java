@@ -3,18 +3,18 @@ package de.schnorrenbergers.automat.server.handler;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import de.schnorrenbergers.automat.Main;
-import de.schnorrenbergers.automat.database.types.User;
+import de.schnorrenbergers.automat.database.types.Student;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class GetAllUsersHandler implements HttpHandler {
+public class GetAllStudentsHandler implements HttpHandler {
     @Override
     public void handle(HttpExchange exchange) throws IOException {
-        List<User> users = new ArrayList<>();
+        List<Student> users = new ArrayList<>();
         Main.getInstance().getDatabase().getSessionFactory().inTransaction(session -> {
-            users.addAll(session.createSelectionQuery("from User u", User.class).getResultList());
+            users.addAll(session.createSelectionQuery("from Student u", Student.class).getResultList());
         });
         StringBuilder response = new StringBuilder();
         response.append("{ \"users\": [");
@@ -26,7 +26,7 @@ public class GetAllUsersHandler implements HttpHandler {
         response.append("] }");
         if (users.isEmpty()) {
             response.replace(0, response.length(), "");
-            response.append("No Users found");
+            response.append("No Students found");
         }
         exchange.sendResponseHeaders(200, response.toString().getBytes().length);
         exchange.getResponseBody().write(response.toString().getBytes());

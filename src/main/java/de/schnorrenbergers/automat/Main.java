@@ -4,13 +4,7 @@ import atlantafx.base.theme.PrimerDark;
 import de.schnorrenbergers.automat.controller.MainController;
 import de.schnorrenbergers.automat.database.Database;
 import de.schnorrenbergers.automat.database.StatisticHandler;
-import de.schnorrenbergers.automat.database.types.Kurs;
-import de.schnorrenbergers.automat.database.types.User;
-import de.schnorrenbergers.automat.database.types.types.Day;
-import de.schnorrenbergers.automat.database.types.types.Gender;
-import de.schnorrenbergers.automat.database.types.types.Wohnort;
 import de.schnorrenbergers.automat.server.Server;
-import de.schnorrenbergers.automat.statistic.Statistic;
 import de.schnorrenbergers.automat.types.CustomRequest;
 import de.schnorrenbergers.automat.types.ScannedCard;
 import de.schnorrenbergers.automat.types.ScreenSaver;
@@ -33,12 +27,11 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Objects;
-import java.util.function.Consumer;
 
 public class Main extends Application {
-
+    //TODO: login
     private static Main instance;
-    private String url = "http://127.0.0.1:5000";
+    private final String url = "http://127.0.0.1:5000";
     private Stage stage;
     private Dimension2D dimension;
     private Server server;
@@ -52,9 +45,10 @@ public class Main extends Application {
     private StatisticHandler handler;
 
     /**
-     * Used to Initialise all objects.
-     * @throws IOException Programm wont work.
-     * @throws SQLException Programm wont work.
+     * Used to Initialize all objects.
+     *
+     * @throws IOException            Programm wont work.
+     * @throws SQLException           Programm wont work.
      * @throws ClassNotFoundException Programm wont work.
      */
     private void initialise() throws IOException, SQLException, ClassNotFoundException {
@@ -65,7 +59,7 @@ public class Main extends Application {
         if (server == null) server = new Server();
         screenSaver = new ScreenSaver();
         handler = new StatisticHandler();
-        try {logoutTime = Integer.parseInt((settings.getSetting("logout")));} catch (Exception e) {logoutTime = 10;}//TODO use new settings system
+        logoutTime = Integer.parseInt(settings.getSettingOrDefault("logout", String.valueOf(logoutTime)));
         checkAvailability = Boolean.parseBoolean(settings.getSettingOrDefault("availability", String.valueOf(false)));/*
         database.getSessionFactory().inTransaction(session -> {
             session.createSelectionQuery("from User u", User.class).getResultList().forEach((x) -> {
@@ -85,14 +79,13 @@ public class Main extends Application {
     }
 
     /**
-     *
      * @param stage the primary stage for this application, onto which
-     * the application scene can be set.
-     * Applications may create other stages, if needed, but they will not be
-     * primary stages.
-     * @throws IOException Inherited form {@link #initialise()}
-     * @throws InterruptedException Inherited form {@link #initialise()}
-     * @throws SQLException Programm wont work.
+     *              the application scene can be set.
+     *              Applications may create other stages, if needed, but they will not be
+     *              primary stages.
+     * @throws IOException            Inherited form {@link #initialise()}
+     * @throws InterruptedException   Inherited form {@link #initialise()}
+     * @throws SQLException           Programm wont work.
      * @throws ClassNotFoundException Inherited form {@link #initialise()}
      */
     @Override
@@ -170,7 +163,7 @@ public class Main extends Application {
         }
         JSONObject jsonObject = new JSONObject(json);
         for (int i = 0; i < MainController.getMainController().getBtns().length; i++) {
-            Button btn = (Button) MainController.getMainController().getBtns()[i];
+            Button btn = MainController.getMainController().getBtns()[i];
             JSONObject subObj = jsonObject.getJSONObject(String.valueOf(i));
 
             btn.setContentDisplay(ContentDisplay.RIGHT);
@@ -288,6 +281,7 @@ public class Main extends Application {
     }
 
     public void setLogoutTime(int logoutTime) {
+        settings.setSetting("logout", String.valueOf(logoutTime));
         this.logoutTime = logoutTime;
     }
 

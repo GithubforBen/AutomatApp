@@ -4,6 +4,10 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 
+/**
+ * Represents a location with address details such as street, city, postal code, and country.
+ * This class is annotated as an entity for persistence in a database.
+ */
 @Entity
 public class Wohnort {
 

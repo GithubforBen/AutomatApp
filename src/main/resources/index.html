@@ -87,7 +87,9 @@ Before adding a user a course must be added. Before adding a Course a Teacher mu
             <p><b>Success(200):</b></p>
             Successfully added curse
         </th>
-        <th><button onclick="addCourse()" class="button">/addTeacher</button></th>
+        <th>
+            <button class="button" onclick="addCourse()">/addCourse</button>
+        </th>
     </tr>
 
     <tr>
@@ -215,11 +217,7 @@ Before adding a user a course must be added. Before adding a Course a Teacher mu
                     "firstName": "John",
                     "lastName": "Doe",
                     "kurse": [
-                        {
-                            "name": "IT",
-                            "tutor": "lelek",
-                            "day":  "MONTAG"
-                        }
+                        "1"
                     ],
                     "birthday": "234567890",
                     "gender": "MALE",//use route /genders for full list
@@ -243,7 +241,6 @@ Before adding a user a course must be added. Before adding a Course a Teacher mu
     }
 
     function addCourse() {
-        //use route /genders for full list
         fetch('./addCourse', {
             method: 'POST',
             body: JSON.stringify(

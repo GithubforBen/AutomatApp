@@ -5,9 +5,9 @@ import com.sun.net.httpserver.HttpHandler;
 import de.schnorrenbergers.automat.Main;
 import de.schnorrenbergers.automat.database.types.Kurs;
 import de.schnorrenbergers.automat.database.types.Student;
-import de.schnorrenbergers.automat.database.types.User;
 import de.schnorrenbergers.automat.database.types.types.Gender;
 import de.schnorrenbergers.automat.database.types.types.Wohnort;
+import org.hibernate.Session;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -15,7 +15,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.sql.Date;
-import java.util.List;
+import java.util.stream.Collectors;
 
 public class AddStudentHandler implements HttpHandler {
     @Override
@@ -34,7 +34,7 @@ public class AddStudentHandler implements HttpHandler {
             jsonObject = new JSONObject(builder.toString());
 
         } catch (JSONException e) {
-            respond(exchange, "The following sting isn't a json object!\n" + builder.toString(), 400);
+            respond(exchange, "The following sting isn't a json object!\n" + builder, 400);
             return;
         }
         try {
@@ -56,20 +56,25 @@ public class AddStudentHandler implements HttpHandler {
                     Gender.valueOf(jsonObject.getString("gender")),
                     new Date(jsonObject.getLong("birthday")),
                     wohnort,
-                    List.of((Kurs[]) jsonObject.getJSONArray("kurse").toList().stream().map((x) -> {
-                        return (Kurs) x;
-                    }).toArray())
+                    jsonObject.getJSONArray("kurse").toList().stream().map((x) -> {
+                        System.out.println(x.getClass().getName());
+                        Session session = Main.getInstance().getDatabase().getSessionFactory().openSession();
+                        Kurs k = session.get(Kurs.class, Long.valueOf(((String) x)));
+                        System.out.println(k.toString());
+                        session.close();
+                        return k;
+                    }).collect(Collectors.toList())
             );
             Main.getInstance().getDatabase().getSessionFactory().inTransaction(session -> {
+                session.persist(wohnort);
                 session.persist(student);
                 session.flush();
             });
-            System.out.println(student.toString());
+            System.out.println(student);
             respond(exchange, "Successfully added student", 200);
         } catch (Exception e) {
             respond(exchange, "Can't parse JSON object!\n" + e.getMessage(), 400);
             e.printStackTrace();
-            return;
         }
     }
 

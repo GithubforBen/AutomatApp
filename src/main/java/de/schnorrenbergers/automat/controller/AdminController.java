@@ -22,6 +22,9 @@ public class AdminController implements Initializable {
         setAlarmBTNColor();
     }
 
+    /**
+     * Sets the color of the alarm button depending on the alarm status
+     */
     private void setAlarmBTNColor() {
         boolean alarm = Main.getInstance().isAlarm();
         if (alarm) {

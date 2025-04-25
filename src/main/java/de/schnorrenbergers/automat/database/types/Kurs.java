@@ -5,6 +5,28 @@ import jakarta.persistence.*;
 
 import java.util.List;
 
+/**
+ * Represents a course entity in the database.
+ * <p>
+ * This class is annotated as an entity using JPA annotations
+ * and is used to store and manage information about courses.
+ * A course has a unique identifier, a name, a list of tutors,
+ * and a specific day on which it is scheduled.
+ * <p>
+ * Fields:
+ * - id: Unique identifier for the course (auto-generated).<p>
+ * - name: Name of the course.<p>
+ * - tutor: List of Teacher objects representing the tutors for this course.<p>
+ * - Day: Enum value representing the day of the week the course is held.<p>
+ * <p>
+ * Constructors:
+ * - A default no-arg constructor.<p>
+ * - A parameterized constructor to initialize the course with a name, a list of tutors, and a day.<p>
+ * <p>
+ * Methods:
+ * - Getters and setters for all fields.<p>
+ * - Overrides the toString method to provide a string representation of the course.<p>
+ */
 @Entity
 public class Kurs {
     @Id
@@ -34,6 +56,30 @@ public class Kurs {
 
     public Long getId() {
         return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public List<Teacher> getTutor() {
+        return tutor;
+    }
+
+    public void setTutor(List<Teacher> tutor) {
+        this.tutor = tutor;
+    }
+
+    public Day getDay() {
+        return day;
+    }
+
+    public void setDay(Day day) {
+        this.day = day;
     }
 
     @Override

@@ -1,6 +1,7 @@
 package de.schnorrenbergers.automat.controller;
 
 import de.schnorrenbergers.automat.Main;
+import de.schnorrenbergers.automat.database.StatisticHandler;
 import de.schnorrenbergers.automat.types.CustomRequest;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -118,8 +119,8 @@ public class MainController implements Initializable {
                     || Main.getInstance().getLastScan().time.getHour() == Integer.MIN_VALUE
                     || !Boolean.parseBoolean(Main.getInstance().getSettings().getSettingOrDefault("checkTime", String.valueOf(true)))) {
                 new CustomRequest("dispense").executeComplex("{\"nr\":" + number + ",\"cost\":" + jsonObject.getInt("hours") + ",\"usr\":" + Arrays.toString(Main.getInstance().getLastScan().getByteAdress()) + "}");
-                //TODO: use new Statistic instead of Main.getInstance().getStatistic().addOne(number);
                 Main.getInstance().setLastScan(null);
+                new StatisticHandler().persistDispense(number);
             } else {
                 setText("Nicht genug Stunden", Color.RED, true);
             }

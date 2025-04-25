@@ -6,9 +6,7 @@ import jakarta.persistence.*;
 import org.json.JSONObject;
 
 import java.sql.Date;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 @Entity
 @Table(name = "user")
@@ -117,13 +115,14 @@ public class User {
     }
 
     public String toJSONString() {
-        JSONObject jsonObject = new JSONObject(this);
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("id", id);
+        jsonObject.put("firstName", firstName);
+        jsonObject.put("lastName", lastName);
+        jsonObject.put("rfid", rfid);
+        jsonObject.put("gender", gender);
+        jsonObject.put("birthday", birthday);
+        jsonObject.put("wohnort", wohnort);
         return jsonObject.toString();
-                /*
-                "{ \"id\":" + id + "," +
-                "\"firstName\":" + firstName + "," +
-
-                 */
-
     }
 }

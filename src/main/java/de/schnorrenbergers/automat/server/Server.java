@@ -22,7 +22,7 @@ public class Server {
         server.createContext("/addStudent", new AddStudentHandler());
         server.createContext("/genders", new GenderHandler());
         server.createContext("/days", new DayHandler());
-        server.createContext("/allUsers", new GetAllUsersHandler());
+        server.createContext("/allStudents", new GetAllStudentsHandler());
         server.createContext("/allTeachers", new GetAllTeatchersHandler());
         server.setExecutor(threadPoolExecutor);
         server.start();

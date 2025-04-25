@@ -1,11 +1,15 @@
 package de.schnorrenbergers.automat.database.types;
+
 import de.schnorrenbergers.automat.database.types.types.Gender;
 import de.schnorrenbergers.automat.database.types.types.Level;
 import de.schnorrenbergers.automat.database.types.types.Wohnort;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import org.json.JSONObject;
 
 import java.sql.Date;
-import java.util.List;
 
 @Entity
 public class Teacher extends User {
@@ -46,4 +50,13 @@ public class Teacher extends User {
         this.password = password;
     }
 
+
+    @Override
+    public String toJSONString() {
+        JSONObject jsonObject = new JSONObject(super.toJSONString());
+        jsonObject.put("mail", email);
+        jsonObject.put("password", password);
+        jsonObject.put("level", level);
+        return jsonObject.toString();
+    }
 }

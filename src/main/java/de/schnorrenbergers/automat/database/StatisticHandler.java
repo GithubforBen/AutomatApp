@@ -6,8 +6,6 @@ import de.schnorrenbergers.automat.database.types.types.LoginStat;
 import de.schnorrenbergers.automat.database.types.types.StatisticType;
 import org.json.JSONObject;
 
-import java.util.HashMap;
-
 public class StatisticHandler {
 
     /**
@@ -26,29 +24,20 @@ public class StatisticHandler {
      * @param sweet sweet to be incremented
      */
     public void persistDispense(int sweet) {
-        Statistic statistic = new Statistic(String.valueOf(sweet), StatisticType.SWEET_DISPENSE);
+        Statistic statistic = new Statistic("{type=" + sweet + "}", StatisticType.SWEET_DISPENSE);
         persist(statistic);
     }
 
+    //TODO: Implement this
     public void persistLogin(LoginStat loginStat) {
         JSONObject jsonObject = new JSONObject();
     }
 
-    public HashMap<String, Integer> getStatisticDispenses() {
-        HashMap<String, Integer> statisticDispenses = new HashMap<>();
-        Main.getInstance().getDatabase().getSessionFactory().inTransaction(session -> {
-            session.createSelectionQuery("from Statistic s where s.type == 'SWEET_DISPENSE'", Statistic.class).list().forEach(statistic -> {
-                String fromId = getFromId(Integer.parseInt(statistic.getData()));
-                Integer i = statisticDispenses.getOrDefault(fromId, 0);
-                if (statisticDispenses.replace(fromId, i + 1) == null) {
-                    statisticDispenses.put(fromId, i + 1);
-                }
-            });
-        });
-        return statisticDispenses;
-    }
-
-    private String getFromId(int id) {
+    /**
+     * @param id
+     * @return sweet associated with the given id.
+     */
+    public String getFromId(int id) {
         switch (id) {
             case 0 -> {
                 return "Mentos";

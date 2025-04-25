@@ -31,7 +31,7 @@ public class Settings {
      */
     public String getSettingOrDefault(String adress, String defaultValue) {
         Session session = Main.getInstance().getDatabase().getSessionFactory().openSession();
-        List<Setting> resultList = session.createSelectionQuery("from Setting s where s.key = :adress", Setting.class).setParameter("adress", adress).getResultList();
+        List<Setting> resultList = session.createSelectionQuery("from Setting s where s.key = :address", Setting.class).setParameter("address", adress).getResultList();
         session.close();
         if (resultList.size() != 1) return defaultValue;
         return resultList.getFirst().getValue();
@@ -47,12 +47,13 @@ public class Settings {
         SessionFactory sessionFactory = Main.getInstance().getDatabase().getSessionFactory();
         try {
             sessionFactory.inTransaction(session -> {
-                List<Setting> resultList = session.createSelectionQuery("from Setting where key = :adress", Setting.class).setParameter("address", address).getResultList();
+                List<Setting> resultList = session.createSelectionQuery("from Setting where key = :address", Setting.class).setParameter("address", address).getResultList();
                 int size = resultList.size();
                 if (size == 0) {
                     throw new RuntimeException("No setting found for address " + address);
                 }
-                session.remove(resultList.getFirst());
+                resultList.forEach(session::remove);
+                session.flush();
                 session.persist(new Setting(address, value));
             });
         } catch (Exception e) {
