@@ -17,7 +17,7 @@ import java.io.InputStreamReader;
 import java.sql.Date;
 import java.util.stream.Collectors;
 
-public class AddStudentHandler implements HttpHandler {
+public class AddStudentHandler extends CustomHandler implements HttpHandler {
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         if (!exchange.getRequestMethod().equalsIgnoreCase("POST")) {
@@ -76,11 +76,5 @@ public class AddStudentHandler implements HttpHandler {
             respond(exchange, "Can't parse JSON object!\n" + e.getMessage(), 400);
             e.printStackTrace();
         }
-    }
-
-    private void respond(HttpExchange exchange, String answer, int code) throws IOException {
-        exchange.sendResponseHeaders(code, answer.getBytes().length);
-        exchange.getResponseBody().write(answer.getBytes());
-        exchange.getResponseBody().close();
     }
 }

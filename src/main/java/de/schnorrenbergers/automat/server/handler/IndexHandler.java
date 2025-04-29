@@ -3,10 +3,11 @@ package de.schnorrenbergers.automat.server.handler;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
-import java.io.*;
-import java.nio.charset.StandardCharsets;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 
-public class IndexHandler implements HttpHandler {
+public class IndexHandler extends CustomHandler implements HttpHandler {
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         ClassLoader classloader = Thread.currentThread().getContextClassLoader();
@@ -18,11 +19,6 @@ public class IndexHandler implements HttpHandler {
             buf.append((char) b);
         }
         exchange.getResponseHeaders().add("Content-Type", "text/html");
-        final String string = buf.toString();
-        exchange.sendResponseHeaders(200, string.getBytes().length);
-        OutputStream responseBody = exchange.getResponseBody();
-        responseBody.write(string.getBytes(StandardCharsets.UTF_8));
-        responseBody.flush();
-        responseBody.close();
+        respond(exchange, buf.toString(), 200);
     }
 }

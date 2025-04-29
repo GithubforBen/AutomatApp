@@ -1,4 +1,4 @@
-package de.schnorrenbergers.automat.utils;
+package de.schnorrenbergers.automat.manager;
 
 import de.schnorrenbergers.automat.Main;
 import de.schnorrenbergers.automat.database.types.Setting;
@@ -7,7 +7,7 @@ import org.hibernate.SessionFactory;
 
 import java.util.List;
 
-public class Settings {
+public class SettingsManager {
 
     /**
     * Finds a setting.

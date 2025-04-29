@@ -3,7 +3,6 @@ package de.schnorrenbergers.automat.server.handler;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import de.schnorrenbergers.automat.Main;
-import de.schnorrenbergers.automat.types.ScannedCard;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
@@ -12,7 +11,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ScannedHandler implements HttpHandler {
+public class ScannedHandler extends CustomHandler implements HttpHandler {
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         InputStreamReader isr = new InputStreamReader(exchange.getRequestBody());
@@ -22,7 +21,7 @@ public class ScannedHandler implements HttpHandler {
         while ((b = br.read()) != -1) {
             buf.append((char) b);
         }
-        JSONObject json = new JSONObject(buf.toString());
+        JSONObject json = getJSON(exchange);
         List<Integer> byteAdresses = new ArrayList<>();
         for (Object rfid : json.getJSONArray("rfid")) {
             byteAdresses.add(Integer.parseInt(rfid.toString()));
@@ -31,12 +30,7 @@ public class ScannedHandler implements HttpHandler {
         for (int i = 0; i < byteAdresses.size(); i++) {
             arr[i] = byteAdresses.get(i);
         }
-        Main.getInstance().setLastScan(new ScannedCard(json.getInt("time"), json.getString("name"), arr));
-        br.close();
-        isr.close();
-        exchange.sendResponseHeaders(200, buf.toString().length());
-        exchange.getResponseBody().write(buf.toString().getBytes());
-        exchange.getResponseBody().close();
-        Main.getInstance().getScreenSaver().setLastMove(System.currentTimeMillis());
+        Main.getInstance().setLastScan(arr);
+        respond(exchange, buf.toString(), 200);
     }
 }

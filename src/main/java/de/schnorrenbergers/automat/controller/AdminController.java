@@ -82,6 +82,16 @@ public class AdminController implements Initializable {
         fill("maoam");
     }
 
+    /**
+     * Performs a fill operation based on the specified parameters
+     * and the current state of the system.
+     * Depending on the value of the `positive` field, this method
+     * either fills a specific amount, re-enables the related entity,
+     * or performs no operation.
+     *
+     * @param name the name of the item or entity to be filled or re-enabled
+     * @throws RuntimeException if an I/O error occurs during the operation
+     */
     public void fill(String name) {
         Main.getInstance().getScreenSaver().setLastMove(System.currentTimeMillis());
         try {

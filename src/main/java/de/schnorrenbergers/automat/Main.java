@@ -3,12 +3,14 @@ package de.schnorrenbergers.automat;
 import atlantafx.base.theme.PrimerDark;
 import de.schnorrenbergers.automat.controller.MainController;
 import de.schnorrenbergers.automat.database.Database;
-import de.schnorrenbergers.automat.database.StatisticHandler;
+import de.schnorrenbergers.automat.database.types.Konto;
+import de.schnorrenbergers.automat.database.types.User;
+import de.schnorrenbergers.automat.manager.KontenManager;
+import de.schnorrenbergers.automat.manager.SettingsManager;
+import de.schnorrenbergers.automat.manager.StatisticManager;
 import de.schnorrenbergers.automat.server.Server;
 import de.schnorrenbergers.automat.types.CustomRequest;
-import de.schnorrenbergers.automat.types.ScannedCard;
 import de.schnorrenbergers.automat.types.ScreenSaver;
-import de.schnorrenbergers.automat.utils.Settings;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
@@ -26,7 +28,9 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 public class Main extends Application {
     //TODO: login
@@ -35,14 +39,14 @@ public class Main extends Application {
     private Stage stage;
     private Dimension2D dimension;
     private Server server;
-    private ScannedCard lastScan;
+    private int[] lastScan;
     private int logoutTime = 10;
     private boolean alarm = false;
     private boolean checkAvailability;
     private ScreenSaver screenSaver;
     private Database database;
-    private Settings settings;
-    private StatisticHandler handler;
+    private SettingsManager settingsManager;
+    private StatisticManager handler;
 
     /**
      * Used to Initialize all objects.
@@ -54,13 +58,13 @@ public class Main extends Application {
     private void initialise() throws IOException, SQLException, ClassNotFoundException {
         instance = this;
         database = new Database();
-        settings = new Settings();
+        settingsManager = new SettingsManager();
         dimension = new Dimension2D(480, 800);
         if (server == null) server = new Server();
         screenSaver = new ScreenSaver();
-        handler = new StatisticHandler();
-        logoutTime = Integer.parseInt(settings.getSettingOrDefault("logout", String.valueOf(logoutTime)));
-        checkAvailability = Boolean.parseBoolean(settings.getSettingOrDefault("availability", String.valueOf(false)));/*
+        handler = new StatisticManager();
+        logoutTime = Integer.parseInt(settingsManager.getSettingOrDefault("logout", String.valueOf(logoutTime)));
+        checkAvailability = Boolean.parseBoolean(settingsManager.getSettingOrDefault("availability", String.valueOf(false)));/*
         database.getSessionFactory().inTransaction(session -> {
             session.createSelectionQuery("from User u", User.class).getResultList().forEach((x) -> {
                 System.out.println(x.toString());
@@ -219,33 +223,33 @@ public class Main extends Application {
         return grayscaleImage;
     }
 
-    public void setLastScan(ScannedCard lastScan) {
-        this.lastScan = lastScan;
-        updateDisplay();
-        if (lastScan == null) return;
-        new Thread(() -> {
-            try {
-                Thread.sleep(1000L * logoutTime);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-            this.lastScan = null;
-            updateDisplay();
-        }).start();
-    }
-
     private void updateDisplay() {
         if (lastScan == null) {
             MainController.getMainController().setText("Bitte Karte Scannen", Color.WHITE, true);
             return;
         }
-        MainController.getMainController().setText(lastScan.name + ":" + (int) lastScan.time.getHour() + "h", Color.WHITE, true);
+        getDatabase().getSessionFactory().inTransaction(session -> {
+            List<User> id = session.createSelectionQuery("from User u where u.rfid = :id", User.class)
+                    .setParameter("id", lastScan).getResultList();
+            if (id.isEmpty()) {
+                MainController.getMainController().setText("Unbekannte Karte", Color.WHITE, true);
+                return;
+            }
+            List<Konto> konten = session.createSelectionQuery("from Konto k where k.userId = :id", Konto.class)
+                    .setParameter("id", id.getFirst().getId()).getResultList();
+            if (konten.isEmpty()) {
+            }
+            MainController.getMainController().setText(id.getFirst().getFullName() + ":" + new KontenManager(id.getFirst().getId()).getKonto().getBalance(TimeUnit.HOURS) + "h", Color.WHITE, true);
+        });
     }
-
 
     public void setCheckAvailability(boolean checkAvailability) {
         this.checkAvailability = checkAvailability;
-        settings.setSetting("availability", String.valueOf(checkAvailability));
+        settingsManager.setSetting("availability", String.valueOf(checkAvailability));
+    }
+
+    public int[] getLastScan() {
+        return lastScan;
     }
 
     public static void main(String[] args) {
@@ -272,8 +276,19 @@ public class Main extends Application {
         return server;
     }
 
-    public ScannedCard getLastScan() {
-        return lastScan;
+    public void setLastScan(int[] lastScan) {
+        this.lastScan = lastScan;
+        updateDisplay();
+        if (lastScan == null) return;
+        new Thread(() -> {
+            try {
+                Thread.sleep(1000L * logoutTime);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            this.lastScan = null;
+            updateDisplay();
+        }).start();
     }
 
     public int getLogoutTime() {
@@ -281,7 +296,7 @@ public class Main extends Application {
     }
 
     public void setLogoutTime(int logoutTime) {
-        settings.setSetting("logout", String.valueOf(logoutTime));
+        settingsManager.setSetting("logout", String.valueOf(logoutTime));
         this.logoutTime = logoutTime;
     }
 
@@ -305,11 +320,11 @@ public class Main extends Application {
         return database;
     }
 
-    public Settings getSettings() {
-        return settings;
+    public SettingsManager getSettings() {
+        return settingsManager;
     }
 
-    public StatisticHandler getHandler() {
+    public StatisticManager getHandler() {
         return handler;
     }
 }

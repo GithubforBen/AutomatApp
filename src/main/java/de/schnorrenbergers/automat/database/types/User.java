@@ -125,4 +125,8 @@ public class User {
         jsonObject.put("wohnort", wohnort);
         return jsonObject.toString();
     }
+
+    public String getFullName() {
+        return firstName + " " + lastName;
+    }
 }

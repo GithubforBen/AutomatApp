@@ -3,7 +3,6 @@ package de.schnorrenbergers.automat.server.handler;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import de.schnorrenbergers.automat.Main;
-import de.schnorrenbergers.automat.database.types.Kurs;
 import de.schnorrenbergers.automat.database.types.Teacher;
 import de.schnorrenbergers.automat.database.types.types.Gender;
 import de.schnorrenbergers.automat.database.types.types.Level;
@@ -16,7 +15,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.sql.Date;
 
-public class AddTeatcherHandler implements HttpHandler {
+public class AddTeatcherHandler extends CustomHandler implements HttpHandler {
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         if (!exchange.getRequestMethod().equalsIgnoreCase("POST")) {
@@ -33,7 +32,7 @@ public class AddTeatcherHandler implements HttpHandler {
             jsonObject = new JSONObject(builder.toString());
 
         } catch (JSONException e) {
-            respond(exchange, "The following sting isn't a json object!\n" + builder.toString(), 400);
+            respond(exchange, "The following sting isn't a json object!\n" + builder, 400);
             return;
         }
         try {
@@ -59,7 +58,7 @@ public class AddTeatcherHandler implements HttpHandler {
                     jsonObject.getString("password"),
                     Level.valueOf(jsonObject.getString("level"))
             );
-            System.out.println(teacher.toString());
+            System.out.println(teacher);
             Main.getInstance().getDatabase().getSessionFactory().inTransaction(session -> {
                 session.persist(wohnort);
                 session.persist(teacher);
@@ -69,14 +68,6 @@ public class AddTeatcherHandler implements HttpHandler {
         } catch (Exception e) {
             respond(exchange, "Can't parse JSON object!\n" + e.getMessage(), 400);
             e.printStackTrace();
-            return;
         }
      }
-
-    private void respond(HttpExchange exchange, String answer, int code) throws IOException {
-        System.out.println(answer);
-        exchange.sendResponseHeaders(code, answer.getBytes().length);
-        exchange.getResponseBody().write(answer.getBytes());
-        exchange.getResponseBody().close();
-    }
 }

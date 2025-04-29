@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class GetAllStudentsHandler implements HttpHandler {
+public class GetAllStudentsHandler extends CustomHandler implements HttpHandler {
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         List<Student> users = new ArrayList<>();
@@ -28,8 +28,6 @@ public class GetAllStudentsHandler implements HttpHandler {
             response.replace(0, response.length(), "");
             response.append("No Students found");
         }
-        exchange.sendResponseHeaders(200, response.toString().getBytes().length);
-        exchange.getResponseBody().write(response.toString().getBytes());
-        exchange.close();
+        respond(exchange, response.toString(), 200);
     }
 }

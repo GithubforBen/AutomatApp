@@ -15,7 +15,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AddCourseHandler implements HttpHandler {
+public class AddCourseHandler extends CustomHandler implements HttpHandler {
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         if (!exchange.getRequestMethod().equalsIgnoreCase("POST")) {
@@ -63,11 +63,5 @@ public class AddCourseHandler implements HttpHandler {
             return;
         }
         System.out.println(3);
-    }
-
-    private void respond(HttpExchange exchange, String answer, int code) throws IOException {
-        exchange.sendResponseHeaders(code, answer.getBytes().length);
-        exchange.getResponseBody().write(answer.getBytes());
-        exchange.getResponseBody().close();
     }
 }

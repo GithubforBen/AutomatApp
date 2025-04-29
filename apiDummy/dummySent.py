@@ -14,6 +14,10 @@ def strom():
     r = requests.post("http://127.0.0.1:8000/energetics")
     print(r.text)
 
+
+def login():
+    r = requests.post("http://127.0.0.1:8000/login", json={"rfid": [99, 179, 107, 0, 187]})
+
 #time in seconds
 scanned({"name": "Ben Schnorri","time": 3600*2,"rfid": [99, 179, 107, 0, 187]});#if time is equal to -2147483648 sweets will be dispensed
 
@@ -27,6 +31,8 @@ while True:
         scanned({"name": "David Glänzel","time": 3600,"rfid": [99, 179, 107, 2  , 187]});#if time is equal to -2147483648 sweets will be dispensed
     elif s == "a":
         scanned({"name": "Benjamin Schnorrenberger-Glänzel","time": 3600,"rfid": [99, 179, 107, 2  , 187]});#if time is equal to -2147483648 sweets will be dispensed
+    elif s == "l":
+        login()
     else:
         print(s + " ist keine Option")
 

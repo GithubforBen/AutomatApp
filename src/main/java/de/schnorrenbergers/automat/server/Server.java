@@ -24,6 +24,7 @@ public class Server {
         server.createContext("/days", new DayHandler());
         server.createContext("/allStudents", new GetAllStudentsHandler());
         server.createContext("/allTeachers", new GetAllTeatchersHandler());
+        server.createContext("/login", new LoginHandler());
         server.setExecutor(threadPoolExecutor);
         server.start();
         System.out.println("Server started on port " + server.getAddress().getPort() + " ip" + Inet4Address.getLocalHost().getHostAddress());

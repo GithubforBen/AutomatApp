@@ -1,4 +1,4 @@
-package de.schnorrenbergers.automat.database;
+package de.schnorrenbergers.automat.manager;
 
 import de.schnorrenbergers.automat.Main;
 import de.schnorrenbergers.automat.database.types.Statistic;
@@ -6,7 +6,7 @@ import de.schnorrenbergers.automat.database.types.types.LoginStat;
 import de.schnorrenbergers.automat.database.types.types.StatisticType;
 import org.json.JSONObject;
 
-public class StatisticHandler {
+public class StatisticManager {
 
     /**
     * Persists the statistic.

@@ -1,8 +1,8 @@
 package de.schnorrenbergers.automat.controller;
 
 import de.schnorrenbergers.automat.Main;
-import de.schnorrenbergers.automat.database.StatisticHandler;
 import de.schnorrenbergers.automat.database.types.Statistic;
+import de.schnorrenbergers.automat.manager.StatisticManager;
 import de.schnorrenbergers.automat.types.CustomRequest;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -36,10 +36,10 @@ public class StatsController implements Initializable {
         }
         for (int i = 0; i < 7; i++) {
             Session session = Main.getInstance().getDatabase().getSessionFactory().openSession();
-            List<Statistic> sq = session.createSelectionQuery("from Statistic stat where stat.data in :sq AND type == 'SWEET_DISPENSE'", Statistic.class)
+            List<Statistic> sq = session.createSelectionQuery("from Statistic stat where stat.data in :sq AND type = 'SWEET_DISPENSE'", Statistic.class)
                     .setParameter("sq", "type=" + i).getResultList();
             session.close();
-            pieData.add(new PieChart.Data(new StatisticHandler().getFromId(i), sq.size()));
+            pieData.add(new PieChart.Data(new StatisticManager().getFromId(i), sq.size()));
             //TODO: test
         }
         pie.setData(pieData);
