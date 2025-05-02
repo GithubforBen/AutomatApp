@@ -28,6 +28,6 @@ public class GetAllStudentsHandler extends CustomHandler implements HttpHandler 
             response.replace(0, response.length(), "");
             response.append("No Students found");
         }
-        respond(exchange, response.toString(), 200);
+        respond(exchange, response.toString());
     }
 }

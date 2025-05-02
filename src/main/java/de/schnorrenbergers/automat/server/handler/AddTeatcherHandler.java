@@ -19,7 +19,7 @@ public class AddTeatcherHandler extends CustomHandler implements HttpHandler {
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         if (!exchange.getRequestMethod().equalsIgnoreCase("POST")) {
-            respond(exchange, "Not a POST request", 400);
+            methodNotAllowed(exchange);
             return;
         }
         BufferedReader requestBodyReaderBuffer = new BufferedReader(new InputStreamReader(exchange.getRequestBody()));
@@ -30,9 +30,8 @@ public class AddTeatcherHandler extends CustomHandler implements HttpHandler {
         JSONObject jsonObject;
         try {
             jsonObject = new JSONObject(builder.toString());
-
         } catch (JSONException e) {
-            respond(exchange, "The following sting isn't a json object!\n" + builder, 400);
+            jsonError(exchange);
             return;
         }
         try {
@@ -64,9 +63,9 @@ public class AddTeatcherHandler extends CustomHandler implements HttpHandler {
                 session.persist(teacher);
                 session.flush();
             });
-            respond(exchange, "Successfully added teacher", 200);
+            respond(exchange, "Successfully added teacher");
         } catch (Exception e) {
-            respond(exchange, "Can't parse JSON object!\n" + e.getMessage(), 400);
+            jsonError(exchange);
             e.printStackTrace();
         }
      }

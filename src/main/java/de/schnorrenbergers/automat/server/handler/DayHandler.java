@@ -15,6 +15,6 @@ public class DayHandler extends CustomHandler implements HttpHandler {
             sb.append(x);
             sb.append('\n');
         });
-        respond(exchange, sb.toString(), 200);
+        respond(exchange, sb.toString());
     }
 }

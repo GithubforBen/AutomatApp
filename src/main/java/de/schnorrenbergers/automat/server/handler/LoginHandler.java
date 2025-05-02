@@ -11,13 +11,13 @@ public class LoginHandler extends CustomHandler implements HttpHandler {
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         if (!exchange.getRequestMethod().equalsIgnoreCase("POST")) {
-            respond(exchange, "Method not allowed", 405);
+            methodNotAllowed(exchange);
         }
         JSONObject json = getJSON(exchange);
         if (new LoginManager().login(json.getJSONArray("rfid").toList().stream().mapToInt((o) -> Integer.parseInt(String.valueOf(o))).toArray())) {
-            respond(exchange, "User came in", 200);
+            respond(exchange, "User came in");
         } else {
-            respond(exchange, "User left", 200);
+            respond(exchange, "User left");
         }
     }
 }

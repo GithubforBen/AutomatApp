@@ -31,6 +31,6 @@ public class ScannedHandler extends CustomHandler implements HttpHandler {
             arr[i] = byteAdresses.get(i);
         }
         Main.getInstance().setLastScan(arr);
-        respond(exchange, buf.toString(), 200);
+        respond(exchange, buf.toString());
     }
 }

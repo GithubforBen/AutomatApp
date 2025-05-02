@@ -16,10 +16,23 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AddCourseHandler extends CustomHandler implements HttpHandler {
+
+    /**
+     * Handles HTTP requests for adding a course into the system.
+     * This method parses the request body to retrieve course details, including the course name,
+     * the tutors (teachers) associated with the course, and the day of the course. It persists the
+     * course to the database, ensuring that the course does not already exist.
+     * <p>
+     * If the request method is not POST or the request body is invalid, it responds with the appropriate
+     * HTTP error codes and messages.
+     *
+     * @param exchange the HttpExchange object representing the HTTP request and response
+     * @throws IOException if an I/O error occurs during the handling of the request
+     */
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         if (!exchange.getRequestMethod().equalsIgnoreCase("POST")) {
-            respond(exchange, "Not a POST request", 400);
+            methodNotAllowed(exchange);
             return;
         }
         BufferedReader requestBodyReaderBuffer = new BufferedReader(new InputStreamReader(exchange.getRequestBody()));
@@ -53,13 +66,13 @@ public class AddCourseHandler extends CustomHandler implements HttpHandler {
                 if (resultList.size() != 1) throw new RuntimeException("The Course already exists!");
                 try {
                     System.out.println("Created course: " + resultList.getFirst().toString());
-                    respond(exchange, "Successfully added course: " + resultList.getFirst().toString(), 200);
+                    respond(exchange, "Successfully added course: " + resultList.getFirst().toString());
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
             });
         } catch (JSONException e) {
-            respond(exchange, "The following sting isn't a json object!\n" + builder, 400);
+            jsonError(exchange);
             return;
         }
         System.out.println(3);

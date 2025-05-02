@@ -9,7 +9,7 @@ import java.io.IOException;
 public class SchonenderHandler extends CustomHandler implements HttpHandler {
     @Override
     public void handle(HttpExchange exchange) throws IOException {
-        respond(exchange, "200", 200);
+        respond(exchange, "200");
         Main.getInstance().getScreenSaver().setLastMove(0);
     }
 }

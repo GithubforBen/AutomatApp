@@ -41,11 +41,24 @@ public class AdminController implements Initializable {
     private Slider slider;
     private int positive = 3; //pos->0;neg->1;re-enable->2
 
+    /**
+     * Handles the navigation back to the main view by loading the "main-view.fxml" scene.
+     * This method also updates the timestamp of the last user interaction in the screen saver.
+     *
+     * @param actionEvent the event that triggered this method, typically a button press
+     */
     public void back(ActionEvent actionEvent) {
         Main.getInstance().loadScene("main-view.fxml");
         Main.getInstance().getScreenSaver().setLastMove(System.currentTimeMillis());
     }
 
+    /**
+     * Toggles the alarm state in the application. If the alarm is currently active,
+     * it sends a request to turn it off, and vice versa. Updates the visual
+     * representation of the alarm button and resets the screen saver timeout.
+     *
+     * @param actionEvent the event that triggered this method, typically a button press
+     */
     public void alarm(ActionEvent actionEvent) {
         boolean alarm = Main.getInstance().isAlarm();
         try {
@@ -106,6 +119,13 @@ public class AdminController implements Initializable {
         }
     }
 
+    /**
+     * Handles the toggling of a button's state and its associated text representation.
+     * This method updates the screen saver's last interaction timestamp and cycles through three states:
+     * "+" when positive is 0, "-" when positive is 1, and "Reaktivieren" when positive is reset to 0.
+     *
+     * @param actionEvent the event that triggered this method, typically a button press
+     */
     public void plus(ActionEvent actionEvent) {
         Main.getInstance().getScreenSaver().setLastMove(System.currentTimeMillis());
         if (positive == 0) {

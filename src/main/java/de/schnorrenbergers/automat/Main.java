@@ -108,6 +108,28 @@ public class Main extends Application {
         new CustomRequest("ping").execute();
     }
 
+    /**
+     * Continuously monitors the state of the screensaver and triggers the loading of the screensaver scene
+     * when certain conditions are met.
+     * <p>
+     * This method runs indefinitely in a separate thread, periodically checking whether the screensaver
+     * should be activated. If the screensaver is enabled (`isSaver` returns true) and has not been
+     * previously activated (`isSaverr` is false), the screensaver scene is loaded, and its state is updated
+     * accordingly. The screensaver's state is managed through the `ScreenSaver` object.
+     * <p>
+     * Functionality:
+     * - Executes in an infinite loop.
+     * - Pauses the thread for 400 milliseconds between checks.
+     * - Retrieves the current screensaver state and verifies whether it needs to be activated.
+     * - Utilizes the `Platform.runLater` method to ensure that UI changes (e.g., scene loading) are performed
+     * on the JavaFX Application Thread.
+     * - Recursively calls itself to maintain the monitoring process.
+     * <p>
+     * Potential exceptions during execution, such as `InterruptedException`, are caught and logged to the console.
+     * <p>
+     * Note: This method should only be called once, typically during the application's initialization phase,
+     * as it creates a new thread for monitoring and recursion. Misuse could lead to multiple redundant threads.
+     */
     public void checkForStuff() {
         new Thread(() -> {
             try {
@@ -127,6 +149,15 @@ public class Main extends Application {
         }).start();
     }
 
+    /**
+     * Loads a new scene for the application, based on the provided scene file name.
+     * The scene dimensions are determined by the application's main instance dimensions.
+     * It preserves the fullscreen state of the current stage after loading the new scene.
+     *
+     * @param sceneName the name of the FXML file to load, which defines the new scene.
+     *                  The file should be located in the application's resources directory.
+     *                  If the file cannot be loaded, a {@link RuntimeException} is thrown.
+     */
     public void loadScene(String sceneName) {
         boolean fullScreen = stage.isFullScreen();
         FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource(sceneName));
@@ -143,7 +174,7 @@ public class Main extends Application {
         stage.show();
     }
 
-    public void load() throws IOException, InterruptedException {
+    public void load() throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("main-view.fxml"));
         Scene scene = new Scene(fxmlLoader.load(), dimension.getWidth(), dimension.getHeight());
         stage.setTitle("Hello!");

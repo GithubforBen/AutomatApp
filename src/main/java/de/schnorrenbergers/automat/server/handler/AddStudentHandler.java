@@ -21,7 +21,7 @@ public class AddStudentHandler extends CustomHandler implements HttpHandler {
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         if (!exchange.getRequestMethod().equalsIgnoreCase("POST")) {
-            respond(exchange, "Not a POST request", 400);
+            methodNotAllowed(exchange);
             return;
         }
         BufferedReader requestBodyReaderBuffer = new BufferedReader(new InputStreamReader(exchange.getRequestBody()));
@@ -34,7 +34,7 @@ public class AddStudentHandler extends CustomHandler implements HttpHandler {
             jsonObject = new JSONObject(builder.toString());
 
         } catch (JSONException e) {
-            respond(exchange, "The following sting isn't a json object!\n" + builder, 400);
+            jsonError(exchange);
             return;
         }
         try {
@@ -71,9 +71,9 @@ public class AddStudentHandler extends CustomHandler implements HttpHandler {
                 session.flush();
             });
             System.out.println(student);
-            respond(exchange, "Successfully added student", 200);
+            respond(exchange, "Successfully added student");
         } catch (Exception e) {
-            respond(exchange, "Can't parse JSON object!\n" + e.getMessage(), 400);
+            jsonError(exchange);
             e.printStackTrace();
         }
     }

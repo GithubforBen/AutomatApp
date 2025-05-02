@@ -19,6 +19,6 @@ public class IndexHandler extends CustomHandler implements HttpHandler {
             buf.append((char) b);
         }
         exchange.getResponseHeaders().add("Content-Type", "text/html");
-        respond(exchange, buf.toString(), 200);
+        respond(exchange, buf.toString());
     }
 }
