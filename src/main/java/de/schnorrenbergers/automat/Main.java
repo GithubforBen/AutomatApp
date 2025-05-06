@@ -5,12 +5,13 @@ import de.schnorrenbergers.automat.controller.MainController;
 import de.schnorrenbergers.automat.database.Database;
 import de.schnorrenbergers.automat.database.types.Konto;
 import de.schnorrenbergers.automat.database.types.User;
+import de.schnorrenbergers.automat.manager.ConfigurationManager;
 import de.schnorrenbergers.automat.manager.KontenManager;
 import de.schnorrenbergers.automat.manager.SettingsManager;
 import de.schnorrenbergers.automat.manager.StatisticManager;
 import de.schnorrenbergers.automat.server.Server;
-import de.schnorrenbergers.automat.types.CustomRequest;
-import de.schnorrenbergers.automat.types.ScreenSaver;
+import de.schnorrenbergers.automat.utils.CustomRequest;
+import de.schnorrenbergers.automat.utils.types.ScreenSaver;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
@@ -28,6 +29,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
@@ -192,23 +194,28 @@ public class Main extends Application {
     }
 
     private void kost(String url) throws IOException {
-        String json = new CustomRequest(url).execute();
-        if (json == null) {
+        ConfigurationManager configurationManager = new ConfigurationManager();
+        HashMap<String, Object> data = (HashMap<String, Object>) configurationManager.get("sweets");
+        if (data == null) {
             return;
         }
-        JSONObject jsonObject = new JSONObject(json);
+        System.out.println(data);
         for (int i = 0; i < MainController.getMainController().getBtns().length; i++) {
             Button btn = MainController.getMainController().getBtns()[i];
-            JSONObject subObj = jsonObject.getJSONObject(String.valueOf(i));
+            HashMap<String, Object> subObj = (HashMap<String, Object>) data.get("_" + i);
 
             btn.setContentDisplay(ContentDisplay.RIGHT);
             btn.setFont(new Font(40));
-            btn.setText(subObj.getInt("hours") + ":");
+            btn.setText(subObj.get("kost") + ":");
             Image image = new Image(Objects.requireNonNull(getClass().getResourceAsStream(getImage(i))));
+            /*
+            //TODO: implement availability
             if (checkAvailability && !subObj.getBoolean("available")) {
                 image = convertToGrayscale(image);
                 btn.setDisable(true);
             }
+
+             */
             ImageView imageView = new ImageView(image);
             imageView.setFitHeight(187);
             imageView.setFitWidth(200);

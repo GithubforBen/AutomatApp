@@ -19,7 +19,7 @@
  * Module exports:<p>
  * - de.schnorrenbergers.automat: The main package of the application.<p>
  * - de.schnorrenbergers.automat.controller: Contains controller classes used in the application.<p>
- * - de.schnorrenbergers.automat.types: Exposes types required by Hibernate ORM and JPA.<p>
+ * - de.schnorrenbergers.automat.utils.types: Exposes types required by Hibernate ORM and JPA.<p>
  * <p>
  * Module opens directives:<p>
  * - de.schnorrenbergers.automat: Opened to javafx.fxml for accessing FXML configurations.<p>
@@ -41,12 +41,14 @@ module de.schnorrenbergers.automat {
     requires jakarta.persistence;
 
     requires java.naming;
+    requires org.yaml.snakeyaml;
 
     opens de.schnorrenbergers.automat to javafx.fxml;
     exports de.schnorrenbergers.automat;
     exports de.schnorrenbergers.automat.controller;
     opens de.schnorrenbergers.automat.controller to javafx.fxml;
     opens de.schnorrenbergers.automat.database.types to org.hibernate.orm.core, jakarta.persistence, java.base;
-    exports de.schnorrenbergers.automat.types to org.hibernate.orm.core, jakarta.persistence, java.base;
+    exports de.schnorrenbergers.automat.utils.types to org.hibernate.orm.core, jakarta.persistence, java.base;
     opens de.schnorrenbergers.automat.database.types.types to jakarta.persistence, java.base, org.hibernate.orm.core;
+    exports de.schnorrenbergers.automat.utils to jakarta.persistence, java.base, org.hibernate.orm.core;
 }

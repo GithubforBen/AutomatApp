@@ -1,0 +1,34 @@
+# "5": {"name": "Haribo", "hours": 2},
+#            "4": {"name": "Smarties", "hours": 2,},
+#            "7": {"name": "Stats", "hours": -1},
+#            "6": {"name": "Brause", "hours": 2},
+#            "1": {"name": "Dublo", "hours": 2},
+#            "0": {"name": "Mentos", "hours": 2},
+#            "3": {"name": "Maoam", "hours": 2},
+#            "2": {"name": "Kinder", "hours": 2}
+
+sweets:
+  _0:
+    name: "Mentos"
+    kost: 2
+  _1:
+    name: "Dublo"
+    kost: 2
+  _2:
+    name: "Kinder"
+    kost: 2
+  _3:
+    name: "Maoam"
+    kost: 2
+  _4:
+    name: "Smarties"
+    kost: 2
+  _5:
+    name: "Haribo"
+    kost: 2
+  _6:
+    name: "Brause"
+    kost: 2
+  _7:
+    name: "Stats"
+    kost: -1

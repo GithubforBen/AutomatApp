@@ -1,4 +1,4 @@
-package de.schnorrenbergers.automat.types;
+package de.schnorrenbergers.automat.utils.types;
 
 import de.schnorrenbergers.automat.Main;
 
