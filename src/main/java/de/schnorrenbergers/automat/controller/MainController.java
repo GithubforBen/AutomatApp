@@ -1,8 +1,9 @@
 package de.schnorrenbergers.automat.controller;
 
 import de.schnorrenbergers.automat.Main;
+import de.schnorrenbergers.automat.manager.KontenManager;
 import de.schnorrenbergers.automat.manager.StatisticManager;
-import de.schnorrenbergers.automat.types.CustomRequest;
+import de.schnorrenbergers.automat.utils.CustomRequest;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -19,6 +20,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.ResourceBundle;
+import java.util.concurrent.TimeUnit;
 
 public class MainController implements Initializable {
 
@@ -114,11 +116,11 @@ public class MainController implements Initializable {
         }
         try {
             JSONObject jsonObject = new JSONObject(new CustomRequest("sweets").execute()).getJSONObject(String.valueOf(number));
-
-            if (Main.getInstance().getLastScan().time.getHour() >= jsonObject.getInt("hours")
-                    || Main.getInstance().getLastScan().time.getHour() == Integer.MIN_VALUE
+            KontenManager kontenManager = new KontenManager(Main.getInstance().getLastScan());
+            if (kontenManager.getKonto().getBalance(TimeUnit.HOURS) >= jsonObject.getInt("hours")
+                    ||kontenManager.getKonto().getBalance(TimeUnit.HOURS) == Integer.MIN_VALUE
                     || !Boolean.parseBoolean(Main.getInstance().getSettings().getSettingOrDefault("checkTime", String.valueOf(true)))) {
-                new CustomRequest("dispense").executeComplex("{\"nr\":" + number + ",\"cost\":" + jsonObject.getInt("hours") + ",\"usr\":" + Arrays.toString(Main.getInstance().getLastScan().getByteAdress()) + "}");
+                new CustomRequest("dispense").executeComplex("{\"nr\":" + number + ",\"cost\":" + jsonObject.getInt("hours") + ",\"usr\":" + Arrays.toString(Main.getInstance().getLastScan()) + "}");
                 Main.getInstance().setLastScan(null);
                 new StatisticManager().persistDispense(number);
             } else {

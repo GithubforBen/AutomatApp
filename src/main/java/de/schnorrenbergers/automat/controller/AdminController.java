@@ -1,7 +1,7 @@
 package de.schnorrenbergers.automat.controller;
 
 import de.schnorrenbergers.automat.Main;
-import de.schnorrenbergers.automat.types.CustomRequest;
+import de.schnorrenbergers.automat.utils.CustomRequest;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;

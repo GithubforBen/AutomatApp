@@ -25,11 +25,11 @@ public class HelloController implements Initializable {
     public SplitPane pane;
 
     public void reconnect(ActionEvent actionEvent) {
+        Main.getInstance().getScreenSaver().setLastMove(System.currentTimeMillis());
         try {
             Main.getInstance().start(Main.getInstance().getStage());
         } catch (IOException | InterruptedException | SQLException | ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
-        Main.getInstance().getScreenSaver().setLastMove(System.currentTimeMillis());
     }
 }
