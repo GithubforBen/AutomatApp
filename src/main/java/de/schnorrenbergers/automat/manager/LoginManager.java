@@ -36,6 +36,7 @@ public class LoginManager {
             return true;
 
         }
+        new StatisticManager().persistLogin(userId);
         resultList.forEach(session::remove);
         session.flush();
         session.close();

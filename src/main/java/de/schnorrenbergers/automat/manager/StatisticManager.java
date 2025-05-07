@@ -2,7 +2,6 @@ package de.schnorrenbergers.automat.manager;
 
 import de.schnorrenbergers.automat.Main;
 import de.schnorrenbergers.automat.database.types.Statistic;
-import de.schnorrenbergers.automat.database.types.types.LoginStat;
 import de.schnorrenbergers.automat.database.types.types.StatisticType;
 import org.json.JSONObject;
 
@@ -24,13 +23,18 @@ public class StatisticManager {
      * @param sweet sweet to be incremented
      */
     public void persistDispense(int sweet) {
-        Statistic statistic = new Statistic("{type=" + sweet + "}", StatisticType.SWEET_DISPENSE);
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.append("type", sweet);
+        Statistic statistic = new Statistic(jsonObject.toString(), StatisticType.SWEET_DISPENSE);
         persist(statistic);
     }
 
-    //TODO: Implement this
-    public void persistLogin(LoginStat loginStat) {
+    //TODO: set User data correctly
+    public void persistLogin(long userId) {
         JSONObject jsonObject = new JSONObject();
+        jsonObject.append("userID", userId);
+        Statistic statistic = new Statistic(jsonObject.toString(), StatisticType.STUDENT_ATTEND);
+        persist(statistic);
     }
 
     /**
