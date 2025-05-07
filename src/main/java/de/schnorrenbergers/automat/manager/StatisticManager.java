@@ -42,34 +42,6 @@ public class StatisticManager {
      * @return sweet associated with the given id.
      */
     public String getFromId(int id) {
-        switch (id) {
-            case 0 -> {
-                return "Mentos";
-            }
-            case 1 -> {
-                return "Dublo";
-            }
-            case 2 -> {
-                return "Kinder";
-            }
-            case 3 -> {
-                return "Maoam";
-            }
-            case 4 -> {
-                return "Smarties";
-            }
-            case 5 -> {
-                return "Haribo";
-            }
-            case 6 -> {
-                return "Brause";
-            }
-            case 7 -> {
-                return "Stats";
-            }
-            default -> {
-                return "";
-            }
-        }
+        return Main.getInstance().getConfigurationManager().getString("sweets._" + id + ".name");
     }
 }

@@ -6,7 +6,7 @@ import java.io.InputStream;
 import java.util.Map;
 
 public class ConfigurationManager {
-    private Map<String, Object> objMap;
+    private final Map<String, Object> objMap;
     public ConfigurationManager() {
         Yaml yaml = new Yaml();
         InputStream inputStream = this.getClass()
@@ -17,7 +17,18 @@ public class ConfigurationManager {
     }
 
     public Object get(String key) {
-        return objMap.get(key);
+        String[] split = key.split("\\.");
+        if (split.length == 1) return objMap.get(key);
+        Map<String, Object> map = objMap;
+        for (String s : split) {
+            System.out.println(s + " " + map.get(s));
+            if (map.get(s) instanceof Map) {
+                map = (Map<String, Object>) map.get(s);
+            } else {
+                return map.get(s);
+            }
+        }
+        return null;
     }
 
     public String getString(String key) {
@@ -28,5 +39,9 @@ public class ConfigurationManager {
     }
     public boolean getBoolean(String key) {
         return (boolean) get(key);
+    }
+
+    public double getDouble(String key) {
+        return (double) get(key);
     }
 }

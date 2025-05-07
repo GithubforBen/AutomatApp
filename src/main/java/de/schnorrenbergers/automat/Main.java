@@ -25,11 +25,9 @@ import javafx.scene.layout.Border;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
-import org.json.JSONObject;
 
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
@@ -37,18 +35,19 @@ import java.util.concurrent.TimeUnit;
 public class Main extends Application {
     //TODO: login
     private static Main instance;
-    private final String url = "http://127.0.0.1:5000";
+    private String url;
     private Stage stage;
     private Dimension2D dimension;
     private Server server;
     private int[] lastScan;
-    private int logoutTime = 10;
+    private int logoutTime;
     private boolean alarm = false;
     private boolean checkAvailability;
     private ScreenSaver screenSaver;
     private Database database;
     private SettingsManager settingsManager;
     private StatisticManager handler;
+    private ConfigurationManager configurationManager;
 
     /**
      * Used to Initialize all objects.
@@ -59,9 +58,14 @@ public class Main extends Application {
      */
     private void initialise() throws IOException, SQLException, ClassNotFoundException {
         instance = this;
+        configurationManager = new ConfigurationManager();
+        url = configurationManager.getString("frontend-url");
+        logoutTime = configurationManager.getInt("default-logout-time");
         database = new Database();
         settingsManager = new SettingsManager();
-        dimension = new Dimension2D(480, 800);
+        dimension = new Dimension2D(
+                configurationManager.getInt("window-dimension.horizontal"),
+                configurationManager.getInt("window-dimension.vertical"));
         if (server == null) server = new Server();
         screenSaver = new ScreenSaver();
         handler = new StatisticManager();
@@ -194,19 +198,12 @@ public class Main extends Application {
     }
 
     private void kost(String url) throws IOException {
-        ConfigurationManager configurationManager = new ConfigurationManager();
-        HashMap<String, Object> data = (HashMap<String, Object>) configurationManager.get("sweets");
-        if (data == null) {
-            return;
-        }
-        System.out.println(data);
         for (int i = 0; i < MainController.getMainController().getBtns().length; i++) {
             Button btn = MainController.getMainController().getBtns()[i];
-            HashMap<String, Object> subObj = (HashMap<String, Object>) data.get("_" + i);
 
             btn.setContentDisplay(ContentDisplay.RIGHT);
             btn.setFont(new Font(40));
-            btn.setText(subObj.get("kost") + ":");
+            btn.setText(configurationManager.getInt("sweets._" + i + ".kost") + ":");
             Image image = new Image(Objects.requireNonNull(getClass().getResourceAsStream(getImage(i))));
             /*
             //TODO: implement availability
@@ -227,16 +224,10 @@ public class Main extends Application {
     }
 
     private String getImage(int id) {
-        return switch (id) {
-            case 0 -> "/image/mentos_0.png";
-            case 1 -> "/image/duplo_1.png";
-            case 2 -> "/image/kinder_2.png";
-            case 3 -> "/image/mauam_3.png";
-            case 4 -> "/image/smarties_4.png";
-            case 5 -> "/image/haribo_5.png";
-            case 6 -> "/image/brause_6.png";
-            default -> "/image/Logo.png";
-        };
+        if (id < 7 && id > -1) {
+            return "/image/" + configurationManager.getString("sweets._" + id + ".name") + "_" + id + ".png";
+        }
+        return "/image/Logo.png";
     }
 
     private Image convertToGrayscale(Image image) {
@@ -364,5 +355,13 @@ public class Main extends Application {
 
     public StatisticManager getHandler() {
         return handler;
+    }
+
+    public SettingsManager getSettingsManager() {
+        return settingsManager;
+    }
+
+    public ConfigurationManager getConfigurationManager() {
+        return configurationManager;
     }
 }

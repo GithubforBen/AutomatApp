@@ -1,12 +1,4 @@
-# "5": {"name": "Haribo", "hours": 2},
-#            "4": {"name": "Smarties", "hours": 2,},
-#            "7": {"name": "Stats", "hours": -1},
-#            "6": {"name": "Brause", "hours": 2},
-#            "1": {"name": "Dublo", "hours": 2},
-#            "0": {"name": "Mentos", "hours": 2},
-#            "3": {"name": "Maoam", "hours": 2},
-#            "2": {"name": "Kinder", "hours": 2}
-
+# sweet names and cost
 sweets:
   _0:
     name: "Mentos"
@@ -32,3 +24,11 @@ sweets:
   _7:
     name: "Stats"
     kost: -1
+# time it takes for a login to be invalidated
+invalidation-time: 14
+frontend-url: "http://127.0.0.1:5000"
+default-logout-time: 10
+window-dimension:
+  horizontal: 480
+  vertical: 800
+shutdown-delay: 30

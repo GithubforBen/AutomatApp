@@ -24,7 +24,8 @@ public class LoginManager {
             return true;
         }
         long attendance = System.currentTimeMillis() - resultList.getFirst().getLoginTime();
-        if (attendance < 1000 * 60 * 60 * 14) {
+        ConfigurationManager configurationManager = Main.getInstance().getConfigurationManager();
+        if (attendance < 1000L * 60 * 60 * configurationManager.getInt("invalidation-time")) {
             List<Konto> konten = session.createSelectionQuery("from Konto k where k.userId == :id", Konto.class)
                     .setParameter("id", userId).getResultList();
             if (konten.isEmpty()) {

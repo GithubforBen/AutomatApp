@@ -97,7 +97,7 @@ public class SettingsController implements Initializable {
             processBuilder.command("shutdown");
             new Thread(() -> {
                 try {
-                    Thread.sleep(1000 * 30);
+                    Thread.sleep(1000L * Main.getInstance().getConfigurationManager().getInt("shutdown-delay"));
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
