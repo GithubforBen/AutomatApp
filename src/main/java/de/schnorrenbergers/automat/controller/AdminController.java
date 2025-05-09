@@ -2,6 +2,7 @@ package de.schnorrenbergers.automat.controller;
 
 import de.schnorrenbergers.automat.Main;
 import de.schnorrenbergers.automat.manager.AvailabilityManager;
+import de.schnorrenbergers.automat.manager.ConfigurationManager;
 import de.schnorrenbergers.automat.utils.CustomRequest;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -117,10 +118,13 @@ public class AdminController implements Initializable {
         try {
             if (positive == 0)
                 availabilityManager.addSweet(type, (int) slider.getValue());
-            if (positive == 1)
+            else if (positive == 1)
                 availabilityManager.addSweet(type, (int) slider.getValue() * -1);
-            if (positive == 2) throw new IOException(); //TODO: add re-enable logic
-            //new CustomRequest("re-enable").executeComplex("{\"name\":\"" + name + "\"}");
+            else if (positive == 2)
+                new CustomRequest("re-enable").executeComplex("{\"name\":\"" + new ConfigurationManager().getString("sweets._" + type + ".name") + "\"}");
+            else {
+                positive = 0;
+            }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

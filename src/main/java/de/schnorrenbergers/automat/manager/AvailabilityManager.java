@@ -94,9 +94,9 @@ public class AvailabilityManager {
      *
      * @param sweet the type of sweet for which duplicate records are detected. Must be an integer representing the sweet type.
      */
-    private void alert(int sweet) {//TODO: test
+    private void alert(int sweet) {
         Main.getInstance().getDatabase().getSessionFactory().inTransaction(session -> {
-            Alert alert = new Alert(Alert.AlertType.WARNING);
+            Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setTitle("Multiple Availability Records found!");
             ConfigurationManager configurationManager = new ConfigurationManager();
             alert.setContentText("Multiple Availability Records found for Sweet " +
@@ -104,7 +104,8 @@ public class AvailabilityManager {
                     "These repetitions will be deleted. Please recount the specified sweet.");
             alert.getButtonTypes().clear();
             alert.getButtonTypes().add(ButtonType.OK);
-            alert.showAndWait();
+            alert.initOwner(Main.getInstance().getStage().getScene().getWindow());
+            alert.show();
         });
     }
 }

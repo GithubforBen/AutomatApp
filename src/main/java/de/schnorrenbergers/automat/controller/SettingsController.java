@@ -12,6 +12,7 @@ import javafx.scene.text.Text;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.List;
 import java.util.ResourceBundle;
 
 public class SettingsController implements Initializable {
@@ -83,11 +84,10 @@ public class SettingsController implements Initializable {
     }
 
     public void resetStats(ActionEvent actionEvent) {
-        //TODO: Test drop database imitate
         Main.getInstance().getScreenSaver().setLastMove(System.currentTimeMillis());
         Main.getInstance().getDatabase().getSessionFactory().inTransaction(session -> {
-            session.createSelectionQuery("select Statistic s", Statistic.class).getResultList().forEach(session::remove);
-            session.flush();
+            List<Statistic> stats = session.createSelectionQuery("from Statistic s", Statistic.class).getResultList();
+            stats.forEach(session::remove);
         });
     }
 

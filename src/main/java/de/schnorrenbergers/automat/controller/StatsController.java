@@ -12,6 +12,7 @@ import javafx.scene.chart.BarChart;
 import javafx.scene.chart.PieChart;
 import javafx.scene.chart.XYChart;
 import org.hibernate.Session;
+import org.json.JSONObject;
 
 import java.net.URL;
 import java.util.List;
@@ -29,11 +30,11 @@ public class StatsController implements Initializable {
 
         for (int i = 0; i < 7; i++) {
             Session session = Main.getInstance().getDatabase().getSessionFactory().openSession();
-            List<Statistic> sq = session.createSelectionQuery("from Statistic stat where stat.data in :sq AND type = 'SWEET_DISPENSE'", Statistic.class)
-                    .setParameter("sq", "type=" + i).getResultList();
+            List<Statistic> sq = session.createSelectionQuery("from Statistic stat where stat.type = 'SWEET_DISPENSE' and stat.data = :data", Statistic.class)
+                    .setParameter("data", new JSONObject().append("type", i).toString()).getResultList();
             session.close();
+            if (sq.isEmpty()) continue;
             pieData.add(new PieChart.Data(new StatisticManager().getFromId(i), sq.size()));
-            //TODO: test
         }
         pie.setData(pieData);
         pie.setAnimated(true);

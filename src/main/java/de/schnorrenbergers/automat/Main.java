@@ -90,6 +90,7 @@ public class Main extends Application {
         Application.setUserAgentStylesheet(new PrimerDark().getUserAgentStylesheet());
         checkForStuff();
         load();
+        stage.setAlwaysOnTop(true);
         new CustomRequest("ping").execute();
     }
 
