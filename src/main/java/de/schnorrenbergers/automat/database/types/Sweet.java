@@ -10,6 +10,16 @@ public class Sweet {
     @GeneratedValue
     private Long id;
 
+    /**
+     * Represents the type of the sweet.
+     * <p>
+     * This variable is used to define different categories or classifications
+     * of sweets. The value is an integer that can correspond to specific
+     * predefined types of sweets. Defined in the configuration.
+     * <p>
+     * It is encapsulated in the {@link Sweet} class and can be accessed or
+     * modified using the {@link Sweet#getType()} and {@link Sweet#setType(int)} methods.
+     */
     private int type;
     private int amount;
 

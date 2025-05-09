@@ -4,8 +4,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 
-import java.util.concurrent.TimeUnit;
-
 @Entity
 public class Konto {
     @Id
@@ -59,11 +57,6 @@ public class Konto {
         this.balance = balance;
     }
 
-    public double getBalance(TimeUnit timeUnit) {
-        if (timeUnit == TimeUnit.HOURS) return (double) ((int) (balance / 6)) / 10; //round
-        return balance;
-    }
-
     public Long getUserId() {
         return userId;
     }
@@ -80,13 +73,12 @@ public class Konto {
         isInfinite = infinite;
     }
 
+    public double getBalanceRounded() {
+        return ((int) (balance * 10)) / 10.0;
+    }
+
     @Override
     public String toString() {
-        return "Konto{" +
-                "id=" + id +
-                ", userId=" + userId +
-                ", balance=" + balance +
-                ", isInfinite=" + isInfinite +
-                '}';
+        return "Konto{" + "id=" + id + ", userId=" + userId + ", balance=" + balance + ", isInfinite=" + isInfinite + '}';
     }
 }

@@ -1,6 +1,7 @@
 package de.schnorrenbergers.automat.controller;
 
 import de.schnorrenbergers.automat.Main;
+import de.schnorrenbergers.automat.manager.AvailabilityManager;
 import de.schnorrenbergers.automat.utils.CustomRequest;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -16,6 +17,7 @@ import java.util.ResourceBundle;
 public class AdminController implements Initializable {
     @FXML
     public Button alarmBTN;
+    //TODO: load button names from config
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -39,7 +41,7 @@ public class AdminController implements Initializable {
     public Button plus;
     @FXML
     private Slider slider;
-    private int positive = 3; //pos->0;neg->1;re-enable->2
+    private int positive = 0; //pos->0;neg->1;re-enable->2
 
     /**
      * Handles the navigation back to the main view by loading the "main-view.fxml" scene.
@@ -76,44 +78,49 @@ public class AdminController implements Initializable {
     }
 
     public void mentos(ActionEvent actionEvent) {
-        fill("mentos");
+        fill(0);
     }
 
     public void haribo(ActionEvent actionEvent) {
-        fill("haribo");
+        fill(5);
     }
 
     public void brause(ActionEvent actionEvent) {
-        fill("brause");
+        fill(6);
     }
 
     public void smarties(ActionEvent actionEvent) {
-        fill("smarties");
+        fill(4);
     }
 
     public void maoam(ActionEvent actionEvent) {
-        fill("maoam");
+        fill(3);
     }
 
     /**
-     * Performs a fill operation based on the specified parameters
-     * and the current state of the system.
-     * Depending on the value of the `positive` field, this method
-     * either fills a specific amount, re-enables the related entity,
-     * or performs no operation.
+     * Fills a specific type of item based on the provided type parameter and the current state of the
+     * {@code positive} field. Depending on the value of {@code positive}, the method executes one of the following:
+     * <ul>
+     *     <li>Adds a positive quantity of the item when {@code positive} is 0.</li>
+     *     <li>Adds a negative quantity of the item when {@code positive} is 1.</li>
+     *     <liExecutes a custom "re-enable" request when {@code positive} is 2.</li>
+     * </ul>
+     * Updates the screen saver's last user interaction timestamp to the current system time and handles potential
+     * input-output exceptions during execution.
      *
-     * @param name the name of the item or entity to be filled or re-enabled
-     * @throws RuntimeException if an I/O error occurs during the operation
+     * @param type the type of item to be processed, represented as an integer identifier.
      */
-    public void fill(String name) {
+    public void fill(int type) {
         Main.getInstance().getScreenSaver().setLastMove(System.currentTimeMillis());
+        AvailabilityManager availabilityManager = new AvailabilityManager();
+        System.out.println("ill" + positive);
         try {
             if (positive == 0)
-                new CustomRequest("fill").executeComplex("{\"name\":\"" + name + "\",\"nr\":" + slider.getValue() + "}");
+                availabilityManager.addSweet(type, (int) slider.getValue());
             if (positive == 1)
-                new CustomRequest("fill").executeComplex("{\"name\":\"" + name + "\",\"nr\":" + slider.getValue() * -1 + "}");
-            if (positive == 2)
-                new CustomRequest("re-enable").executeComplex("{\"name\":\"" + name + "\"}");
+                availabilityManager.addSweet(type, (int) slider.getValue() * -1);
+            if (positive == 2) throw new IOException(); //TODO: add re-enable logic
+            //new CustomRequest("re-enable").executeComplex("{\"name\":\"" + name + "\"}");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -141,10 +148,10 @@ public class AdminController implements Initializable {
     }
 
     public void duplo(ActionEvent actionEvent) {
-        fill("duplo");
+        fill(1);
     }
 
     public void kinder(ActionEvent actionEvent) {
-        fill("kinder");
+        fill(2);
     }
 }

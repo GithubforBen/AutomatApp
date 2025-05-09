@@ -15,7 +15,8 @@ public class CustomRequest {
     public CustomRequest(String url) {
         this.urlString = Main.getInstance().getUrl() + "/" + url;
         System.out.println(urlString);
-        if (urlString.equals("http://127.0.0.1:5000/sweets")) throw new RuntimeException();
+        if (urlString.equals("http://127.0.0.1:5000/sweets") || urlString.equals("http://127.0.0.1:5000/fill"))
+            throw new RuntimeException();
     }
 
     public String execute() throws IOException {

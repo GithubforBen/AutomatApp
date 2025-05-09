@@ -3,12 +3,8 @@ package de.schnorrenbergers.automat;
 import atlantafx.base.theme.PrimerDark;
 import de.schnorrenbergers.automat.controller.MainController;
 import de.schnorrenbergers.automat.database.Database;
-import de.schnorrenbergers.automat.database.types.Konto;
 import de.schnorrenbergers.automat.database.types.User;
-import de.schnorrenbergers.automat.manager.ConfigurationManager;
-import de.schnorrenbergers.automat.manager.KontenManager;
-import de.schnorrenbergers.automat.manager.SettingsManager;
-import de.schnorrenbergers.automat.manager.StatisticManager;
+import de.schnorrenbergers.automat.manager.*;
 import de.schnorrenbergers.automat.server.Server;
 import de.schnorrenbergers.automat.utils.CustomRequest;
 import de.schnorrenbergers.automat.utils.types.ScreenSaver;
@@ -30,7 +26,6 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.TimeUnit;
 
 public class Main extends Application {
     private static Main instance;
@@ -70,24 +65,6 @@ public class Main extends Application {
         handler = new StatisticManager();
         logoutTime = Integer.parseInt(settingsManager.getSettingOrDefault("logout", String.valueOf(logoutTime)));
         checkAvailability = Boolean.parseBoolean(settingsManager.getSettingOrDefault("availability", String.valueOf(false)));
-        KontenManager kontenManager = new KontenManager(new int[]{100, 100, 100, 100});
-        System.out.println(kontenManager.getKonto().getBalance());
-        /*
-        database.getSessionFactory().inTransaction(session -> {
-            session.createSelectionQuery("from User u", User.class).getResultList().forEach((x) -> {
-                System.out.println(x.toString());
-            });
-        });
-
-        database.getSessionFactory().inTransaction(session -> {
-            Kurs kurs = new Kurs("Test", "Paul", Day.DONNERSTAG);
-            session.persist(kurs);
-            Wohnort wohnort = new Wohnort(1, " ", "sad", 48, "germany");
-            session.persist(wohnort);
-            session.persist(new User("Ben", "Schnorrenberger", new int[]{0,1,2,3}, Gender.DUAL_GENDER, 10, wohnort, new Kurs[]{kurs}));
-        });
-
- */
     }
 
     /**
@@ -191,15 +168,7 @@ public class Main extends Application {
         new CustomRequest("alarm_off").execute();
     }
 
-    public void setKost() throws IOException {
-        if (checkAvailability) {
-            kost("sweetsDa");
-            return;
-        }
-        kost("sweets");
-    }
-
-    private void kost(String url) throws IOException {
+    public void kost() throws IOException {
         for (int i = 0; i < MainController.getMainController().getBtns().length; i++) {
             Button btn = MainController.getMainController().getBtns()[i];
 
@@ -207,14 +176,14 @@ public class Main extends Application {
             btn.setFont(new Font(40));
             btn.setText(configurationManager.getInt("sweets._" + i + ".kost") + ":");
             Image image = new Image(Objects.requireNonNull(getClass().getResourceAsStream(getImage(i))));
-            /*
+
             //TODO: implement availability
-            if (checkAvailability && !subObj.getBoolean("available")) {
+
+            if (checkAvailability && !new AvailabilityManager().checkAvailability(i)) {
                 image = convertToGrayscale(image);
                 btn.setDisable(true);
             }
 
-             */
             ImageView imageView = new ImageView(image);
             imageView.setFitHeight(187);
             imageView.setFitWidth(200);
@@ -266,11 +235,7 @@ public class Main extends Application {
                 MainController.getMainController().setText("Unbekannte Karte", Color.WHITE, true);
                 return;
             }
-            List<Konto> konten = session.createSelectionQuery("from Konto k where k.userId = :id", Konto.class)
-                    .setParameter("id", id.getFirst().getId()).getResultList();
-            if (konten.isEmpty()) {
-            }
-            MainController.getMainController().setText(id.getFirst().getFullName() + ":" + new KontenManager(id.getFirst().getId()).getKonto().getBalance(TimeUnit.HOURS) + "h", Color.WHITE, true);
+            MainController.getMainController().setText(id.getFirst().getFullName() + ":" + new KontenManager(lastScan).getKonto().getBalanceRounded() + "h", Color.WHITE, true);
         });
     }
 
@@ -317,7 +282,7 @@ public class Main extends Application {
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
-            this.lastScan = null;
+            if (lastScan == this.lastScan) this.lastScan = null;
             updateDisplay();
         }).start();
     }

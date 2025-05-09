@@ -8,7 +8,8 @@ import org.json.JSONObject;
 public class StatisticManager {
 
     /**
-    * Persists the statistic.
+     * Persists the statistic.
+     *
      * @param statistic the statistic to persist
      */
     public void persist(Statistic statistic) {
@@ -20,6 +21,7 @@ public class StatisticManager {
 
     /**
      * Increments the sweet's dispense amount by one
+     *
      * @param sweet sweet to be incremented
      */
     public void persistDispense(int sweet) {

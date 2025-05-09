@@ -1,6 +1,7 @@
 package de.schnorrenbergers.automat.controller;
 
 import de.schnorrenbergers.automat.Main;
+import de.schnorrenbergers.automat.manager.AvailabilityManager;
 import de.schnorrenbergers.automat.manager.ConfigurationManager;
 import de.schnorrenbergers.automat.manager.KontenManager;
 import de.schnorrenbergers.automat.manager.StatisticManager;
@@ -20,7 +21,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.ResourceBundle;
-import java.util.concurrent.TimeUnit;
 
 public class MainController implements Initializable {
 
@@ -85,7 +85,7 @@ public class MainController implements Initializable {
         setText("Bitte Karte scannen", Color.WHITE, true);
         MainController.mainController = this;
         try {
-            Main.getInstance().setKost();
+            Main.getInstance().kost();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -124,11 +124,15 @@ public class MainController implements Initializable {
         try {
             KontenManager kontenManager = new KontenManager(Main.getInstance().getLastScan());
             ConfigurationManager configurationManager = new ConfigurationManager();
-            if (kontenManager.getKonto().getBalance(TimeUnit.HOURS) >= configurationManager.getInt("sweets._" + number + ".kost")
-                    ||kontenManager.getKonto().getBalance(TimeUnit.HOURS) == Integer.MIN_VALUE
+            AvailabilityManager availabilityManager = new AvailabilityManager();
+            availabilityManager.addSweet(number, -1);
+            if (kontenManager.getKonto().getBalance() >= configurationManager.getInt("sweets._" + number + ".kost")
+                    || kontenManager.getKonto().getBalance() == Integer.MIN_VALUE
                     || !Boolean.parseBoolean(Main.getInstance().getSettings().getSettingOrDefault("checkTime", String.valueOf(true)))) {
                 new CustomRequest("dispense").executeComplex("{\"nr\":" + number + ",\"cost\":" + configurationManager.getInt("sweets._" + number + ".kost") + ",\"usr\":" + Arrays.toString(Main.getInstance().getLastScan()) + "}");
                 Main.getInstance().setLastScan(null);
+                kontenManager.withdraw(configurationManager.getInt("sweets._" + number + ".kost"));
+                Main.getInstance().kost();
                 new StatisticManager().persistDispense(number);
             } else {
                 setText("Nicht genug Stunden", Color.RED, true);

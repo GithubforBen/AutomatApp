@@ -10,11 +10,15 @@ import java.util.List;
 public class SettingsManager {
 
     /**
-    * Finds a setting.
-    * @param address  The address associated with the setting
-     * @return The setting
-     * @deprecated  Use {@link #getSettingOrDefault(String, String)}
-     **/
+     * Retrieves the value of a setting for the provided address. This method
+     * is deprecated and may be removed in future versions.
+     *
+     * @param address The address (key) associated with the setting to retrieve.
+     * @return The value of the setting corresponding to the given address,
+     *         or null if the setting does not exist.
+     * @deprecated Use {@link #getSettingOrDefault(String, String)} instead for
+     *             better handling of non-existing settings.
+     */
     @Deprecated
     public String getSetting(String address) {
         Session session = Main.getInstance().getDatabase().getSessionFactory().openSession();
@@ -25,7 +29,8 @@ public class SettingsManager {
 
     /**
      * Returns a setting.
-     * @param adress The address associated with the setting
+     *
+     * @param adress       The address associated with the setting
      * @param defaultValue This value will be returned if the setting wasn't found
      * @return The setting
      */
@@ -39,8 +44,9 @@ public class SettingsManager {
 
     /**
      * Sets a setting
+     *
      * @param address The address where the setting should be saved.
-     * @param value The Value of the setting.
+     * @param value   The Value of the setting.
      * @return true if a setting was replaced; false if the setting is new
      */
     public boolean setSetting(String address, String value) {
