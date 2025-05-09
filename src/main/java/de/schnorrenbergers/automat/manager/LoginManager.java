@@ -1,8 +1,8 @@
 package de.schnorrenbergers.automat.manager;
 
 import de.schnorrenbergers.automat.Main;
-import de.schnorrenbergers.automat.database.types.Konto;
 import de.schnorrenbergers.automat.database.types.Login;
+import de.schnorrenbergers.automat.database.types.Student;
 import de.schnorrenbergers.automat.database.types.User;
 import org.hibernate.Session;
 
@@ -15,30 +15,28 @@ public class LoginManager {
      */
     public boolean login(Long userId) {
         Session session = Main.getInstance().getDatabase().getSessionFactory().openSession();
-        List<Login> resultList = session.createSelectionQuery("from Login l where l.userId == :id", Login.class)
+        List<Login> resultList = session.createSelectionQuery("from Login l where l.userId = :id", Login.class)
                 .setParameter("id", userId).getResultList();
+        resultList.forEach(System.out::println);
+        new StatisticManager().persistLogin(userId);
         if (resultList.isEmpty()) {
-            session.persist(new Login(userId, System.currentTimeMillis()));
-            session.flush();
             session.close();
+            Main.getInstance().getDatabase().getSessionFactory().inTransaction((transaction) -> {
+                transaction.persist(new Login(userId, System.currentTimeMillis()));
+                List<Login> selectLogin = transaction.createSelectionQuery("from Login l", Login.class).getResultList();
+            });
             return true;
         }
+        Main.getInstance().getDatabase().getSessionFactory().inTransaction((transaction) -> {
+            resultList.forEach(transaction::remove);
+        });
         long attendance = System.currentTimeMillis() - resultList.getFirst().getLoginTime();
         ConfigurationManager configurationManager = Main.getInstance().getConfigurationManager();
         if (attendance < 1000L * 60 * 60 * configurationManager.getInt("invalidation-time")) {
-            List<Konto> konten = session.createSelectionQuery("from Konto k where k.userId == :id", Konto.class)
-                    .setParameter("id", userId).getResultList();
-            if (konten.isEmpty()) {
-                session.persist(new Konto(userId, ((double) attendance / 60 / 60 / 1000), false));
-            } else {
-                konten.forEach(session::remove);
-                new KontenManager(userId).deposit((double) attendance / 60 / 60 / 1000);
-            }
-            return true;
-
+            new KontenManager(userId).deposit((double) attendance / 60 / 60 / 1000L);
+            session.close();
+            return false;
         }
-        new StatisticManager().persistLogin(userId);
-        resultList.forEach(session::remove);
         session.flush();
         session.close();
         return false;
@@ -59,5 +57,20 @@ public class LoginManager {
         }
         session.close();
         return false;
+    }
+
+    /**
+     * Retrieves attendance data representing the number of currently logged-in users and the number
+     * of users not currently logged in.
+     *
+     * @return an integer array where the first element is the total count of logged-in users
+     * and the second element is the total count of users not logged in.
+     */
+    public int[] getAttendance() {
+        Session session = Main.getInstance().getDatabase().getSessionFactory().openSession();
+        List<Login> login = session.createSelectionQuery("from Login l", Login.class).getResultList();
+        List<Student> students = session.createSelectionQuery("from Student s", Student.class).getResultList();
+        session.close();
+        return new int[]{login.size(), students.size() - login.size()};
     }
 }

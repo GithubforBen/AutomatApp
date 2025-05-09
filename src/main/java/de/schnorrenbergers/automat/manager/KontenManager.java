@@ -2,6 +2,7 @@ package de.schnorrenbergers.automat.manager;
 
 import de.schnorrenbergers.automat.Main;
 import de.schnorrenbergers.automat.database.types.Konto;
+import de.schnorrenbergers.automat.database.types.User;
 import org.hibernate.Session;
 
 import java.util.List;
@@ -27,9 +28,9 @@ public class KontenManager {
      */
     public KontenManager(int[] rfid) {
         Main.getInstance().getDatabase().getSessionFactory().inTransaction(session -> {
-            List<Konto> resultList = session.createSelectionQuery("from User u where u.rfid in :rfid", Konto.class)
+            List<User> resultList = session.createSelectionQuery("from User u where u.rfid in :rfid", User.class)
                     .setParameter("rfid", rfid).getResultList();
-            id = resultList.getFirst().getUserId();
+            this.id = resultList.getFirst().getId();
         });
     }
 
@@ -61,6 +62,7 @@ public class KontenManager {
      *              It must not be null and should contain valid data to be persisted.
      */
     public void updateKonto(Konto konto) {
+        System.out.println("Konto update:" + konto.toString());
         Main.getInstance().getDatabase().getSessionFactory().inTransaction(session -> {
             session.merge(konto);
         });

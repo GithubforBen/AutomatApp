@@ -33,7 +33,6 @@ import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 public class Main extends Application {
-    //TODO: login
     private static Main instance;
     private String url;
     private Stage stage;
@@ -70,7 +69,10 @@ public class Main extends Application {
         screenSaver = new ScreenSaver();
         handler = new StatisticManager();
         logoutTime = Integer.parseInt(settingsManager.getSettingOrDefault("logout", String.valueOf(logoutTime)));
-        checkAvailability = Boolean.parseBoolean(settingsManager.getSettingOrDefault("availability", String.valueOf(false)));/*
+        checkAvailability = Boolean.parseBoolean(settingsManager.getSettingOrDefault("availability", String.valueOf(false)));
+        KontenManager kontenManager = new KontenManager(new int[]{100, 100, 100, 100});
+        System.out.println(kontenManager.getKonto().getBalance());
+        /*
         database.getSessionFactory().inTransaction(session -> {
             session.createSelectionQuery("from User u", User.class).getResultList().forEach((x) -> {
                 System.out.println(x.toString());
@@ -225,7 +227,7 @@ public class Main extends Application {
 
     private String getImage(int id) {
         if (id < 7 && id > -1) {
-            return "/image/" + configurationManager.getString("sweets._" + id + ".name") + "_" + id + ".png";
+            return ("/image/" + configurationManager.getString("sweets._" + id + ".name") + "_" + id + ".png").toLowerCase();
         }
         return "/image/Logo.png";
     }

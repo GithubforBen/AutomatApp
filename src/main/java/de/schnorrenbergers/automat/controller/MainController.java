@@ -1,6 +1,7 @@
 package de.schnorrenbergers.automat.controller;
 
 import de.schnorrenbergers.automat.Main;
+import de.schnorrenbergers.automat.manager.ConfigurationManager;
 import de.schnorrenbergers.automat.manager.KontenManager;
 import de.schnorrenbergers.automat.manager.StatisticManager;
 import de.schnorrenbergers.automat.utils.CustomRequest;
@@ -14,7 +15,6 @@ import javafx.scene.image.ImageView;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
-import org.json.JSONObject;
 
 import java.io.IOException;
 import java.net.URL;
@@ -100,6 +100,13 @@ public class MainController implements Initializable {
         return new Button[]{btn_1, btn_2, btn_3, btn_4, btn_5, btn_6, btn_7, btn_8};
     }
 
+    /**
+     * Handles the logic for dispensing an item identified by its number.
+     * Verifies user's available balance in hours against the cost,
+     * processes the request, updates statistics, and manages screen messages.
+     *
+     * @param number The identifier of the item to be dispensed.
+     */
     public void click(int number) {
         Main.getInstance().getScreenSaver().setLastMove(System.currentTimeMillis());
         if (Main.getInstance().getLastScan() == null) {
@@ -115,24 +122,32 @@ public class MainController implements Initializable {
             return;
         }
         try {
-            JSONObject jsonObject = new JSONObject(new CustomRequest("sweets").execute()).getJSONObject(String.valueOf(number));
             KontenManager kontenManager = new KontenManager(Main.getInstance().getLastScan());
-            if (kontenManager.getKonto().getBalance(TimeUnit.HOURS) >= jsonObject.getInt("hours")
+            ConfigurationManager configurationManager = new ConfigurationManager();
+            if (kontenManager.getKonto().getBalance(TimeUnit.HOURS) >= configurationManager.getInt("sweets._" + number + ".kost")
                     ||kontenManager.getKonto().getBalance(TimeUnit.HOURS) == Integer.MIN_VALUE
                     || !Boolean.parseBoolean(Main.getInstance().getSettings().getSettingOrDefault("checkTime", String.valueOf(true)))) {
-                new CustomRequest("dispense").executeComplex("{\"nr\":" + number + ",\"cost\":" + jsonObject.getInt("hours") + ",\"usr\":" + Arrays.toString(Main.getInstance().getLastScan()) + "}");
+                new CustomRequest("dispense").executeComplex("{\"nr\":" + number + ",\"cost\":" + configurationManager.getInt("sweets._" + number + ".kost") + ",\"usr\":" + Arrays.toString(Main.getInstance().getLastScan()) + "}");
                 Main.getInstance().setLastScan(null);
                 new StatisticManager().persistDispense(number);
             } else {
                 setText("Nicht genug Stunden", Color.RED, true);
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-            //throw new RuntimeException(e);
+        } catch (Exception e) {
+            setText("Unbekannte karte[login]", Color.RED, true);
         }
     }
 
-    //is allowed to be null
+    /**
+     * Updates the textual content and appearance of the `Text` node on the JavaFX application thread.
+     * The method clears any existing text, sets the new text string, adjusts the font size if specified,
+     * and applies the provided `Paint` color to the text.
+     *
+     * @param s     The new text to display. If null, no text update is performed.
+     * @param paint The paint color for the text. If null, the text color is not updated.
+     * @param first A boolean indicating whether this is the first time setting the text.
+     *              If true, a larger font size is applied.
+     */
     public void setText(String s, Paint paint, boolean first) {
         Platform.runLater(new Runnable() {
             @Override

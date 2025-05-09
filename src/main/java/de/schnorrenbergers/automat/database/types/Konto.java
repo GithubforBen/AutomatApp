@@ -46,6 +46,7 @@ public class Konto {
         if (amount < 0) {
             return false;
         }
+        System.out.println("Deposit(" + userId + "): " + amount + " (" + balance + ")");
         balance += amount;
         return true;
     }
@@ -77,5 +78,15 @@ public class Konto {
 
     public void setInfinite(boolean infinite) {
         isInfinite = infinite;
+    }
+
+    @Override
+    public String toString() {
+        return "Konto{" +
+                "id=" + id +
+                ", userId=" + userId +
+                ", balance=" + balance +
+                ", isInfinite=" + isInfinite +
+                '}';
     }
 }

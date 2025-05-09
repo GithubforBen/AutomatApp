@@ -21,7 +21,6 @@ public class ConfigurationManager {
         if (split.length == 1) return objMap.get(key);
         Map<String, Object> map = objMap;
         for (String s : split) {
-            System.out.println(s + " " + map.get(s));
             if (map.get(s) instanceof Map) {
                 map = (Map<String, Object>) map.get(s);
             } else {

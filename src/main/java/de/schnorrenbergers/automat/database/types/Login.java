@@ -45,4 +45,12 @@ public class Login {
         this.loginTime = loginTime;
     }
 
+    @Override
+    public String toString() {
+        return "Login{" +
+                "id=" + id +
+                ", userId=" + userId +
+                ", loginTime=" + loginTime +
+                '}';
+    }
 }

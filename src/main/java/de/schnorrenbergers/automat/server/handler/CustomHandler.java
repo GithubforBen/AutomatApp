@@ -33,7 +33,9 @@ public class CustomHandler {
         try {
             return new JSONObject(new String(exchange.getRequestBody().readAllBytes()));
         } catch (JSONException e) {
-            respond(exchange, "Invalid JSON format", BAD_REQUEST);
+            System.out.println(new String(exchange.getRequestBody().readAllBytes()));
+            System.out.println(exchange.getRequestBody().readAllBytes().length);
+            jsonError(exchange);
             throw e;
         }
     }

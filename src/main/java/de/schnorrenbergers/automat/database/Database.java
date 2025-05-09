@@ -40,6 +40,7 @@ public class Database {
                 .addAnnotatedClass(Teacher.class)
                 .addAnnotatedClass(Login.class)
                 .addAnnotatedClass(Konto.class)
+                .addAnnotatedClass(Sweet.class)
                 .setProperty("show_sql", true)
                 .buildSessionFactory();
     }

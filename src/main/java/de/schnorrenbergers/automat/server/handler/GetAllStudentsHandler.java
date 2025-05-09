@@ -4,20 +4,22 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import de.schnorrenbergers.automat.Main;
 import de.schnorrenbergers.automat.database.types.Student;
+import org.hibernate.Session;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class GetAllStudentsHandler extends CustomHandler implements HttpHandler {
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         List<Student> users = new ArrayList<>();
-        Main.getInstance().getDatabase().getSessionFactory().inTransaction(session -> {
-            users.addAll(session.createSelectionQuery("from Student u", Student.class).getResultList());
-        });
+        Session session = Main.getInstance().getDatabase().getSessionFactory().openSession();
+        users.addAll(session.createSelectionQuery("from Student u", Student.class).getResultList());
+        System.out.println(Arrays.toString(users.toArray()));
         StringBuilder response = new StringBuilder();
-        response.append("{ \"users\": [");
+        response.append("{ \"students\": [");
         users.forEach(user -> {
             response.append(user.toJSONString());
             response.append(",");
@@ -28,6 +30,7 @@ public class GetAllStudentsHandler extends CustomHandler implements HttpHandler 
             response.replace(0, response.length(), "");
             response.append("No Students found");
         }
+        session.close();
         respond(exchange, response.toString());
     }
 }
