@@ -178,8 +178,6 @@ public class Main extends Application {
             btn.setText(configurationManager.getInt("sweets._" + i + ".kost") + ":");
             Image image = new Image(Objects.requireNonNull(getClass().getResourceAsStream(getImage(i))));
 
-            //TODO: implement availability
-
             if (checkAvailability && !new AvailabilityManager().checkAvailability(i)) {
                 image = convertToGrayscale(image);
                 btn.setDisable(true);

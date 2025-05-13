@@ -5,7 +5,7 @@
 <AnchorPane prefHeight="800" prefWidth="480.0" xmlns="http://javafx.com/javafx/17.0.12"
             xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.schnorrenbergers.automat.controller.AdminController">
     <children>
-        <GridPane layoutX="-1.0" layoutY="-2.0" prefHeight="800.0" prefWidth="480.0">
+        <GridPane layoutX="-1.0" layoutY="-2.0" prefHeight="800.0" prefWidth="480.0" fx:id="pane">
             <columnConstraints>
                 <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0"/>
                 <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0"/>
@@ -38,19 +38,19 @@
                                 showTickMarks="true" snapToTicks="true" value="1.0" GridPane.rowIndex="1"/>
                     </children>
                 </GridPane>
-                <Button mnemonicParsing="false" onAction="#duplo" prefHeight="164.0" prefWidth="290.0" text="Duplo"
+                <Button mnemonicParsing="false" prefHeight="164.0" prefWidth="290.0" text="Duplo"
                         GridPane.rowIndex="1"/>
-                <Button mnemonicParsing="false" onAction="#mentos" prefHeight="164.0" prefWidth="256.0" text="Mentos"
+                <Button mnemonicParsing="false" prefHeight="164.0" prefWidth="256.0" text="Mentos"
                         GridPane.columnIndex="1"/>
-                <Button mnemonicParsing="false" onAction="#kinder" prefHeight="178.0" prefWidth="260.0" text="Kinder"
+                <Button mnemonicParsing="false" prefHeight="178.0" prefWidth="260.0" text="Kinder"
                         GridPane.columnIndex="1" GridPane.rowIndex="1"/>
-                <Button mnemonicParsing="false" onAction="#haribo" prefHeight="162.0" prefWidth="243.0" text="Haribo"
+                <Button mnemonicParsing="false" prefHeight="162.0" prefWidth="243.0" text="Haribo"
                         GridPane.rowIndex="2"/>
-                <Button mnemonicParsing="false" onAction="#brause" prefHeight="162.0" prefWidth="259.0" text="Brause"
+                <Button mnemonicParsing="false" prefHeight="162.0" prefWidth="259.0" text="Brause"
                         GridPane.columnIndex="1" GridPane.rowIndex="2"/>
-                <Button mnemonicParsing="false" onAction="#smarties" prefHeight="168.0" prefWidth="266.0"
+                <Button mnemonicParsing="false" prefHeight="168.0" prefWidth="266.0"
                         text="Smarties" GridPane.rowIndex="3"/>
-                <Button mnemonicParsing="false" onAction="#maoam" prefHeight="174.0" prefWidth="257.0" text="Maoam"
+                <Button mnemonicParsing="false" prefHeight="174.0" prefWidth="257.0" text="Maoam"
                         GridPane.columnIndex="1" GridPane.rowIndex="3"/>
             </children>
         </GridPane>

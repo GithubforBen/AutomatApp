@@ -9,20 +9,29 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.Slider;
+import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.List;
 import java.util.ResourceBundle;
 
 public class AdminController implements Initializable {
     @FXML
     public Button alarmBTN;
-    //TODO: load button names from config
+    @FXML
+    public GridPane pane;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         setAlarmBTNColor();
+        List<Button> buttons = pane.getChildren().stream().filter(node -> node instanceof Button).map(node -> (Button) node).toList().reversed();
+        for (int i = 0; i < 7; i++) {
+            buttons.get(i).setText(new ConfigurationManager().getString("sweets._" + i + ".name"));
+            int finalI = i;
+            buttons.get(i).setOnAction(event -> fill(finalI));
+        }
     }
 
     /**
@@ -78,26 +87,6 @@ public class AdminController implements Initializable {
         Main.getInstance().getScreenSaver().setLastMove(System.currentTimeMillis());
     }
 
-    public void mentos(ActionEvent actionEvent) {
-        fill(0);
-    }
-
-    public void haribo(ActionEvent actionEvent) {
-        fill(5);
-    }
-
-    public void brause(ActionEvent actionEvent) {
-        fill(6);
-    }
-
-    public void smarties(ActionEvent actionEvent) {
-        fill(4);
-    }
-
-    public void maoam(ActionEvent actionEvent) {
-        fill(3);
-    }
-
     /**
      * Fills a specific type of item based on the provided type parameter and the current state of the
      * {@code positive} field. Depending on the value of {@code positive}, the method executes one of the following:
@@ -149,13 +138,5 @@ public class AdminController implements Initializable {
             positive = 0;
             plus.setText("Reaktivieren");
         }
-    }
-
-    public void duplo(ActionEvent actionEvent) {
-        fill(1);
-    }
-
-    public void kinder(ActionEvent actionEvent) {
-        fill(2);
     }
 }
