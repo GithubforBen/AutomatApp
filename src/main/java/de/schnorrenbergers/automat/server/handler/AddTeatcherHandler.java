@@ -7,7 +7,6 @@ import de.schnorrenbergers.automat.database.types.Teacher;
 import de.schnorrenbergers.automat.database.types.types.Gender;
 import de.schnorrenbergers.automat.database.types.types.Level;
 import de.schnorrenbergers.automat.database.types.types.Wohnort;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
@@ -27,13 +26,7 @@ public class AddTeatcherHandler extends CustomHandler implements HttpHandler {
         while (requestBodyReaderBuffer.ready()) {
             builder.append(requestBodyReaderBuffer.readLine());
         }
-        JSONObject jsonObject;
-        try {
-            jsonObject = new JSONObject(builder.toString());
-        } catch (JSONException e) {
-            jsonError(exchange);
-            return;
-        }
+        JSONObject jsonObject = getJSON(exchange);
         try {
             //int number, String street, String city, int zip, String country
             JSONObject address = jsonObject.getJSONObject("address");
@@ -57,7 +50,6 @@ public class AddTeatcherHandler extends CustomHandler implements HttpHandler {
                     jsonObject.getString("password"),
                     Level.valueOf(jsonObject.getString("level"))
             );
-            System.out.println(teacher);
             Main.getInstance().getDatabase().getSessionFactory().inTransaction(session -> {
                 session.persist(wohnort);
                 session.persist(teacher);

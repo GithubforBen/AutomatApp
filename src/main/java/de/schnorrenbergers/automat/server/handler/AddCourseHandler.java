@@ -57,12 +57,10 @@ public class AddCourseHandler extends CustomHandler implements HttpHandler {
                 session.flush();
             });
             Main.getInstance().getDatabase().getSessionFactory().inTransaction(session -> {
-                System.out.println(1);
                 List<Kurs> resultList = session.createSelectionQuery("from Kurs k where k.name = :name AND k.day = :day", Kurs.class)
                         .setParameter("name", kurs.getName())
                         .setParameter("day", kurs.getDay()).getResultList();
 
-                resultList.stream().forEach(System.out::println);
                 if (resultList.size() != 1) throw new RuntimeException("The Course already exists!");
                 try {
                     System.out.println("Created course: " + resultList.getFirst().toString());
@@ -73,8 +71,6 @@ public class AddCourseHandler extends CustomHandler implements HttpHandler {
             });
         } catch (JSONException e) {
             jsonError(exchange);
-            return;
         }
-        System.out.println(3);
     }
 }

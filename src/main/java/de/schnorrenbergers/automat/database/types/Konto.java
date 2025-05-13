@@ -44,7 +44,6 @@ public class Konto {
         if (amount < 0) {
             return false;
         }
-        System.out.println("Deposit(" + userId + "): " + amount + " (" + balance + ")");
         balance += amount;
         return true;
     }

@@ -18,7 +18,7 @@ public class Teacher extends User {
     private String email;
 
     @Column(name = "password") // needs to be hashed
-    private String password;
+    private String password;  //TODO: Passwords are stored in plaintext!
 
     @Enumerated(EnumType.STRING)
     private Level level;
@@ -26,7 +26,8 @@ public class Teacher extends User {
     public Teacher(String firstName, String lastName, int[] rfid, Gender gender, Date age, Wohnort wohnort, String email, String password, Level level) {
         super(firstName, lastName, rfid, gender, age, wohnort);
         this.email = email;
-        this.password = password;
+        this.password = password;  //TODO: Password should be hashed before storage
+        this.level = level;
     }
 
     public Teacher() {
@@ -47,7 +48,7 @@ public class Teacher extends User {
     }
 
     public void setPassword(String password) {
-        this.password = password;
+        this.password = password;  //TODO: hash password
     }
 
 

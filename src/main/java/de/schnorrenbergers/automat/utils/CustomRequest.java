@@ -8,21 +8,20 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLConnection;
 
 public class CustomRequest {
     String urlString;
 
     public CustomRequest(String url) {
         this.urlString = Main.getInstance().getUrl() + "/" + url;
-        System.out.println(urlString);
-        if (urlString.equals("http://127.0.0.1:5000/sweets") || urlString.equals("http://127.0.0.1:5000/fill"))
-            throw new RuntimeException();
     }
 
     public String execute() throws IOException {
         if (!isOnline()) return null;
         URL url = new URL(urlString);
-        url.openConnection();
+        URLConnection urlConnection = url.openConnection();
+        urlConnection.setConnectTimeout(1000);
         BufferedReader br = new BufferedReader(new InputStreamReader(url.openStream()));
         StringBuilder sb = new StringBuilder();
         br.lines().forEach(sb::append);
@@ -33,7 +32,8 @@ public class CustomRequest {
     public boolean isOnline() {
         try {
             URL url = new URL(Main.getInstance().getUrl() + "/ping");
-            url.openConnection();
+            URLConnection urlConnection = url.openConnection();
+            urlConnection.setConnectTimeout(1000);
             BufferedReader br = new BufferedReader(new InputStreamReader(url.openStream()));
             StringBuilder sb = new StringBuilder();
             br.lines().forEach(sb::append);
@@ -54,6 +54,7 @@ public class CustomRequest {
         urlConnection.setDoInput(true);
         urlConnection.setRequestProperty("Content-Type", "application/json");
         urlConnection.setRequestProperty("Accept", "application/json");
+        urlConnection.setConnectTimeout(1000);
         OutputStream outputStream = urlConnection.getOutputStream();
         outputStream.write(data.getBytes());
         outputStream.flush();
@@ -65,6 +66,7 @@ public class CustomRequest {
             response.append(inputLine);
         }
         in.close();
+        urlConnection.disconnect();
         return response.toString();
     }
 }

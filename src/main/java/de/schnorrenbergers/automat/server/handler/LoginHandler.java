@@ -12,12 +12,19 @@ public class LoginHandler extends CustomHandler implements HttpHandler {
     public void handle(HttpExchange exchange) throws IOException {
         if (!exchange.getRequestMethod().equalsIgnoreCase("POST")) {
             methodNotAllowed(exchange);
+            return;
         }
         JSONObject json = getJSON(exchange);
-        if (new LoginManager().login(json.getJSONArray("rfid").toList().stream().mapToInt((o) -> Integer.parseInt(String.valueOf(o))).toArray())) {
-            respond(exchange, "User came in");
-        } else {
-            respond(exchange, "User left");
+        try {
+            if (new LoginManager().login(json.getJSONArray("rfid").toList().stream().mapToInt((o) -> Integer.parseInt(String.valueOf(o))).toArray())) {
+                respond(exchange, "User came in");
+            } else {
+                respond(exchange, "User left");
+            }
+        } catch (Exception e) {
+            badRequest(exchange);
+            e.printStackTrace();
         }
+
     }
 }

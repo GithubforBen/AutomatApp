@@ -8,7 +8,6 @@ import de.schnorrenbergers.automat.database.types.Student;
 import de.schnorrenbergers.automat.database.types.types.Gender;
 import de.schnorrenbergers.automat.database.types.types.Wohnort;
 import org.hibernate.Session;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
@@ -29,14 +28,7 @@ public class AddStudentHandler extends CustomHandler implements HttpHandler {
         while (requestBodyReaderBuffer.ready()) {
             builder.append(requestBodyReaderBuffer.readLine());
         }
-        JSONObject jsonObject;
-        try {
-            jsonObject = new JSONObject(builder.toString());
-
-        } catch (JSONException e) {
-            jsonError(exchange);
-            return;
-        }
+        JSONObject jsonObject = getJSON(exchange);
         try {
             //int number, String street, String city, int zip, String country
             JSONObject address = jsonObject.getJSONObject("address");
@@ -57,10 +49,8 @@ public class AddStudentHandler extends CustomHandler implements HttpHandler {
                     new Date(jsonObject.getLong("birthday")),
                     wohnort,
                     jsonObject.getJSONArray("kurse").toList().stream().map((x) -> {
-                        System.out.println(x.getClass().getName());
                         Session session = Main.getInstance().getDatabase().getSessionFactory().openSession();
                         Kurs k = session.get(Kurs.class, Long.valueOf(((String) x)));
-                        System.out.println(k.toString());
                         session.close();
                         return k;
                     }).collect(Collectors.toList())
@@ -70,7 +60,6 @@ public class AddStudentHandler extends CustomHandler implements HttpHandler {
                 session.persist(student);
                 session.flush();
             });
-            System.out.println(student);
             respond(exchange, "Successfully added student");
         } catch (Exception e) {
             jsonError(exchange);

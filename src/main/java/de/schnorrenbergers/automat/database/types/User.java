@@ -21,7 +21,7 @@ public class User {
     @Column(name = "lastName")
     private String lastName;
 
-    @Column(name = "rifd")
+    @Column(name = "rfid")
     private int[] rfid;
 
     @Enumerated(EnumType.STRING)

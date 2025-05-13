@@ -8,7 +8,6 @@ import org.hibernate.Session;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class GetAllStudentsHandler extends CustomHandler implements HttpHandler {
@@ -17,7 +16,6 @@ public class GetAllStudentsHandler extends CustomHandler implements HttpHandler 
         List<Student> users = new ArrayList<>();
         Session session = Main.getInstance().getDatabase().getSessionFactory().openSession();
         users.addAll(session.createSelectionQuery("from Student u", Student.class).getResultList());
-        System.out.println(Arrays.toString(users.toArray()));
         StringBuilder response = new StringBuilder();
         response.append("{ \"students\": [");
         users.forEach(user -> {

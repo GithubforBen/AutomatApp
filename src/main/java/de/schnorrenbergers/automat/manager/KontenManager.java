@@ -62,7 +62,6 @@ public class KontenManager {
      *              It must not be null and should contain valid data to be persisted.
      */
     public void updateKonto(Konto konto) {
-        System.out.println("Konto update:" + konto.toString());
         Main.getInstance().getDatabase().getSessionFactory().inTransaction(session -> {
             session.merge(konto);
         });

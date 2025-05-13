@@ -25,7 +25,6 @@ public class AvailabilityManager {
      * @param amount the quantity of the sweet to add. This value is added to the sweet's existing total.
      */
     public void addSweet(int sweet, int amount) {
-        System.out.println(3);
         Main.getInstance().getDatabase().getSessionFactory().inTransaction(session -> {
             List<Sweet> sweets = session.createSelectionQuery("from Sweet s where s.type = :sweet", Sweet.class).setParameter("sweet", sweet).getResultList();
             if (sweets.isEmpty()) {

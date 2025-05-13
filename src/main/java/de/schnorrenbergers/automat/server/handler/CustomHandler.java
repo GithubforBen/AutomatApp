@@ -33,8 +33,6 @@ public class CustomHandler {
         try {
             return new JSONObject(new String(exchange.getRequestBody().readAllBytes()));
         } catch (JSONException e) {
-            System.out.println(new String(exchange.getRequestBody().readAllBytes()));
-            System.out.println(exchange.getRequestBody().readAllBytes().length);
             jsonError(exchange);
             throw e;
         }
@@ -44,8 +42,8 @@ public class CustomHandler {
         respond(exchange, "Method not allowed", METHOD_NOT_ALLOWED);
     }
 
-    protected void badRequest(HttpExchange exchange, String message) throws IOException {
-        respond(exchange, message, BAD_REQUEST);
+    protected void badRequest(HttpExchange exchange) throws IOException {
+        respond(exchange, "BAD REQUEST: " + BAD_REQUEST, BAD_REQUEST);
     }
 
     protected void notFound(HttpExchange exchange, String message) throws IOException {
