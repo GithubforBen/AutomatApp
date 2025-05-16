@@ -3,12 +3,14 @@ package de.schnorrenbergers.automat.database.types;
 import de.schnorrenbergers.automat.database.types.types.Gender;
 import de.schnorrenbergers.automat.database.types.types.Level;
 import de.schnorrenbergers.automat.database.types.types.Wohnort;
+import de.schnorrenbergers.automat.manager.CipherManager;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import org.json.JSONObject;
 
+import java.security.NoSuchAlgorithmException;
 import java.sql.Date;
 
 @Entity
@@ -18,15 +20,15 @@ public class Teacher extends User {
     private String email;
 
     @Column(name = "password") // needs to be hashed
-    private String password;  //TODO: Passwords are stored in plaintext!
+    private byte[] password;  //TODO: Passwords are stored in plaintext!
 
     @Enumerated(EnumType.STRING)
     private Level level;
 
-    public Teacher(String firstName, String lastName, int[] rfid, Gender gender, Date age, Wohnort wohnort, String email, String password, Level level) {
+    public Teacher(String firstName, String lastName, int[] rfid, Gender gender, Date age, Wohnort wohnort, String email, String password, Level level) throws NoSuchAlgorithmException {
         super(firstName, lastName, rfid, gender, age, wohnort);
         this.email = email;
-        this.password = password;  //TODO: Password should be hashed before storage
+        this.password = new CipherManager().hash(password);  //TODO: Password should be hashed before storage
         this.level = level;
     }
 
@@ -43,12 +45,12 @@ public class Teacher extends User {
         this.email = email;
     }
 
-    public String getPassword() {
+    public byte[] getPassword() {
         return password;
     }
 
-    public void setPassword(String password) {
-        this.password = password;  //TODO: hash password
+    public void setPassword(String password) throws NoSuchAlgorithmException {
+        this.password = new CipherManager().hash(password);  //TODO: hash password
     }
 
 

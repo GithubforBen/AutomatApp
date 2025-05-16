@@ -2,8 +2,11 @@ package de.schnorrenbergers.automat.manager;
 
 import de.schnorrenbergers.automat.Main;
 import de.schnorrenbergers.automat.database.types.Statistic;
+import de.schnorrenbergers.automat.database.types.User;
 import de.schnorrenbergers.automat.database.types.types.StatisticType;
 import org.json.JSONObject;
+
+import java.util.List;
 
 public class StatisticManager {
 
@@ -31,10 +34,14 @@ public class StatisticManager {
         persist(statistic);
     }
 
-    //TODO: set User data correctly
     public void persistLogin(long userId) {
         JSONObject jsonObject = new JSONObject();
-        jsonObject.append("userID", userId);
+        Main.getInstance().getDatabase().getSessionFactory().inTransaction(session -> {
+            List<User> id = session.createSelectionQuery("from User u where u.id = :id", User.class).setParameter("id", userId).getResultList();
+            jsonObject.append("gender", id.getFirst().getGender());
+            jsonObject.append("age", id.getFirst().getBirthday().getYear());
+            jsonObject.append("zip", id.getFirst().getWohnort().getZip());
+        });
         Statistic statistic = new Statistic(jsonObject.toString(), StatisticType.STUDENT_ATTEND);
         persist(statistic);
     }

@@ -6,9 +6,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.SplitPane;
 
-import java.io.IOException;
 import java.net.URL;
-import java.sql.SQLException;
 import java.util.ResourceBundle;
 
 public class HelloController implements Initializable {
@@ -29,7 +27,7 @@ public class HelloController implements Initializable {
         try {
             Thread.sleep(1000L);
             Main.getInstance().start(Main.getInstance().getStage());
-        } catch (IOException | InterruptedException | SQLException | ClassNotFoundException e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }

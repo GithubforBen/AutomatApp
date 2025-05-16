@@ -24,6 +24,7 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -51,7 +52,14 @@ public class Main extends Application {
      * @throws SQLException           Programm wont work.
      * @throws ClassNotFoundException Programm wont work.
      */
-    private void initialise() throws IOException, SQLException, ClassNotFoundException {
+    private void initialise() throws Exception {
+        CipherManager cipherManager = new CipherManager();
+        String enc = cipherManager.encrypt("David", "12345678901234567890123456789012");
+        System.out.println(enc);
+        System.out.println(cipherManager.decrypt(enc, "12345678901234567890123456789012"));
+        System.out.println(Arrays.toString(cipherManager.hash("david")));
+        System.out.println(Arrays.toString(cipherManager.hash("david")));
+        System.out.println(Arrays.toString(cipherManager.hash("david")));
         instance = this;
         configurationManager = new ConfigurationManager();
         url = configurationManager.getString("frontend-url");
@@ -79,7 +87,7 @@ public class Main extends Application {
      * @throws ClassNotFoundException Inherited form {@link #initialise()}
      */
     @Override
-    public void start(Stage stage) throws IOException, InterruptedException, SQLException, ClassNotFoundException {
+    public void start(Stage stage) throws Exception {
         initialise();
         FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("hello-view.fxml"));
         Scene scene = new Scene(fxmlLoader.load(), dimension.getWidth(), dimension.getHeight());
