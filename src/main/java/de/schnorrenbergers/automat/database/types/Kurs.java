@@ -2,6 +2,7 @@ package de.schnorrenbergers.automat.database.types;
 
 import de.schnorrenbergers.automat.database.types.types.Day;
 import jakarta.persistence.*;
+import org.json.JSONObject;
 
 import java.util.List;
 
@@ -90,5 +91,14 @@ public class Kurs {
                 ", tutor=" + tutor +
                 ", day=" + day +
                 '}';
+    }
+
+    public String toJSONString() {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("id", id);
+        jsonObject.put("name", name);
+        jsonObject.put("tutor", tutor);
+        jsonObject.put("day", day);
+        return jsonObject.toString();
     }
 }

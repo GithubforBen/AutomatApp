@@ -1,0 +1,34 @@
+package de.schnorrenbergers.automat.server.handler;
+
+import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.HttpHandler;
+import de.schnorrenbergers.automat.Main;
+import de.schnorrenbergers.automat.database.types.Kurs;
+import org.hibernate.Session;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+public class GetAllCoursesHandler extends CustomHandler implements HttpHandler {
+    @Override
+    public void handle(HttpExchange exchange) throws IOException {
+        List<Kurs> users = new ArrayList<>();
+        Session session = Main.getInstance().getDatabase().getSessionFactory().openSession();
+        users.addAll(session.createSelectionQuery("from Kurs u", Kurs.class).getResultList());
+        StringBuilder response = new StringBuilder();
+        response.append("{ \"students\": [");
+        users.forEach(user -> {
+            response.append(user.toJSONString());
+            response.append(",");
+        });
+        response.replace(response.length() - 1, response.length(), "");
+        response.append("] }");
+        if (users.isEmpty()) {
+            response.replace(0, response.length(), "");
+            response.append("No Courses found");
+        }
+        session.close();
+        respond(exchange, response.toString());
+    }
+}
