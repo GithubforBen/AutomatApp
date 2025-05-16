@@ -22,12 +22,8 @@ public class GetAllCoursesHandler extends CustomHandler implements HttpHandler {
             response.append(user.toJSONString());
             response.append(",");
         });
-        response.replace(response.length() - 1, response.length(), "");
+        if (!users.isEmpty()) response.replace(response.length() - 1, response.length(), "");
         response.append("] }");
-        if (users.isEmpty()) {
-            response.replace(0, response.length(), "");
-            response.append("No Courses found");
-        }
         session.close();
         respond(exchange, response.toString());
     }
