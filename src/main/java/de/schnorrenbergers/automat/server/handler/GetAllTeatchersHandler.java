@@ -4,25 +4,42 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import de.schnorrenbergers.automat.Main;
 import de.schnorrenbergers.automat.database.types.Teacher;
+import de.schnorrenbergers.automat.database.types.types.Gender;
+import de.schnorrenbergers.automat.database.types.types.Level;
+import de.schnorrenbergers.automat.database.types.types.Wohnort;
 
 import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
+import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
 
 public class GetAllTeatchersHandler extends CustomHandler implements HttpHandler {
     @Override
     public void handle(HttpExchange exchange) throws IOException {
-        List<Teacher> users = new ArrayList<>();
+        List<Teacher> teachers = new ArrayList<>();
         Main.getInstance().getDatabase().getSessionFactory().inTransaction(session -> {
-            users.addAll(session.createSelectionQuery("from Teacher t", Teacher.class).getResultList());
+            if (session.createQuery("from Teacher t", Teacher.class).getResultList().isEmpty()) {
+                Wohnort wohnort = new Wohnort(7, "test", "test", 678, "Germany");
+                Teacher teacher = null;
+                try {
+                    teacher = new Teacher("Jon", "Doe", new int[]{100, 100, 100, 100}, Gender.OTHER, new Date(1999, 02, 01), wohnort, "test@gmail.com", "test", Level.ADMIN);
+                } catch (NoSuchAlgorithmException e) {
+                    throw new RuntimeException(e);
+                }
+                session.persist(wohnort);
+                session.persist(teacher);
+            }
+            teachers.addAll(session.createSelectionQuery("from Teacher t", Teacher.class).getResultList());
         });
         StringBuilder response = new StringBuilder();
-        response.append("{ \"users\": [");
-        users.forEach(user -> {
-            response.append(user.toJSONString());
+        response.append("{ \"teachers\": [");
+        teachers.forEach(teacher -> {
+            response.append(teacher.toJSONString());
+            System.out.println(teacher.toJSONString());
             response.append(",");
         });
-        if (!users.isEmpty()) response.replace(response.length() - 1, response.length(), "");
+        if (!teachers.isEmpty()) response.replace(response.length() - 1, response.length(), "");
         response.append("] }");
         respond(exchange, response.toString());
     }
