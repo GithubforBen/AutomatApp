@@ -1,4 +1,4 @@
-package de.schnorrenbergers.automat.server.handler;
+package de.schnorrenbergers.automat.server.handler.add;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
@@ -6,6 +6,7 @@ import de.schnorrenbergers.automat.Main;
 import de.schnorrenbergers.automat.database.types.Kurs;
 import de.schnorrenbergers.automat.database.types.Teacher;
 import de.schnorrenbergers.automat.database.types.types.Day;
+import de.schnorrenbergers.automat.server.handler.CustomHandler;
 import org.json.JSONException;
 import org.json.JSONObject;
 

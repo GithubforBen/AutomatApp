@@ -1,22 +1,21 @@
-package de.schnorrenbergers.automat.server.handler;
+package de.schnorrenbergers.automat.server.handler.modify;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import de.schnorrenbergers.automat.Main;
-import de.schnorrenbergers.automat.database.types.Kurs;
-import de.schnorrenbergers.automat.database.types.Student;
+import de.schnorrenbergers.automat.database.types.Teacher;
 import de.schnorrenbergers.automat.database.types.types.Gender;
+import de.schnorrenbergers.automat.database.types.types.Level;
 import de.schnorrenbergers.automat.database.types.types.Wohnort;
-import org.hibernate.Session;
+import de.schnorrenbergers.automat.server.handler.CustomHandler;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.sql.Date;
-import java.util.stream.Collectors;
 
-public class AddStudentHandler extends CustomHandler implements HttpHandler {
+public class ModifyTeatcherHandler extends CustomHandler implements HttpHandler {
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         if (!exchange.getRequestMethod().equalsIgnoreCase("POST")) {
@@ -38,8 +37,8 @@ public class AddStudentHandler extends CustomHandler implements HttpHandler {
                     address.getString("city"),
                     address.getInt("zip"),
                     address.getString("country"));
-            //String firstName, String lastName, int[] rfid, Gender gender, Date age, Wohnort wohnort, Kurs[] kurse
-            Student student = new Student(
+            //String firstName, String lastName, int[] rfid, Gender gender, Date age, Wohnort wohnort, Kurs[] kurse, String email, String password
+            Teacher teacher = new Teacher(
                     jsonObject.getString("firstName"),
                     jsonObject.getString("lastName"),
                     jsonObject.getJSONArray("rfid").toList().stream().mapToInt((x) -> {
@@ -48,22 +47,19 @@ public class AddStudentHandler extends CustomHandler implements HttpHandler {
                     Gender.valueOf(jsonObject.getString("gender")),
                     new Date(jsonObject.getLong("birthday")),
                     wohnort,
-                    jsonObject.getJSONArray("kurse").toList().stream().map((x) -> {
-                        Session session = Main.getInstance().getDatabase().getSessionFactory().openSession();
-                        Kurs k = session.get(Kurs.class, Long.valueOf(((String) x)));
-                        session.close();
-                        return k;
-                    }).collect(Collectors.toList())
+                    jsonObject.getString("email"),
+                    jsonObject.getString("password"),
+                    Level.valueOf(jsonObject.getString("level"))
             );
             Main.getInstance().getDatabase().getSessionFactory().inTransaction(session -> {
                 session.persist(wohnort);
-                session.persist(student);
+                session.persist(teacher);
                 session.flush();
             });
-            respond(exchange, "Successfully added student");
+            respond(exchange, "Successfully added teacher");
         } catch (Exception e) {
             jsonError(exchange);
             e.printStackTrace();
         }
-    }
+     }
 }
