@@ -10,7 +10,6 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import org.json.JSONObject;
 
-import java.security.NoSuchAlgorithmException;
 import java.sql.Date;
 
 @Entity
@@ -20,15 +19,15 @@ public class Teacher extends User {
     private String email;
 
     @Column(name = "password") // needs to be hashed
-    private byte[] password;  //TODO: Passwords are stored in plaintext!
+    private String password;  //TODO: Passwords are stored in plaintext!
 
     @Enumerated(EnumType.STRING)
     private Level level;
 
-    public Teacher(String firstName, String lastName, int[] rfid, Gender gender, Date age, Wohnort wohnort, String email, String password, Level level) throws NoSuchAlgorithmException {
+    public Teacher(String firstName, String lastName, int[] rfid, Gender gender, Date age, Wohnort wohnort, String email, String password, Level level) throws Exception {
         super(firstName, lastName, rfid, gender, age, wohnort);
         this.email = email;
-        this.password = new CipherManager().hash(password);  //TODO: Password should be hashed before storage
+        this.password = new CipherManager().encrypt(password);  //TODO: Password should be hashed before storage
         this.level = level;
     }
 
@@ -45,12 +44,12 @@ public class Teacher extends User {
         this.email = email;
     }
 
-    public byte[] getPassword() {
+    public String getPassword() {
         return password;
     }
 
-    public void setPassword(String password) throws NoSuchAlgorithmException {
-        this.password = new CipherManager().hash(password);  //TODO: hash password
+    public void setPassword(String password) throws Exception {
+        this.password = new CipherManager().encrypt(password);
     }
 
 

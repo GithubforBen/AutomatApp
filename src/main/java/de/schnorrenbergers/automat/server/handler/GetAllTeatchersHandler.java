@@ -9,7 +9,6 @@ import de.schnorrenbergers.automat.database.types.types.Level;
 import de.schnorrenbergers.automat.database.types.types.Wohnort;
 
 import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
 import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +23,7 @@ public class GetAllTeatchersHandler extends CustomHandler implements HttpHandler
                 Teacher teacher = null;
                 try {
                     teacher = new Teacher("Jon", "Doe", new int[]{100, 100, 100, 100}, Gender.OTHER, new Date(1999, 02, 01), wohnort, "test@gmail.com", "test", Level.ADMIN);
-                } catch (NoSuchAlgorithmException e) {
+                } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
                 session.persist(wohnort);

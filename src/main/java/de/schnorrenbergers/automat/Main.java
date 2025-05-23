@@ -24,7 +24,6 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -53,13 +52,6 @@ public class Main extends Application {
      * @throws ClassNotFoundException Programm wont work.
      */
     private void initialise() throws Exception {
-        CipherManager cipherManager = new CipherManager();
-        String enc = cipherManager.encrypt("David", "12345678901234567890123456789012");
-        System.out.println(enc);
-        System.out.println(cipherManager.decrypt(enc, "12345678901234567890123456789012"));
-        System.out.println(Arrays.toString(cipherManager.hash("david")));
-        System.out.println(Arrays.toString(cipherManager.hash("david")));
-        System.out.println(Arrays.toString(cipherManager.hash("david")));
         instance = this;
         configurationManager = new ConfigurationManager();
         url = configurationManager.getString("frontend-url");

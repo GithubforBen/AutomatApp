@@ -1,12 +1,9 @@
 package de.schnorrenbergers.automat.manager;
 
-import javax.crypto.Cipher;
+import at.favre.lib.crypto.bcrypt.BCrypt;
+
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
-import java.security.Key;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.Base64;
 
 public class CipherManager {
 
@@ -14,14 +11,18 @@ public class CipherManager {
         return new SecretKeySpec(pass.getBytes(), "AES");
     }
 
-    public String encrypt(String valueToEnc, String pass) throws Exception {
+    public String encrypt(String password) throws Exception {
+        /*
         Key key = generateKey(pass);
         Cipher c = Cipher.getInstance("AES");
         c.init(Cipher.ENCRYPT_MODE, key);
         byte[] encValue = c.doFinal(valueToEnc.getBytes());
         return Base64.getEncoder().encodeToString(encValue);
+        String password = "1234";
+         */
+        return BCrypt.withDefaults().hashToString(12, password.toCharArray());
     }
-
+/*
     public String decrypt(String encryptedValue, String pass) throws Exception {
         Key key = generateKey(pass);
         Cipher c = Cipher.getInstance("AES");
@@ -35,4 +36,5 @@ public class CipherManager {
         MessageDigest md = MessageDigest.getInstance("SHA-512");
         return md.digest(pass.getBytes());
     }
+ */
 }

@@ -42,6 +42,7 @@ module de.schnorrenbergers.automat {
 
     requires java.naming;
     requires org.yaml.snakeyaml;
+    requires bcrypt;
 
     opens de.schnorrenbergers.automat to javafx.fxml;
     exports de.schnorrenbergers.automat;

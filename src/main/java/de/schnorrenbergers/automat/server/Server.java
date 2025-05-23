@@ -50,6 +50,9 @@ public class Server {
         server.createContext("/allTeachers", new GetAllTeatchersHandler());
         server.createContext("/login", new LoginHandler());
         server.createContext("/allCourses", new GetAllCoursesHandler());
+        server.createContext("/deleteStudent", new DeleteStudentHandler());
+        server.createContext("/deleteTeacher", new DeleteTeacherHandler());
+        server.createContext("/deleteCourse", new DeleteCourseHandler());
         server.setExecutor(threadPoolExecutor);
         server.start();
         System.out.println("Server started on port " + server.getAddress().getPort() + " ip" + Inet4Address.getLocalHost().getHostAddress());
