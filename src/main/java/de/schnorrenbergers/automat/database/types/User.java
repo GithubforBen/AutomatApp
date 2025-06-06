@@ -7,6 +7,7 @@ import org.json.JSONObject;
 
 import java.sql.Date;
 import java.util.Arrays;
+import java.util.Objects;
 
 @Entity
 @Table(name = "user")
@@ -114,19 +115,30 @@ public class User {
                 '}';
     }
 
-    public String toJSONString() {
+    public JSONObject toJSON() {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("id", id);
         jsonObject.put("firstName", firstName);
         jsonObject.put("lastName", lastName);
         jsonObject.put("rfid", rfid);
         jsonObject.put("gender", gender);
-        jsonObject.put("birthday", birthday);
-        jsonObject.put("wohnort", wohnort);
-        return jsonObject.toString();
+        jsonObject.put("birthday", birthday.getTime());
+        jsonObject.put("wohnort", wohnort.toJson());
+        return jsonObject;
     }
 
     public String getFullName() {
         return firstName + " " + lastName;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof User user)) return false;
+        return Objects.equals(id, user.id) && Objects.equals(firstName, user.firstName) && Objects.equals(lastName, user.lastName) && Objects.deepEquals(rfid, user.rfid) && gender == user.gender && Objects.equals(birthday, user.birthday) && Objects.equals(wohnort, user.wohnort);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, firstName, lastName, Arrays.hashCode(rfid), gender, birthday, wohnort);
     }
 }

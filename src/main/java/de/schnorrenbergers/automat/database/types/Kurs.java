@@ -2,6 +2,7 @@ package de.schnorrenbergers.automat.database.types;
 
 import de.schnorrenbergers.automat.database.types.types.Day;
 import jakarta.persistence.*;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.List;
@@ -93,12 +94,28 @@ public class Kurs {
                 '}';
     }
 
-    public String toJSONString() {
+    public static Kurs fromJSON(JSONObject jsonObject) {
+        Kurs kurs = new Kurs();
+        kurs.setId(jsonObject.getLong("id"));
+        kurs.setName(jsonObject.getString("name"));
+        kurs.setDay(Day.valueOf(jsonObject.getString("day")));
+        List<Teacher> tutor1 = jsonObject.getJSONArray("tutor").toList().stream().map((x) -> {
+            try {
+                return Teacher.fromJSON((JSONObject) x);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }).toList();
+        kurs.setTutor(tutor1);
+        return kurs;
+    }
+
+    public JSONObject toJSON() {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("id", id);
         jsonObject.put("name", name);
-        jsonObject.put("tutor", tutor);
         jsonObject.put("day", day);
-        return jsonObject.toString();
+        jsonObject.put("tutor", new JSONArray(tutor.stream().map(Teacher::toJSON).toArray()));
+        return jsonObject;
     }
 }

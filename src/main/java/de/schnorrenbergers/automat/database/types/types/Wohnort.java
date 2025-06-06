@@ -3,6 +3,9 @@ package de.schnorrenbergers.automat.database.types.types;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
+import org.json.JSONObject;
+
+import java.util.Objects;
 
 /**
  * Represents a location with address details such as street, city, postal code, and country.
@@ -81,5 +84,37 @@ public class Wohnort {
 
     public void setCountry(String country) {
         this.country = country;
+    }
+
+    public static Wohnort fromJson(JSONObject json) {
+        Wohnort wohnort = new Wohnort(json.getInt("nr"),
+                json.getString("street"),
+                json.getString("city"),
+                json.getInt("zip"),
+                json.getString("country"));
+        wohnort.setId(json.getLong("id"));
+        return wohnort;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof Wohnort wohnort)) return false;
+        return number == wohnort.number && zip == wohnort.zip && Objects.equals(street, wohnort.street) && Objects.equals(city, wohnort.city) && Objects.equals(country, wohnort.country) && Objects.equals(id, wohnort.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(number, street, city, zip, country, id);
+    }
+
+    public JSONObject toJson() {
+        JSONObject json = new JSONObject();
+        json.put("nr", number);
+        json.put("street", street);
+        json.put("city", city);
+        json.put("zip", zip);
+        json.put("country", country);
+        json.put("id", getId());
+        return json;
     }
 }

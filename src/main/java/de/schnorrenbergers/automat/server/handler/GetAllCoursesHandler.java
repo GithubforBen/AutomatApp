@@ -19,7 +19,7 @@ public class GetAllCoursesHandler extends CustomHandler implements HttpHandler {
         StringBuilder response = new StringBuilder();
         response.append("{ \"students\": [");
         users.forEach(user -> {
-            response.append(user.toJSONString());
+            response.append(user.toJSON().toString());
             response.append(",");
         });
         if (!users.isEmpty()) response.replace(response.length() - 1, response.length(), "");

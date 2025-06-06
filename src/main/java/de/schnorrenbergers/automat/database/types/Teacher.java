@@ -11,6 +11,7 @@ import jakarta.persistence.Enumerated;
 import org.json.JSONObject;
 
 import java.sql.Date;
+import java.util.Objects;
 
 @Entity
 public class Teacher extends User {
@@ -53,12 +54,40 @@ public class Teacher extends User {
     }
 
 
+    public static Teacher fromJSON(JSONObject jsonObject) throws Exception {
+        Teacher teacher = new Teacher(
+                jsonObject.getString("firstName"),
+                jsonObject.getString("lastName"),
+                jsonObject.getJSONArray("rfid").toList().stream().mapToInt((x) -> {
+                    return Integer.parseInt(String.valueOf(x));
+                }).toArray(),
+                Gender.valueOf(jsonObject.getString("gender")),
+                new Date(jsonObject.getLong("birthday")),
+                Wohnort.fromJson(jsonObject.getJSONObject("address")),
+                jsonObject.getString("email"),
+                jsonObject.getString("password"),
+                Level.valueOf(jsonObject.getString("level"))
+        );
+        return teacher;
+    }
+
     @Override
-    public String toJSONString() {
-        JSONObject jsonObject = new JSONObject(super.toJSONString());
+    public JSONObject toJSON() {
+        JSONObject jsonObject = super.toJSON();
         jsonObject.put("mail", email);
         jsonObject.put("password", password);
         jsonObject.put("level", level);
-        return jsonObject.toString();
+        return jsonObject;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof Teacher teacher)) return false;
+        return Objects.equals(email, teacher.email) && Objects.equals(password, teacher.password) && level == teacher.level && super.equals(o);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(email, password, level);
     }
 }

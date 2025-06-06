@@ -28,11 +28,14 @@ public class ModifyCourseHandler extends CustomHandler implements HttpHandler {
         long id = json.getLong("id");
         if (id == 0) {
             badRequest(exchange);
+            return;
         }
         Session session = Main.getInstance().getDatabase().getSessionFactory().openSession();
         Kurs kurs = session.get(Kurs.class, id);
         if (kurs == null) {
+            session.close();
             badRequest(exchange);
+            return;
         }
         if (json.has("day")) kurs.setDay(Day.valueOf(json.getString("day")));
         if (json.has("name")) kurs.setName(json.getString("name"));
@@ -40,6 +43,7 @@ public class ModifyCourseHandler extends CustomHandler implements HttpHandler {
             Teacher teacher = session.get(Teacher.class, Long.valueOf(json.getString("addTeacher")));
             if (teacher == null) {
                 badRequest(exchange);
+                session.close();
                 return;
             }
             kurs.getTutor().add(teacher);
@@ -48,6 +52,7 @@ public class ModifyCourseHandler extends CustomHandler implements HttpHandler {
             Teacher teacher = session.get(Teacher.class, Long.valueOf(json.getString("removeTeacher")));
             if (teacher == null) {
                 badRequest(exchange);
+                session.close();
                 return;
             }
             kurs.getTutor().remove(teacher);

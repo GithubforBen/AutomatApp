@@ -34,8 +34,7 @@ public class GetAllTeatchersHandler extends CustomHandler implements HttpHandler
         StringBuilder response = new StringBuilder();
         response.append("{ \"teachers\": [");
         teachers.forEach(teacher -> {
-            response.append(teacher.toJSONString());
-            System.out.println(teacher.toJSONString());
+            response.append(teacher.toJSON().toString());
             response.append(",");
         });
         if (!teachers.isEmpty()) response.replace(response.length() - 1, response.length(), "");

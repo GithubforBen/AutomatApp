@@ -3,7 +3,14 @@ package de.schnorrenbergers.automat;
 import atlantafx.base.theme.PrimerDark;
 import de.schnorrenbergers.automat.controller.MainController;
 import de.schnorrenbergers.automat.database.Database;
+import de.schnorrenbergers.automat.database.types.Kurs;
+import de.schnorrenbergers.automat.database.types.Student;
+import de.schnorrenbergers.automat.database.types.Teacher;
 import de.schnorrenbergers.automat.database.types.User;
+import de.schnorrenbergers.automat.database.types.types.Day;
+import de.schnorrenbergers.automat.database.types.types.Gender;
+import de.schnorrenbergers.automat.database.types.types.Level;
+import de.schnorrenbergers.automat.database.types.types.Wohnort;
 import de.schnorrenbergers.automat.manager.*;
 import de.schnorrenbergers.automat.server.Server;
 import de.schnorrenbergers.automat.utils.CustomRequest;
@@ -23,6 +30,7 @@ import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.sql.Date;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Objects;
@@ -66,6 +74,24 @@ public class Main extends Application {
         handler = new StatisticManager();
         logoutTime = Integer.parseInt(settingsManager.getSettingOrDefault("logout", String.valueOf(logoutTime)));
         checkAvailability = Boolean.parseBoolean(settingsManager.getSettingOrDefault("availability", String.valueOf(false)));
+        database.getSessionFactory().inTransaction((x) -> {
+            if (1 == 1) return;
+            Wohnort wohnortT = new Wohnort(1, "s", "s", 456, "dsa");
+            Wohnort wohnortS = new Wohnort(1, "s", "s", 4456, "dsa");
+            try {
+                Teacher teacher = new Teacher("Test", "TEzjk", new int[]{0, 1, 2, 3}, Gender.DUAL_GENDER, new Date(System.currentTimeMillis()), wohnortT, "tets@gamil.com", "sad", Level.ADMIN);
+                Kurs kurs = new Kurs("Kurs", List.of(teacher), Day.DÖNNERSTAG);
+                Student student = new Student("Test", "Test", new int[]{0, 0, 0, 0}, Gender.OTHER, new Date(System.currentTimeMillis()), wohnortS, List.of(kurs));
+                x.persist(wohnortT);
+                x.persist(wohnortS);
+                x.persist(teacher);
+                x.persist(kurs);
+                x.persist(student
+                );
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
 
     /**

@@ -4,10 +4,12 @@ import de.schnorrenbergers.automat.database.types.types.Gender;
 import de.schnorrenbergers.automat.database.types.types.Wohnort;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToMany;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.sql.Date;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 public class Student extends User{
@@ -43,10 +45,45 @@ public class Student extends User{
                 '}';
     }
 
+    public static Student fromJSON(JSONObject jsonObject) {
+        Student student = new Student();
+        student.setId(jsonObject.getLong("id"));
+        student.setFirstName(jsonObject.getString("firstName"));
+        student.setLastName(jsonObject.getString("lastName"));
+        student.setRfid(jsonObject.getJSONArray("rfid").toList().stream().mapToInt((x) -> {
+            if (x instanceof Integer) return (int) x;
+            throw new IllegalArgumentException("Invalid rfid: " + x);
+        }).toArray());
+        student.setGender(Gender.valueOf(jsonObject.getString("gender")));
+        student.setBirthday(new Date(jsonObject.getLong("birthday")));
+        student.setWohnort(Wohnort.fromJson(jsonObject.getJSONObject("wohnort")));
+        List<Kurs> kurse1 = jsonObject.getJSONArray("kurse").toList().stream().map((x) -> {
+            try {
+                return Kurs.fromJSON((JSONObject) x);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }).toList();
+        student.setKurse(kurse1);
+        return student;
+    }
+
     @Override
-    public String toJSONString() {
-        JSONObject jsonObject = new JSONObject(super.toJSONString());
-        jsonObject.put("kurse", kurse);
-        return jsonObject.toString();
+    public JSONObject toJSON() {
+        JSONObject jsonObject = super.toJSON();
+        jsonObject.put("kurse", new JSONArray(kurse.stream().map(Kurs::toJSON).toArray()));
+        return jsonObject;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof Student student)) return false;
+        if (!super.equals(o)) return false;
+        return Objects.equals(kurse, student.kurse);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), kurse);
     }
 }
