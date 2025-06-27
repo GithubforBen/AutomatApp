@@ -13,16 +13,16 @@ import java.util.List;
 public class GetAllCoursesHandler extends CustomHandler implements HttpHandler {
     @Override
     public void handle(HttpExchange exchange) throws IOException {
-        List<Kurs> users = new ArrayList<>();
+        List<Kurs> courses = new ArrayList<>();
         Session session = Main.getInstance().getDatabase().getSessionFactory().openSession();
-        users.addAll(session.createSelectionQuery("from Kurs u", Kurs.class).getResultList());
+        courses.addAll(session.createSelectionQuery("from Kurs u", Kurs.class).getResultList());
         StringBuilder response = new StringBuilder();
-        response.append("{ \"students\": [");
-        users.forEach(user -> {
-            response.append(user.toJSON().toString());
+        response.append("{ \"courses\": [");
+        courses.forEach(kurs -> {
+            response.append(kurs.toJSON().toString());
             response.append(",");
         });
-        if (!users.isEmpty()) response.replace(response.length() - 1, response.length(), "");
+        if (!courses.isEmpty()) response.replace(response.length() - 1, response.length(), "");
         response.append("] }");
         session.close();
         respond(exchange, response.toString());
