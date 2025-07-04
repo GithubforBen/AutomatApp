@@ -12,14 +12,6 @@ public class CipherManager {
     }
 
     public String encrypt(String password) throws Exception {
-        /*
-        Key key = generateKey(pass);
-        Cipher c = Cipher.getInstance("AES");
-        c.init(Cipher.ENCRYPT_MODE, key);
-        byte[] encValue = c.doFinal(valueToEnc.getBytes());
-        return Base64.getEncoder().encodeToString(encValue);
-        String password = "1234";
-         */
         return BCrypt.withDefaults().hashToString(12, password.toCharArray());
     }
 /*

@@ -29,8 +29,13 @@ public class Database {
      * The resulting SessionFactory is used to manage database connections and transactions
      * throughout the application lifecycle.
      */
-    public Database() {
-        sessionFactory = new Configuration().configure()
+    public Database(String user, String filePW, String userPW) {
+        String password = filePW + " " + userPW;
+        System.out.println(password);
+        Configuration configuration = new Configuration().configure()
+                .setProperty("show_sql", true)
+                .setProperty("connection.username", user)
+                .setProperty("connection.password", password)
                 .addAnnotatedClass(Setting.class)
                 .addAnnotatedClass(User.class)
                 .addAnnotatedClass(Kurs.class)
@@ -40,8 +45,8 @@ public class Database {
                 .addAnnotatedClass(Teacher.class)
                 .addAnnotatedClass(Login.class)
                 .addAnnotatedClass(Konto.class)
-                .addAnnotatedClass(Sweet.class)
-                .setProperty("show_sql", true)
+                .addAnnotatedClass(Sweet.class);
+        sessionFactory = configuration
                 .buildSessionFactory();
     }
 
@@ -49,3 +54,8 @@ public class Database {
         return sessionFactory;
     }
 }
+/*
+
+                .setProperty("connection.username", user)
+                .setProperty("connection.password", password)
+ */

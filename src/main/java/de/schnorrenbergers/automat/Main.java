@@ -59,16 +59,10 @@ public class Main extends Application {
      * @throws SQLException           Programm wont work.
      * @throws ClassNotFoundException Programm wont work.
      */
-    private void initialise() throws Exception {
-        instance = this;
-        configurationManager = new ConfigurationManager();
+    public void initialise() throws Exception {
         url = configurationManager.getString("frontend-url");
         logoutTime = configurationManager.getInt("default-logout-time");
-        database = new Database();
         settingsManager = new SettingsManager();
-        dimension = new Dimension2D(
-                configurationManager.getInt("window-dimension.horizontal"),
-                configurationManager.getInt("window-dimension.vertical"));
         if (server == null) server = new Server();
         screenSaver = new ScreenSaver();
         handler = new StatisticManager();
@@ -106,8 +100,12 @@ public class Main extends Application {
      */
     @Override
     public void start(Stage stage) throws Exception {
-        initialise();
-        FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("hello-view.fxml"));
+        instance = this;
+        configurationManager = new ConfigurationManager();
+        dimension = new Dimension2D(
+                configurationManager.getInt("window-dimension.horizontal"),
+                configurationManager.getInt("window-dimension.vertical"));
+        FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("login-view.fxml"));
         Scene scene = new Scene(fxmlLoader.load(), dimension.getWidth(), dimension.getHeight());
         stage.setTitle("Hello!");
         stage.setScene(scene);
@@ -115,10 +113,7 @@ public class Main extends Application {
         this.stage = stage;
         stage.setFullScreenExitHint("");
         Application.setUserAgentStylesheet(new PrimerDark().getUserAgentStylesheet());
-        checkForStuff();
-        load();
         stage.setAlwaysOnTop(true);
-        new CustomRequest("ping").execute();
     }
 
     /**
@@ -193,6 +188,7 @@ public class Main extends Application {
         stage.setTitle("Hello!");
         stage.setScene(scene);
         stage.show();
+        new CustomRequest("ping").execute();
         new CustomRequest("alarm_off").execute();
     }
 
@@ -356,5 +352,9 @@ public class Main extends Application {
 
     public ConfigurationManager getConfigurationManager() {
         return configurationManager;
+    }
+
+    public void setDatabase(Database database) {
+        this.database = database;
     }
 }
