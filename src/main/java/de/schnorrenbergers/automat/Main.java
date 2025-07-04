@@ -60,10 +60,10 @@ public class Main extends Application {
      * @throws ClassNotFoundException Programm wont work.
      */
     public void initialise() throws Exception {
+        System.out.println("Initialize");
         url = configurationManager.getString("frontend-url");
         logoutTime = configurationManager.getInt("default-logout-time");
         settingsManager = new SettingsManager();
-        if (server == null) server = new Server();
         screenSaver = new ScreenSaver();
         handler = new StatisticManager();
         logoutTime = Integer.parseInt(settingsManager.getSettingOrDefault("logout", String.valueOf(logoutTime)));
@@ -80,12 +80,13 @@ public class Main extends Application {
                 x.persist(wohnortS);
                 x.persist(teacher);
                 x.persist(kurs);
-                x.persist(student
-                );
+                x.persist(student);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
         });
+        System.out.println(new LoginManager().login(new int[]{0, 1, 2, 3}));
+        if (server == null) server = new Server();
     }
 
     /**
@@ -106,6 +107,23 @@ public class Main extends Application {
                 configurationManager.getInt("window-dimension.horizontal"),
                 configurationManager.getInt("window-dimension.vertical"));
         FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("login-view.fxml"));
+        Scene scene = new Scene(fxmlLoader.load(), dimension.getWidth(), dimension.getHeight());
+        stage.setTitle("Hello!");
+        stage.setScene(scene);
+        stage.show();
+        this.stage = stage;
+        stage.setFullScreenExitHint("");
+        Application.setUserAgentStylesheet(new PrimerDark().getUserAgentStylesheet());
+        stage.setAlwaysOnTop(true);
+    }
+
+    public void startWithouthPassword(Stage stage) throws Exception {
+        instance = this;
+        configurationManager = new ConfigurationManager();
+        dimension = new Dimension2D(
+                configurationManager.getInt("window-dimension.horizontal"),
+                configurationManager.getInt("window-dimension.vertical"));
+        FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("main-view.fxml"));
         Scene scene = new Scene(fxmlLoader.load(), dimension.getWidth(), dimension.getHeight());
         stage.setTitle("Hello!");
         stage.setScene(scene);

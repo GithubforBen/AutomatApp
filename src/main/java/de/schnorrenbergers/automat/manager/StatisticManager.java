@@ -43,7 +43,9 @@ public class StatisticManager {
             jsonObject.append("zip", id.getFirst().getWohnort().getZip());
         });
         Statistic statistic = new Statistic(jsonObject.toString(), StatisticType.STUDENT_ATTEND);
+        Statistic statistic_static = new Statistic(String.valueOf(userId), StatisticType.STUDENT_ATTEND_STATIC);
         persist(statistic);
+        persist(statistic_static);
     }
 
     /**

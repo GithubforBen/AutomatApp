@@ -14,6 +14,7 @@ public class LoginManager {
      * @return true if the user just came in
      */
     public boolean login(Long userId) {
+        System.out.println(userId);
         Session session = Main.getInstance().getDatabase().getSessionFactory().openSession();
         List<Login> resultList = session.createSelectionQuery("from Login l where l.userId = :id", Login.class)
                 .setParameter("id", userId).getResultList();

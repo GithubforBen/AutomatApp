@@ -26,7 +26,7 @@ public class HelloController implements Initializable {
         Main.getInstance().getScreenSaver().setLastMove(System.currentTimeMillis());
         try {
             Thread.sleep(1000L);
-            Main.getInstance().start(Main.getInstance().getStage());
+            Main.getInstance().startWithouthPassword(Main.getInstance().getStage());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

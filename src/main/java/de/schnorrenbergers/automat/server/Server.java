@@ -76,6 +76,7 @@ public class Server {
         server.createContext("/modifyStudent", new ModifyStudentHandler());
         server.createContext("/modifyCourse", new ModifyCourseHandler());
         server.createContext("/modifyTeacher", new ModifyTeatcherHandler());
+        server.createContext("/csv", new GetCSVHandler());
         server.setExecutor(threadPoolExecutor);
         server.start();
         System.out.println("Server started on port " + server.getAddress().getPort() + " ip" + Inet4Address.getLocalHost().getHostAddress());
