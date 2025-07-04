@@ -73,7 +73,7 @@ public class Main extends Application {
             Wohnort wohnortT = new Wohnort(1, "s", "s", 456, "dsa");
             Wohnort wohnortS = new Wohnort(1, "s", "s", 4456, "dsa");
             try {
-                Teacher teacher = new Teacher("Test", "TEzjk", new int[]{0, 1, 2, 3}, Gender.DUAL_GENDER, new Date(System.currentTimeMillis()), wohnortT, "test@example.com", "1234", Level.ADMIN);
+                Teacher teacher = new Teacher("Test", "TEzjk", new int[]{0, 1, 2, 3}, Gender.DUAL_GENDER, new Date(System.currentTimeMillis()), wohnortT, "test@gmail.com", "123", Level.ADMIN);
                 Kurs kurs = new Kurs("Kurs", List.of(teacher), Day.DÖNNERSTAG);
                 Student student = new Student("Test", "Test", new int[]{0, 0, 0, 0}, Gender.OTHER, new Date(System.currentTimeMillis()), wohnortS, List.of(kurs));
                 x.persist(wohnortT);
