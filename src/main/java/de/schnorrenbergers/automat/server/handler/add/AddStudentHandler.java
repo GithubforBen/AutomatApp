@@ -11,9 +11,7 @@ import de.schnorrenbergers.automat.server.handler.CustomHandler;
 import org.hibernate.Session;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.sql.Date;
 import java.util.stream.Collectors;
 
@@ -40,11 +38,6 @@ public class AddStudentHandler extends CustomHandler implements HttpHandler {
             methodNotAllowed(exchange);
             return;
         }
-        BufferedReader requestBodyReaderBuffer = new BufferedReader(new InputStreamReader(exchange.getRequestBody()));
-        StringBuilder builder = new StringBuilder();
-        while (requestBodyReaderBuffer.ready()) {
-            builder.append(requestBodyReaderBuffer.readLine());
-        }
         JSONObject jsonObject = getJSON(exchange);
         try {
             //int number, String street, String city, int zip, String country
@@ -67,7 +60,7 @@ public class AddStudentHandler extends CustomHandler implements HttpHandler {
                     wohnort,
                     jsonObject.getJSONArray("kurse").toList().stream().map((x) -> {
                         Session session = Main.getInstance().getDatabase().getSessionFactory().openSession();
-                        Kurs k = session.get(Kurs.class, Long.valueOf(((String) x)));
+                        Kurs k = session.get(Kurs.class, Long.valueOf(String.valueOf(x)));
                         session.close();
                         return k;
                     }).collect(Collectors.toList())

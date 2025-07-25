@@ -1,0 +1,36 @@
+meta {
+  name: addStudent
+  type: http
+  seq: 1
+}
+
+post {
+  url: http://127.0.1.1:8000/addStudent
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "address": {
+      "nr": 1,
+      "street": "Test",
+      "city": "Darmstadt",
+      "zip": 64342,
+      "country": "Germany"
+    },
+    "firstName": "David",
+    "lastName": "Glänzel",
+    "rfid": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "gender": "OTHER",
+    "birthday": 939393,
+    "kurse": [
+      1
+    ]
+  }
+}

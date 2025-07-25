@@ -5,6 +5,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 public class CustomHandler {
     // Standard HTTP status codes
@@ -31,9 +32,11 @@ public class CustomHandler {
 
     protected JSONObject getJSON(HttpExchange exchange) throws IOException {
         try {
-            return new JSONObject(new String(exchange.getRequestBody().readAllBytes()));
+            byte[] bytes = exchange.getRequestBody().readAllBytes();
+            return new JSONObject(new String(bytes, StandardCharsets.UTF_8));
         } catch (JSONException e) {
             jsonError(exchange);
+            e.printStackTrace();
             throw e;
         }
     }
