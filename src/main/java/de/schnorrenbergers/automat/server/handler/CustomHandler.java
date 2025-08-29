@@ -33,7 +33,9 @@ public class CustomHandler {
     protected JSONObject getJSON(HttpExchange exchange) throws IOException {
         try {
             byte[] bytes = exchange.getRequestBody().readAllBytes();
-            return new JSONObject(new String(bytes, StandardCharsets.UTF_8));
+            String s = new String(bytes, StandardCharsets.UTF_8);
+            System.out.println(s);
+            return new JSONObject(s);
         } catch (JSONException e) {
             jsonError(exchange);
             e.printStackTrace();
