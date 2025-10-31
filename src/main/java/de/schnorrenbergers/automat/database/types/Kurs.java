@@ -44,10 +44,13 @@ public class Kurs {
     @Enumerated(EnumType.STRING)
     private Day day;
 
+    private Long creationDate;
+
     public Kurs(String name, List<Teacher> tutor, Day day) {
         this.name = name;
         this.tutor = tutor;
         this.day = day;
+        this.creationDate = System.currentTimeMillis();
     }
 
     public Kurs() {}

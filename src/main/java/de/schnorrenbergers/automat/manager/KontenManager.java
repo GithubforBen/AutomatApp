@@ -5,6 +5,7 @@ import de.schnorrenbergers.automat.database.types.Konto;
 import de.schnorrenbergers.automat.database.types.User;
 import org.hibernate.Session;
 
+import java.util.Date;
 import java.util.List;
 
 public class KontenManager {
@@ -100,5 +101,35 @@ public class KontenManager {
         boolean b = konto.withdraw(amount);
         updateKonto(konto);
         return b;
+    }
+
+    /**
+     * Checks whether attendance records contain an entry for the specified date.
+     * <p>
+     * This method iterates through the attendance timestamps retrieved from getKonto().
+     * It converts each timestamp to a {@code Date} object and compares it to the provided day,
+     * month, and year. If a match is found, the method returns {@code true}.
+     *
+     * @param day   the day of the month to check for attendance (1-31).
+     * @param month the zero-based month of the year to check for attendance (0-11).
+     * @param year  the year to check for attendance (e.g., 2023).
+     * @return {@code true} if an attendance record exists for the specified date;
+     * {@code false} otherwise.
+     */
+    public boolean checkAttendance(int day, int month, int year) {
+        for (Long attendance : getKonto().getAttendances()) {
+            Date date = new Date(attendance);
+            if (date.getDate() == day && date.getMonth() == month && date.getYear() == year) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Adds a users attandance to the Users record.
+     */
+    public void attend(long l) {
+        getKonto().attend(l);
     }
 }

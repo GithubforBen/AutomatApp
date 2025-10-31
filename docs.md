@@ -26,9 +26,7 @@ including user management, course administration, and authentication.
 
 ```json
 {
-  "rfid": [
-    integer_array
-  ]
+  "rfid": [1, 2, 3, 4]
 }
 ```
 
@@ -53,23 +51,21 @@ including user management, course administration, and authentication.
 
 ```json
 {
-  "firstName": "string",
-  "lastName": "string",
-  "rfid": [
-    integer_array
-  ],
-  "gender": "ENUM_VALUE",
-  "birthday": long_timestamp,
+  "firstName": "John",
+  "lastName": "Doe",
+  "rfid": [1, 2, 3, 4],
+  "gender": "MALE",
+  "birthday": 1609459200000,
   "address": {
-    "nr": integer,
-    "street": "string",
-    "city": "string",
-    "zip": integer,
-    "country": "string"
+    "nr": 123,
+    "street": "Main Street",
+    "city": "Berlin",
+    "zip": 10115,
+    "country": "Germany"
   },
-  "email": "string",
-  "password": "string",
-  "level": "ENUM_VALUE"
+  "email": "john.doe@example.com",
+  "password": "securePassword123",
+  "level": "ADMIN"
 }
 ```
 
@@ -78,7 +74,7 @@ including user management, course administration, and authentication.
 - Success: "Successfully added teacher"
 - Error: "Can't parse JSON"
 
-**Description:** Adds a new teacher to the system with their personal data, address, and authentication details.
+**Description:** Registers a new teacher with personal information, address, and authentication details.
 
 ---
 
@@ -92,23 +88,19 @@ including user management, course administration, and authentication.
 
 ```json
 {
-  "firstName": "string",
-  "lastName": "string",
-  "rfid": [
-    integer_array
-  ],
-  "gender": "ENUM_VALUE",
-  "birthday": long_timestamp,
+  "firstName": "Jane",
+  "lastName": "Smith",
+  "rfid": [5, 6, 7, 8],
+  "gender": "FEMALE",
+  "birthday": 1609459200000,
   "address": {
-    "nr": integer,
-    "street": "string",
-    "city": "string",
-    "zip": integer,
-    "country": "string"
+    "nr": 456,
+    "street": "School Avenue",
+    "city": "Berlin",
+    "zip": 10115,
+    "country": "Germany"
   },
-  "kurse": [
-    string_array_of_course_ids
-  ]
+  "kurse": ["1", "2", "3"]
 }
 ```
 
@@ -131,11 +123,9 @@ including user management, course administration, and authentication.
 
 ```json
 {
-  "name": "string",
-  "tutor": [
-    string_array_of_teacher_ids
-  ],
-  "day": "DAY_ENUM_VALUE"
+  "name": "Mathematics 101",
+  "tutor": ["1", "2"],
+  "day": "MONDAY"
 }
 ```
 
@@ -163,12 +153,21 @@ including user management, course administration, and authentication.
 {
   "students": [
     {
-      student_object
-    },
-    {
-      student_object
-    },
-    ...
+      "id": 1,
+      "firstName": "Jane",
+      "lastName": "Smith",
+      "rfid": [5, 6, 7, 8],
+      "gender": "FEMALE",
+      "birthday": 1609459200000,
+      "wohnort": {
+        "id": 1,
+        "nr": 456,
+        "street": "School Avenue",
+        "city": "Berlin",
+        "zip": 10115,
+        "country": "Germany"
+      }
+    }
   ]
 }
 ```
@@ -193,12 +192,24 @@ including user management, course administration, and authentication.
 {
   "users": [
     {
-      teacher_object
-    },
-    {
-      teacher_object
-    },
-    ...
+      "id": 1,
+      "firstName": "John",
+      "lastName": "Doe",
+      "rfid": [1, 2, 3, 4],
+      "gender": "MALE",
+      "birthday": 1609459200000,
+      "wohnort": {
+        "id": 1,
+        "nr": 123,
+        "street": "Main Street",
+        "city": "Berlin",
+        "zip": 10115,
+        "country": "Germany"
+      },
+      "mail": "john.doe@example.com",
+      "password": "encryptedPassword123",
+      "level": "ADMIN"
+    }
   ]
 }
 ```
@@ -209,7 +220,56 @@ including user management, course administration, and authentication.
 
 ---
 
-### 7. Scanned Card Endpoint
+### 7. Get All Courses Endpoint
+
+**URL:** `/allCourses`
+
+**Method:** GET
+
+**Input:** None
+
+**Output:**
+
+```json
+{
+  "courses": [
+    {
+      "id": 1,
+      "name": "Mathematics 101",
+      "day": "MONDAY",
+      "tutor": [
+        {
+          "id": 1,
+          "firstName": "John",
+          "lastName": "Doe",
+          "rfid": [1, 2, 3, 4],
+          "gender": "MALE",
+          "birthday": 1609459200000,
+          "wohnort": {
+            "id": 1,
+            "nr": 123,
+            "street": "Main Street",
+            "city": "Berlin",
+            "zip": 10115,
+            "country": "Germany"
+          },
+          "mail": "john.doe@example.com",
+          "password": "encryptedPassword123",
+          "level": "ADMIN"
+        }
+      ]
+    }
+  ]
+}
+```
+
+- Or empty array if no courses are registered
+
+**Description:** Retrieves a complete list of all courses in the system with their details.
+
+---
+
+### 8. Scanned Card Endpoint
 
 **URL:** `/scanned`
 
@@ -219,9 +279,7 @@ including user management, course administration, and authentication.
 
 ```json
 {
-  "rfid": [
-    integer_array
-  ]
+  "rfid": [1, 2, 3, 4]
 }
 ```
 
@@ -234,7 +292,7 @@ Automat login)
 
 ---
 
-### 8. Screen Saver Control Endpoint
+### 9. Screen Saver Control Endpoint
 
 **URL:** `/energetics`
 
@@ -250,7 +308,7 @@ Automat login)
 
 ---
 
-### 9. Gender List Endpoint
+### 10. Gender List Endpoint
 
 **URL:** `/genders`
 
@@ -264,7 +322,7 @@ Automat login)
 
 ---
 
-### 10. Day List Endpoint
+### 11. Day List Endpoint
 
 **URL:** `/days`
 
@@ -278,7 +336,194 @@ Automat login)
 
 ---
 
-### 11. Index Endpoint
+### 12. Delete Student Endpoint
+
+**URL:** `/deleteStudent`
+
+**Method:** DELETE
+
+**Input:**
+
+```json
+{
+  "id": 1
+}
+```
+
+**Output:**
+
+- Success: "Successfully deleted Student"
+- Error: "Can't parse JSON"
+- Error: "Bad Request" (if student ID doesn't exist)
+
+**Description:** Deletes a student from the system based on the provided ID.
+
+---
+
+### 13. Delete Teacher Endpoint
+
+**URL:** `/deleteTeacher`
+
+**Method:** DELETE
+
+**Input:**
+
+```json
+{
+  "id": 1
+}
+```
+
+**Output:**
+
+- Success: "Successfully deleted teacher"
+- Error: "Can't parse JSON"
+- Error: "Bad Request" (if teacher ID doesn't exist)
+
+**Description:** Deletes a teacher from the system based on the provided ID.
+
+---
+
+### 14. Delete Course Endpoint
+
+**URL:** `/deleteCourse`
+
+**Method:** DELETE
+
+**Input:**
+
+```json
+{
+  "id": 1
+}
+```
+
+**Output:**
+
+- Success: "Successfully deleted Kurs"
+- Error: "Can't parse JSON"
+- Error: "Bad Request" (if course ID doesn't exist)
+
+**Description:** Deletes a course from the system based on the provided ID.
+
+---
+
+### 15. Modify Student Endpoint
+
+**URL:** `/modifyStudent`
+
+**Method:** POST
+
+**Input:**
+
+```json
+{
+  "id": 1,
+  "gender": "MALE"
+}
+```
+
+**Output:**
+
+- Success: "Successfully deleted Kurs" (Note: This appears to be an incorrect message in the implementation)
+- Error: "Can't parse JSON"
+- Error: "Bad Request" (if student ID doesn't exist)
+
+**Description:** Updates student information based on the provided data. Note: This endpoint appears to be incomplete in
+the implementation.
+
+---
+
+### 16. Modify Teacher Endpoint
+
+**URL:** `/modifyTeacher`
+
+**Method:** POST
+
+**Input:**
+
+```json
+{
+  "id": 1,
+  "firstName": "John",
+  "lastName": "Doe",
+  "rfid": [1, 2, 3, 4],
+  "gender": "MALE",
+  "birthday": 1609459200000,
+  "address": {
+    "id": 1,
+    "nr": 123,
+    "street": "Main Street",
+    "city": "Berlin",
+    "zip": 10115,
+    "country": "Germany"
+  },
+  "email": "john.doe@example.com",
+  "password": "securePassword123",
+  "level": "ADMIN"
+}
+```
+
+**Output:**
+
+- Success: "Successfully added teacher" (Note: This appears to be an incorrect message in the implementation)
+- Error: "Can't parse JSON"
+
+**Description:** Updates teacher information or creates a new teacher if the ID doesn't exist.
+
+---
+
+### 17. Modify Course Endpoint
+
+**URL:** `/modifyCourse`
+
+**Method:** POST
+
+**Input:**
+
+```json
+{
+  "id": 1,
+  "name": "Advanced Mathematics",
+  "day": "TUESDAY",
+  "addTeacher": "2",
+  "removeTeacher": "3"
+}
+```
+
+**Output:**
+
+- Success: "Successfully deleted Kurs" (Note: This appears to be an incorrect message in the implementation)
+- Error: "Can't parse JSON"
+- Error: "Bad Request" (if course ID or teacher ID doesn't exist)
+
+**Description:** Updates course information based on the provided data. Can modify the name, day, and add or remove
+teachers.
+
+---
+
+### 18. CSV Export Endpoint
+
+**URL:** `/csv`
+
+**Method:** POST
+
+**Input:**
+
+```json
+{
+  "kurs": 1
+}
+```
+
+**Output:** CSV data with student attendance information.
+
+**Description:** Generates a CSV file with attendance data for students in the specified course. The CSV includes
+student names and attendance dates, with each row representing a student and each column representing a date.
+
+---
+
+### 19. Index Endpoint
 
 **URL:** `/`
 

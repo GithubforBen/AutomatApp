@@ -6,7 +6,6 @@ import java.util.Date;
 
 public class ScreenSaver {
     private long lastMove;
-    private boolean permanent = false;
     private boolean doSaver;
     private boolean isSaverr = false;
 
@@ -17,7 +16,6 @@ public class ScreenSaver {
 
     public boolean isSaver() {
         Date date = new Date();
-        if (permanent) return true;
         if (!doSaver) {
             return false;
         }

@@ -4,6 +4,9 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 
+import java.util.LinkedList;
+import java.util.List;
+
 @Entity
 public class Konto {
     @Id
@@ -13,11 +16,13 @@ public class Konto {
     private Long userId;
     private double balance;
     private boolean isInfinite;
+    private List<Long> attendances;
 
     public Konto(Long userId, double balance, boolean isInfinite) {
         this.userId = userId;
         this.balance = balance;
         this.isInfinite = isInfinite;
+        this.attendances = new LinkedList<>();
     }
 
     public Konto() {
@@ -76,8 +81,26 @@ public class Konto {
         return ((int) (balance * 10)) / 10.0;
     }
 
+    public void attend(long l) {
+        attendances.add(l);
+    }
+
     @Override
     public String toString() {
-        return "Konto{" + "id=" + id + ", userId=" + userId + ", balance=" + balance + ", isInfinite=" + isInfinite + '}';
+        return "Konto{" +
+                "id=" + id +
+                ", userId=" + userId +
+                ", balance=" + balance +
+                ", isInfinite=" + isInfinite +
+                ", attendances=" + attendances +
+                '}';
+    }
+
+    public List<Long> getAttendances() {
+        return attendances;
+    }
+
+    public void setAttendances(List<Long> attendances) {
+        this.attendances = attendances;
     }
 }

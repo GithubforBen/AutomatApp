@@ -2,6 +2,7 @@ package de.schnorrenbergers.automat.database.types;
 
 import de.schnorrenbergers.automat.database.types.types.Gender;
 import de.schnorrenbergers.automat.database.types.types.Wohnort;
+import de.schnorrenbergers.automat.manager.KontenManager;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToMany;
 import org.json.JSONArray;
@@ -71,6 +72,8 @@ public class Student extends User{
     @Override
     public JSONObject toJSON() {
         JSONObject jsonObject = super.toJSON();
+        KontenManager manager = new KontenManager(getId());
+        jsonObject.append("hours", manager.getKonto().getBalanceRounded());
         jsonObject.put("kurse", new JSONArray(kurse.stream().map(Kurs::toJSON).toArray()));
         return jsonObject;
     }

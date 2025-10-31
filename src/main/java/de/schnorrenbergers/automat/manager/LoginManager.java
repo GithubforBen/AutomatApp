@@ -35,6 +35,7 @@ public class LoginManager {
         ConfigurationManager configurationManager = Main.getInstance().getConfigurationManager();
         if (attendance < 1000L * 60 * 60 * configurationManager.getInt("invalidation-time")) {
             new KontenManager(userId).deposit((double) attendance / 60 / 60 / 1000L);
+            new KontenManager(userId).attend(System.currentTimeMillis());
             session.close();
             return false;
         }
