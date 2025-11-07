@@ -3,13 +3,12 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Font?>
-<AnchorPane xmlns:fx="http://javafx.com/fxml"
-            xmlns="http://javafx.com/javafx"
-            fx:controller="de.schnorrenbergers.automat.controller.LoginController"
-            prefHeight="800.0" prefWidth="480.0">
+<AnchorPane xmlns:fx="http://javafx.com/fxml/1" prefHeight="800.0" prefWidth="480.0"
+            xmlns="http://javafx.com/javafx/17.0.12" fx:controller="de.schnorrenbergers.automat.controller.LoginController">
     <VBox prefHeight="800.0" prefWidth="480.0">
         <children>
-            <Label fx:id="text" prefHeight="53.0" prefWidth="480" wrapText="true" text="Annika ist im Code">
+            <Label fx:id="text" prefHeight="53.0" prefWidth="480" text="Password eingeben" textAlignment="CENTER"
+                   wrapText="true">
                 <font>
                     <Font name="Segoe UI" size="48.0"/>
                 </font>
@@ -27,8 +26,7 @@
                     <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
                 </rowConstraints>
                 <children>
-                    <Button mnemonicParsing="false" onAction="#btn_1" prefHeight="208.0" prefWidth="201.0"
-                            text="1"/>
+                    <Button mnemonicParsing="false" onAction="#btn_1" prefHeight="208.0" prefWidth="201.0" text="1"/>
                     <Button mnemonicParsing="false" onAction="#btn_2" prefHeight="197.0" prefWidth="200.0" text="2"
                             GridPane.columnIndex="1"/>
                     <Button mnemonicParsing="false" onAction="#btn_3" prefHeight="214.0" prefWidth="200.0" text="3"
@@ -49,8 +47,8 @@
                             text="&lt;-" GridPane.rowIndex="3"/>
                     <Button mnemonicParsing="false" onAction="#btn_0" prefHeight="277.0" prefWidth="200.0" text="0"
                             GridPane.columnIndex="1" GridPane.rowIndex="3"/>
-                    <Button mnemonicParsing="false" onAction="#btn_next" prefHeight="215.0" prefWidth="200.0"
-                            text="✓" textFill="#12da23" GridPane.columnIndex="2" GridPane.rowIndex="3">
+                    <Button mnemonicParsing="false" onAction="#btn_next" prefHeight="215.0" prefWidth="200.0" text="✓"
+                            textFill="#12da23" GridPane.columnIndex="2" GridPane.rowIndex="3">
                         <font>
                             <Font size="40.0"/>
                         </font>

@@ -4,6 +4,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -26,7 +27,6 @@ public class Konto {
     }
 
     public Konto() {
-
     }
 
     public Long getId() {
@@ -82,6 +82,10 @@ public class Konto {
     }
 
     public void attend(long l) {
+        if (attendances == null) {
+            attendances = new ArrayList<>();
+            System.out.println("Attendance list is empty it was fixed but it might be a type of problem.");
+        }
         attendances.add(l);
     }
 

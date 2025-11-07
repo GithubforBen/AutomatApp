@@ -80,7 +80,7 @@ public class LoginController implements Initializable {
         String filePW = sb.toString().replace(userPW, "");
         try {
             // Swap userPW and filePW to match the expected order in Database constructor
-            Main.getInstance().setDatabase(new Database("Netanjahu", filePW, userPW));
+            Main.getInstance().setDatabase(new Database("MiNt-ZeNtRuM", filePW, userPW));
             Main.getInstance().initialise();
             Main.getInstance().checkForStuff();
             Main.getInstance().load();
@@ -112,6 +112,7 @@ public class LoginController implements Initializable {
     public void setText(String s, Paint paint, boolean first) {
         Platform.runLater(() -> {
             if (s != null) {
+                text.setAlignment(javafx.geometry.Pos.CENTER);
                 text.setText("");
                 text.setText(s);
                 double fontSize = text.getFont().getSize();

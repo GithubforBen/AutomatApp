@@ -13,7 +13,8 @@
     <children>
         <VBox prefHeight="800.0" prefWidth="480.0">
             <children>
-                <BarChart fx:id="chart" legendVisible="false" title="Schüler*innen">
+                <BarChart fx:id="chart" horizontalGridLinesVisible="false" horizontalZeroLineVisible="false"
+                          legendVisible="false" title="Schüler*innen">
                     <xAxis>
                         <CategoryAxis side="BOTTOM"/>
                     </xAxis>

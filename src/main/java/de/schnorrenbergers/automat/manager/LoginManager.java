@@ -39,7 +39,6 @@ public class LoginManager {
             session.close();
             return false;
         }
-        session.flush();
         session.close();
         return false;
     }

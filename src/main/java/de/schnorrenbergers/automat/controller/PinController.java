@@ -15,8 +15,8 @@ import java.util.ResourceBundle;
 public class PinController implements Initializable {
 
     private int[] last;
-    private final int[] code = new int[]{1, 2, 3, 4};
-    private final int[] settings = new int[]{3, 3, 3, 3};
+    private final int[] code = new int[]{1, 2, 3, 4, 5};
+    private final int[] settings = new int[]{3, 3, 3, 3, 3};
 
     @FXML
     private Text text;
@@ -76,7 +76,7 @@ public class PinController implements Initializable {
             text.setText("Korrekt!");
             sceneId = "settings-view.fxml";
         } else {
-            text.setText("_ _ _ _");
+            text.setText("_ ".repeat(code.length));
             Arrays.fill(last, -1);
             sceneId = "stats-view.fxml";
         }
@@ -86,8 +86,11 @@ public class PinController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        text.setText("_ _ _ _");
-        last = new int[4];
+        if (code.length != settings.length) {
+            throw new RuntimeException("Code and last have different lengths");
+        }
+        last = new int[code.length];
+        text.setText("_ ".repeat(code.length));
         Arrays.fill(last, -1);
     }
 
@@ -103,14 +106,14 @@ public class PinController implements Initializable {
     }
 
     public void display() {
-        String s = "";
+        StringBuilder s = new StringBuilder();
         for (int i : last) {
             if (i == -1) {
-                s = s + "_ ";
+                s.append("_ ");
             } else {
-                s = s + "* ";
+                s.append("* ");
             }
         }
-        text.setText(s);
+        text.setText(s.toString());
     }
 }
