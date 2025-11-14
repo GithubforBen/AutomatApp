@@ -16,11 +16,11 @@ public class LoginHandler extends CustomHandler implements HttpHandler {
         }
         JSONObject json = getJSON(exchange);
         try {
-            if (new LoginManager().login(json.getJSONArray("rfid").toList().stream().mapToInt((o) -> Integer.parseInt(String.valueOf(o))).toArray())) {
-                respond(exchange, "User came in");
-            } else {
-                respond(exchange, "User left");
-            }
+            long userID = json.getLong("id");
+            long time = json.getLong("time");
+            new LoginManager().login(userID, time);
+            new LoginManager().login(userID, time + 1000);
+            respond(exchange, "GOOD BOY");
         } catch (Exception e) {
             badRequest(exchange);
             e.printStackTrace();

@@ -14,6 +14,10 @@ public class LoginManager {
      * @return true if the user just came in
      */
     public boolean login(Long userId) {
+        return login(userId, System.currentTimeMillis());
+    }
+
+    public boolean login(Long userId, long time) {
         System.out.println(userId);
         Session session = Main.getInstance().getDatabase().getSessionFactory().openSession();
         List<Login> resultList = session.createSelectionQuery("from Login l where l.userId = :id", Login.class)
@@ -23,7 +27,7 @@ public class LoginManager {
         if (resultList.isEmpty()) {
             session.close();
             Main.getInstance().getDatabase().getSessionFactory().inTransaction((transaction) -> {
-                transaction.persist(new Login(userId, System.currentTimeMillis()));
+                transaction.persist(new Login(userId, time));
                 List<Login> selectLogin = transaction.createSelectionQuery("from Login l", Login.class).getResultList();
             });
             return true;
@@ -31,11 +35,11 @@ public class LoginManager {
         Main.getInstance().getDatabase().getSessionFactory().inTransaction((transaction) -> {
             resultList.forEach(transaction::remove);
         });
-        long attendance = System.currentTimeMillis() - resultList.getFirst().getLoginTime();
+        long attendance = time - resultList.getFirst().getLoginTime();
         ConfigurationManager configurationManager = Main.getInstance().getConfigurationManager();
         if (attendance < 1000L * 60 * 60 * configurationManager.getInt("invalidation-time")) {
             new KontenManager(userId).deposit((double) attendance / 60 / 60 / 1000L);
-            new KontenManager(userId).attend(System.currentTimeMillis());
+            new KontenManager(userId).attend(time);
             session.close();
             return false;
         }
