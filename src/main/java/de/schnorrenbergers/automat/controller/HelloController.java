@@ -1,6 +1,7 @@
 package de.schnorrenbergers.automat.controller;
 
 import de.schnorrenbergers.automat.Main;
+import de.schnorrenbergers.automat.utils.CustomRequest;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -25,7 +26,10 @@ public class HelloController implements Initializable {
     public void reconnect(ActionEvent actionEvent) {
         Main.getInstance().getScreenSaver().setLastMove(System.currentTimeMillis());
         try {
-            Thread.sleep(1000L);
+            String ping = new CustomRequest("ping").execute();
+            if (ping == null) {
+                return;
+            }
             Main.getInstance().startWithouthPassword(Main.getInstance().getStage());
         } catch (Exception e) {
             throw new RuntimeException(e);

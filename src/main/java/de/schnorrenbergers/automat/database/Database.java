@@ -1,6 +1,7 @@
 package de.schnorrenbergers.automat.database;
 
 import de.schnorrenbergers.automat.database.types.*;
+import de.schnorrenbergers.automat.database.types.types.Attandance;
 import de.schnorrenbergers.automat.database.types.types.Wohnort;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
@@ -45,7 +46,8 @@ public class Database {
                 .addAnnotatedClass(Teacher.class)
                 .addAnnotatedClass(Login.class)
                 .addAnnotatedClass(Konto.class)
-                .addAnnotatedClass(Sweet.class);
+                .addAnnotatedClass(Sweet.class)
+                .addAnnotatedClass(Attandance.class);
         sessionFactory = configuration
                 .buildSessionFactory();
     }

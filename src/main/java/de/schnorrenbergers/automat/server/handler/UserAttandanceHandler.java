@@ -2,6 +2,7 @@ package de.schnorrenbergers.automat.server.handler;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+import de.schnorrenbergers.automat.database.types.types.Attandance;
 import de.schnorrenbergers.automat.manager.KontenManager;
 import org.json.JSONObject;
 
@@ -25,9 +26,9 @@ public class UserAttandanceHandler extends CustomHandler implements HttpHandler 
             badRequest(exchange);
         }
         KontenManager kontenManager = new KontenManager(id);
-        List<Long> attendances = kontenManager.getKonto().getAttendances();
+        List<Attandance> attendances = kontenManager.getKonto().getAttendances();
         JSONObject response = new JSONObject();
-        response.put("attendances", attendances);
+        response.put("attendances", attendances.stream().map((a) -> new JSONObject().put("day", a.getDay()).put("month", a.getMonth()).put("year", a.getYear()).put("type", a.getType().toString())).toList());
         respond(exchange, response.toString());
     }
 }

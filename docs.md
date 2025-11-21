@@ -1,5 +1,18 @@
 ## General Information
 
+Important note
+
+This document is kept for reference. A newer, expanded, and authoritative API document is available in
+docs_NEW_BETTER.md. It includes long-form descriptions for every endpoint and a dedicated section listing the external
+requests the desktop app sends (Expected External Requests).
+
+Highlights of changes in the new docs:
+
+- Clarifies that POST /login expects an object with id (long) and time (epoch millis), not an RFID array.
+- Documents the POST /attendances endpoint for fetching a user’s attendance entries.
+- Adds a full “Expected External Requests” section covering /ping, /alarm_on, /alarm_off, /dispense, and /re-enable used
+  by the app via CustomRequest.
+
 This documentation covers all HTTP API endpoints in the AutomatApp project. The API serves various functionalities
 including user management, course administration, and authentication.
 

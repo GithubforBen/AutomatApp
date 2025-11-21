@@ -1,10 +1,13 @@
 package de.schnorrenbergers.automat.database.types;
 
+import de.schnorrenbergers.automat.database.types.types.Attandance;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -17,7 +20,8 @@ public class Konto {
     private Long userId;
     private double balance;
     private boolean isInfinite;
-    private List<Long> attendances;
+    @OneToMany
+    private List<Attandance> attendances;
 
     public Konto(Long userId, double balance, boolean isInfinite) {
         this.userId = userId;
@@ -86,7 +90,29 @@ public class Konto {
             attendances = new ArrayList<>();
             System.out.println("Attendance list is empty it was fixed but it might be a type of problem.");
         }
-        attendances.add(l);
+        Date date = new Date(l);
+        for (Attandance attendance : attendances) {
+            if (attendance.getDay() == date.getDay() && attendance.getMonth() == date.getMonth() && attendance.getYear() == date.getYear()) {
+                attendance.logout(l);
+                return;
+            }
+        }
+        attendances.add(new Attandance(date.getDay(), date.getMonth(), date.getYear(), l, Attandance.Type.NORMAL));
+    }
+
+    public void gone(long l) {
+        if (attendances == null) {
+            attendances = new ArrayList<>();
+            System.out.println("Attendance list is empty it was fixed but it might be a type of problem.");
+        }
+        Date date = new Date(l);
+        for (Attandance attendance : attendances) {
+            if (attendance.getDay() == date.getDay() && attendance.getMonth() == date.getMonth() && attendance.getYear() == date.getYear()) {
+                attendance.logout(l);
+                return;
+            }
+        }
+        attendances.add(new Attandance(date.getDay(), date.getMonth(), date.getYear(), l, Attandance.Type.NORMAL));
     }
 
     @Override
@@ -100,11 +126,7 @@ public class Konto {
                 '}';
     }
 
-    public List<Long> getAttendances() {
+    public List<Attandance> getAttendances() {
         return attendances;
-    }
-
-    public void setAttendances(List<Long> attendances) {
-        this.attendances = attendances;
     }
 }

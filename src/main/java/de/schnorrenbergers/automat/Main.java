@@ -36,7 +36,6 @@ import java.util.List;
 import java.util.Objects;
 
 public class Main extends Application {
-    //TODO: import password and encrption keys from file or smth. else
     private static Main instance;
     private String url;
     private Stage stage;

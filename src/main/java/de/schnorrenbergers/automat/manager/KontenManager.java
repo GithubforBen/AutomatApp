@@ -3,9 +3,9 @@ package de.schnorrenbergers.automat.manager;
 import de.schnorrenbergers.automat.Main;
 import de.schnorrenbergers.automat.database.types.Konto;
 import de.schnorrenbergers.automat.database.types.User;
+import de.schnorrenbergers.automat.database.types.types.Attandance;
 import org.hibernate.Session;
 
-import java.util.Date;
 import java.util.List;
 
 public class KontenManager {
@@ -117,10 +117,9 @@ public class KontenManager {
      * {@code false} otherwise.
      */
     public boolean checkAttendance(int day, int month, int year) {
-        for (Long attendance : getKonto().getAttendances()) {
-            Date date = new Date(attendance);
-            if (date.getDate() == day && date.getMonth() == month && date.getYear() == year) {
-                return true;
+        for (Attandance attendance : getKonto().getAttendances()) {
+            if (attendance.getDay() == day && attendance.getMonth() == month && attendance.getYear() == year) {
+                return !attendance.getType().equals(Attandance.Type.AWAY);
             }
         }
         return false;
