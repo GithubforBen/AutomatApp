@@ -15,16 +15,8 @@ public class LoginHandler extends CustomHandler implements HttpHandler {
             return;
         }
         JSONObject json = getJSON(exchange);
-        try {
-            long userID = json.getLong("id");
-            long time = json.getLong("time");
-            new LoginManager().login(userID, time);
-            new LoginManager().login(userID, time + 1000);
-            respond(exchange, "GOOD BOY");
-        } catch (Exception e) {
-            badRequest(exchange);
-            e.printStackTrace();
-        }
-
+        new LoginManager().login(
+                json.getJSONArray("rfid").toList().stream().map(Object::toString).mapToInt(Integer::parseInt).toArray());
+        respond(exchange, "GOOD BOY");
     }
 }

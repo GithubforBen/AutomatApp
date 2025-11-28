@@ -84,7 +84,6 @@ public class Main extends Application {
                 throw new RuntimeException(e);
             }
         });
-        System.out.println(new LoginManager().login(new int[]{0, 1, 2, 3}));
         if (server == null) server = new Server();
     }
 
