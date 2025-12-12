@@ -15,9 +15,14 @@ public class CustomHandler {
     protected static final int METHOD_NOT_ALLOWED = 405;
     protected static final int CONFLICT = 409;
     protected static final int JSON_ERROR = 410;
+    protected static final int DATAT_NOT_FOUND = 501;
 
     protected void respond(HttpExchange exchange, String answer) throws IOException {
         respond(exchange, answer, OK);
+    }
+
+    public void respondDataNotFound(HttpExchange exchange, String data) throws IOException {
+        respond(exchange, data, DATAT_NOT_FOUND);
     }
 
     protected void respondJson(HttpExchange exchange, JSONObject json, int code) throws IOException {

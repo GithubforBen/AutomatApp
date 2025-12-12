@@ -68,7 +68,8 @@ public class Main extends Application {
         logoutTime = Integer.parseInt(settingsManager.getSettingOrDefault("logout", String.valueOf(logoutTime)));
         checkAvailability = Boolean.parseBoolean(settingsManager.getSettingOrDefault("availability", String.valueOf(false)));
         database.getSessionFactory().inTransaction((x) -> {
-            if (1 == 1) return;
+            x.createSelectionQuery("from Student s", Student.class).getResultList().forEach(System.out::println);
+            if (!x.createSelectionQuery("from Student s", Student.class).getResultList().isEmpty()) return;
             Wohnort wohnortT = new Wohnort(1, "s", "s", 456, "dsa");
             Wohnort wohnortS = new Wohnort(1, "s", "s", 4456, "dsa");
             try {
