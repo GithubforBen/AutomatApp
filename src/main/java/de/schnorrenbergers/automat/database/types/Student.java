@@ -9,6 +9,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.sql.Date;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -42,7 +43,7 @@ public class Student extends User{
     @Override
     public String toString() {
         return "Student{" +
-                "rfid=" + getRfid() +
+                "rfid=" + Arrays.toString(getRfid()) +
                 "kurse=" + kurse +
                 '}';
     }
