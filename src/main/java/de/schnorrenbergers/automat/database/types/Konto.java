@@ -1,10 +1,12 @@
 package de.schnorrenbergers.automat.database.types;
 
+import de.schnorrenbergers.automat.Main;
 import de.schnorrenbergers.automat.database.types.types.Attandance;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+import org.hibernate.Session;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -113,6 +115,13 @@ public class Konto {
             }
         }
         attendances.add(new Attandance(date.getDay(), date.getMonth(), date.getYear(), l, Attandance.Type.NORMAL));
+    }
+
+    public User getUser() {
+        Session session = Main.getInstance().getDatabase().getSessionFactory().openSession();
+        User user = session.get(User.class, userId);
+        session.close();
+        return user;
     }
 
     @Override
