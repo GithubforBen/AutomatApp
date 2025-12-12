@@ -88,6 +88,7 @@ public class Konto {
     }
 
     public void attend(long l) {
+        Main.getInstance().getDatabase().getSessionFactory().openSession();
         if (attendances == null) {
             attendances = new ArrayList<>();
             System.out.println("Attendance list is empty it was fixed but it might be a type of problem.");
@@ -100,6 +101,7 @@ public class Konto {
             }
         }
         attendances.add(new Attandance(date.getDay(), date.getMonth(), date.getYear(), l, Attandance.Type.NORMAL));
+        Main.getInstance().getDatabase().getSessionFactory().getCurrentSession().close();
     }
 
     public void gone(long l) {
