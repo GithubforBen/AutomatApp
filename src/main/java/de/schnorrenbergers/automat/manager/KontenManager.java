@@ -44,7 +44,7 @@ public class KontenManager {
      */
     public Konto getKonto() {
         Session session = Main.getInstance().getDatabase().getSessionFactory().openSession();
-        List<Konto> resultList = session.createSelectionQuery("from Konto k where k.userId = :id", Konto.class)
+        List<Konto> resultList = session.createSelectionQuery("from Konto k left join fetch k.attendances where k.userId = :id", Konto.class)
                 .setParameter("id", id).getResultList();
         if (resultList.isEmpty()) {
             session.close();
