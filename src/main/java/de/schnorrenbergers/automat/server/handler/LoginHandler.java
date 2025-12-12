@@ -17,18 +17,18 @@ public class LoginHandler extends CustomHandler implements HttpHandler {
             return;
         }
         JSONObject json = getJSON(exchange);
-        int[] rfids = json.getJSONArray("rfid").toList().stream().map(Object::toString).mapToInt(Integer::parseInt).toArray();
-        boolean rfid = new LoginManager().login(rfids);
-        KontenManager kontenManager = new KontenManager(rfids);
-        JSONObject jsonResponse = new JSONObject();
-        jsonResponse.put("cameIn", rfid);
-        jsonResponse.put("time", kontenManager.getKonto().getBalance());
-        User user = kontenManager.getKonto().getUser();
-        if (user == null) {
-            respond(exchange, ".-.-.-.--.-.-.-.-.-.-..-.-.-.-.-.-.-..--.-..-.-.-.-.-.-.-.-.-");
-            return;
+        try {
+            int[] rfids = json.getJSONArray("rfid").toList().stream().map(Object::toString).mapToInt(Integer::parseInt).toArray();
+            boolean rfid = new LoginManager().login(rfids);
+            KontenManager kontenManager = new KontenManager(rfids);
+            JSONObject jsonResponse = new JSONObject();
+            jsonResponse.put("cameIn", rfid);
+            jsonResponse.put("time", kontenManager.getKonto().getBalance());
+            User user = kontenManager.getKonto().getUser();
+            jsonResponse.put("name", user.getFullName());
+            respond(exchange, jsonResponse.toString());
+        } catch (Exception e) {
+            respond(exchange, "There is no user associated with this rfid card. Please register one or start crying.");
         }
-        jsonResponse.put("name", user.getFullName());
-        respond(exchange, jsonResponse.toString());
     }
 }
