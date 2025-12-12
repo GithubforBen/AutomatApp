@@ -42,6 +42,7 @@ public class Student extends User{
     @Override
     public String toString() {
         return "Student{" +
+                "rfid=" + getRfid() +
                 "kurse=" + kurse +
                 '}';
     }
