@@ -28,6 +28,7 @@ public class LoginHandler extends CustomHandler implements HttpHandler {
             jsonResponse.put("name", user.getFullName());
             respond(exchange, jsonResponse.toString());
         } catch (Exception e) {
+            e.printStackTrace();
             respondDataNotFound(exchange, "There is no user associated with this rfid card. Please register one or start crying.");
         }
     }
