@@ -11,14 +11,19 @@ import java.net.URL;
 import java.net.URLConnection;
 
 public class CustomRequest {
-    String urlString;
 
-    public CustomRequest(String url) {
-        this.urlString = Main.getInstance().getUrl() + "/" + url;
+    private final String urlString;
+    private final REVIVER reviver;
+
+    public CustomRequest(String url, REVIVER reviver) {
+        this.reviver = reviver;
+        this.urlString = Main.getInstance().getUrl(reviver) + "/" + url;
     }
 
     public String execute() throws IOException {
-        if (!isOnline()) return null;
+        if (!urlString.contains("ping")) {
+            if (!isOnline()) return null;
+        }
         URL url = new URL(urlString);
         URLConnection urlConnection = url.openConnection();
         urlConnection.setConnectTimeout(1000);
@@ -31,7 +36,7 @@ public class CustomRequest {
 
     public boolean isOnline() {
         try {
-            URL url = new URL(Main.getInstance().getUrl() + "/ping");
+            URL url = new URL(Main.getInstance().getUrl(reviver) + "/ping");
             URLConnection urlConnection = url.openConnection();
             urlConnection.setConnectTimeout(1000);
             BufferedReader br = new BufferedReader(new InputStreamReader(url.openStream()));
@@ -68,5 +73,9 @@ public class CustomRequest {
         in.close();
         urlConnection.disconnect();
         return response.toString();
+    }
+
+    public enum REVIVER {
+        WEBSITE, DISPENSER, SCANNER
     }
 }

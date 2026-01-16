@@ -12,7 +12,6 @@ import javafx.scene.control.Slider;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 
-import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -75,9 +74,9 @@ public class AdminController implements Initializable {
         boolean alarm = Main.getInstance().isAlarm();
         try {
             if (alarm) {
-                new CustomRequest("alarm_on").execute();
+                new CustomRequest("alarm_on", CustomRequest.REVIVER.SCANNER).execute();
             } else {
-                new CustomRequest("alarm_off").execute();
+                new CustomRequest("alarm_off", CustomRequest.REVIVER.SCANNER).execute();
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -104,18 +103,14 @@ public class AdminController implements Initializable {
         Main.getInstance().getScreenSaver().setLastMove(System.currentTimeMillis());
         AvailabilityManager availabilityManager = new AvailabilityManager();
         System.out.println("ill" + positive);
-        try {
-            if (positive == 0)
-                availabilityManager.addSweet(type, (int) slider.getValue());
-            else if (positive == 1)
-                availabilityManager.addSweet(type, (int) slider.getValue() * -1);
-            else if (positive == 2)
-                new CustomRequest("re-enable").executeComplex("{\"name\":\"" + new ConfigurationManager().getString("sweets._" + type + ".name") + "\"}");
-            else {
-                positive = 0;
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        if (positive == 0)
+            availabilityManager.addSweet(type, (int) slider.getValue());
+        else if (positive == 1)
+            availabilityManager.addSweet(type, (int) slider.getValue() * -1);
+        else if (positive == 2) {
+            //TODO: what does this there new CustomRequest("re-enable").executeComplex("{\"name\":\"" + new ConfigurationManager().getString("sweets._" + type + ".name") + "\"}");
+        } else {
+            positive = 0;
         }
     }
 

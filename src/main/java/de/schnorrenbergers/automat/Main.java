@@ -37,7 +37,6 @@ import java.util.Objects;
 
 public class Main extends Application {
     private static Main instance;
-    private String url;
     private Stage stage;
     private Dimension2D dimension;
     private Server server;
@@ -60,7 +59,6 @@ public class Main extends Application {
      */
     public void initialise() throws Exception {
         System.out.println("Initialize");
-        url = configurationManager.getString("frontend-url");
         logoutTime = configurationManager.getInt("default-logout-time");
         settingsManager = new SettingsManager();
         screenSaver = new ScreenSaver();
@@ -214,8 +212,14 @@ public class Main extends Application {
         stage.setTitle("Hello!");
         stage.setScene(scene);
         stage.show();
-        new CustomRequest("ping").execute();
-        new CustomRequest("alarm_off").execute();
+        try {
+            new CustomRequest("ping", CustomRequest.REVIVER.WEBSITE).execute();
+            new CustomRequest("ping", CustomRequest.REVIVER.SCANNER).execute();
+            new CustomRequest("ping", CustomRequest.REVIVER.DISPENSER).execute();
+        } catch (Exception e) {
+            loadScene("hello-view.fxml");
+        }
+        new CustomRequest("alarm_off", CustomRequest.REVIVER.SCANNER).execute();
     }
 
     public void kost() throws IOException {
@@ -304,8 +308,12 @@ public class Main extends Application {
         return instance;
     }
 
-    public String getUrl() {
-        return url;
+    public String getUrl(CustomRequest.REVIVER reviver) {
+        return switch (reviver) {
+            case WEBSITE -> configurationManager.getString("website-url");
+            case DISPENSER -> configurationManager.getString("dispenser-url");
+            case SCANNER -> configurationManager.getString("scanner-url");
+        };
     }
 
     public Stage getStage() {

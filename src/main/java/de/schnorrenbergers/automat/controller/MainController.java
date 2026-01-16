@@ -129,7 +129,7 @@ public class MainController implements Initializable {
             if (kontenManager.getKonto().getBalance() >= configurationManager.getInt("sweets._" + number + ".kost")
                     || kontenManager.getKonto().getBalance() == Integer.MIN_VALUE
                     || !Boolean.parseBoolean(Main.getInstance().getSettings().getSettingOrDefault("checkTime", String.valueOf(true)))) {
-                new CustomRequest("dispense").executeComplex("{\"nr\":" + number + ",\"cost\":" + configurationManager.getInt("sweets._" + number + ".kost") + ",\"usr\":" + Arrays.toString(Main.getInstance().getLastScan()) + "}");
+                new CustomRequest("dispense", CustomRequest.REVIVER.DISPENSER).executeComplex("{\"nr\":" + number + ",\"cost\":" + configurationManager.getInt("sweets._" + number + ".kost") + ",\"usr\":" + Arrays.toString(Main.getInstance().getLastScan()) + "}");
                 Main.getInstance().setLastScan(null);
                 kontenManager.withdraw(configurationManager.getInt("sweets._" + number + ".kost"));
                 Main.getInstance().kost();

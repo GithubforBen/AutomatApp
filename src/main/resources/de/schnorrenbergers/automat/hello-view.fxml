@@ -21,10 +21,10 @@
                 </AnchorPane>
                 <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
                     <children>
-                        <Button mnemonicParsing="false" onAction="#reconnect" prefHeight="239.0" prefWidth="478.0"
-                                text="Neu Verbinden">
+                        <Button fx:id="button" mnemonicParsing="false" onAction="#reconnect" prefHeight="239.0"
+                                prefWidth="478.0" text="Neu Verbinden">
                             <font>
-                                <Font size="53.0"/>
+                                <Font size="33.0"/>
                             </font>
                         </Button>
                     </children>
