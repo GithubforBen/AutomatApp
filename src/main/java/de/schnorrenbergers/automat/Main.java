@@ -86,6 +86,15 @@ public class Main extends Application {
             }
         });
         if (server == null) server = new Server();
+        Runtime.getRuntime().addShutdownHook(new Thread(this::shutdown));
+    }
+
+    public void shutdown() {
+        try {
+            configurationManager.save();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**

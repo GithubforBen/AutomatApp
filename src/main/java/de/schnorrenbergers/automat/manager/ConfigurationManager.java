@@ -2,16 +2,33 @@ package de.schnorrenbergers.automat.manager;
 
 import org.yaml.snakeyaml.Yaml;
 
-import java.io.InputStream;
+import java.io.*;
 import java.util.Map;
 
 public class ConfigurationManager {
     private final Map<String, Object> objMap;
+    private final File file;
 
     public ConfigurationManager() {
+        file = new File("./config.yaml");
         Yaml yaml = new Yaml();
-        InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream("config.yaml");
-        objMap = yaml.load(inputStream);
+        if (!file.exists()) {
+            InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream("config.yaml");
+            objMap = yaml.load(inputStream);
+        } else {
+            try {
+                objMap = yaml.load(new FileReader(file));
+            } catch (FileNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    public void save() throws IOException {
+        FileWriter fileWriter = new FileWriter(file);
+        fileWriter.write(new Yaml().dump(objMap));
+        fileWriter.flush();
+        fileWriter.close();
     }
 
     public Object get(String key) {
