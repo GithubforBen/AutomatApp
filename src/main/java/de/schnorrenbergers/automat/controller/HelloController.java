@@ -61,9 +61,9 @@ public class HelloController implements Initializable {
             Platform.runLater(() -> {
                 button.setDisable(false);
                 button.setText("Verbindung wiederherstellen\n" +
-                        "Website: " + Objects.requireNonNullElseGet(finalWebsite, () -> "/") + "\n" +
-                        "Ausgabe: " + Objects.requireNonNullElseGet(finalDispenser, () -> "/") + "\n" +
-                        "Scanner: " + Objects.requireNonNullElseGet(finalScanner, () -> "/") + "\n");
+                        "Website: " + Objects.requireNonNullElse(finalWebsite, "/") + "\n" +
+                        "Ausgabe: " + Objects.requireNonNullElse(finalDispenser, "/") + "\n" +
+                        "Scanner: " + Objects.requireNonNullElse(finalScanner, "/") + "\n");
             });
             if (website != null && dispenser != null && scanner != null) {
                 try {
