@@ -24,19 +24,14 @@ public class CustomRequest {
         if (!urlString.contains("ping")) {
             if (!isOnline()) return null;
         }
-        try {
-            URL url = new URL(urlString);
-            URLConnection urlConnection = url.openConnection();
-            urlConnection.setConnectTimeout(1000);
-            BufferedReader br = new BufferedReader(new InputStreamReader(url.openStream()));
-            StringBuilder sb = new StringBuilder();
-            br.lines().forEach(sb::append);
-            br.close();
-            return sb.toString();
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw e;
-        }
+        URL url = new URL(urlString);
+        URLConnection urlConnection = url.openConnection();
+        urlConnection.setConnectTimeout(1000);
+        BufferedReader br = new BufferedReader(new InputStreamReader(url.openStream()));
+        StringBuilder sb = new StringBuilder();
+        br.lines().forEach(sb::append);
+        br.close();
+        return sb.toString();
     }
 
     public boolean isOnline() {
