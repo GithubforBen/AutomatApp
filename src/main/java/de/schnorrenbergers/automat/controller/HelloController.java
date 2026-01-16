@@ -48,12 +48,14 @@ public class HelloController implements Initializable {
                 dispenser = new CustomRequest("ping", CustomRequest.REVIVER.DISPENSER).execute();
             } catch (Exception e) {
                 dispenser = null;
+                e.printStackTrace();
             }
             String scanner;
             try {
                 scanner = new CustomRequest("ping", CustomRequest.REVIVER.SCANNER).execute();
             } catch (IOException e) {
                 scanner = null;
+                e.printStackTrace();
             }
             String finalWebsite = website;
             String finalScanner = scanner;
