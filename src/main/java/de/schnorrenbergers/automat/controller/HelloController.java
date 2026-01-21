@@ -23,6 +23,7 @@ public class HelloController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        System.out.println("Loading Hello");
         button.setDisable(false);
         for (SplitPane.Divider divider : pane.getDividers()) {
             divider.positionProperty().addListener((observable, oldValue, newValue) -> {

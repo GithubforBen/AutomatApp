@@ -207,19 +207,23 @@ public class Main extends Application {
     }
 
     public void load() throws IOException {
+        System.out.println("Load");
         FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("main-view.fxml"));
         Scene scene = new Scene(fxmlLoader.load(), dimension.getWidth(), dimension.getHeight());
         stage.setTitle("Hello!");
         stage.setScene(scene);
         stage.show();
         try {
+            System.out.println("Ping");
             new CustomRequest("ping", CustomRequest.REVIVER.WEBSITE).execute();
             new CustomRequest("ping", CustomRequest.REVIVER.SCANNER).execute();
             new CustomRequest("ping", CustomRequest.REVIVER.DISPENSER).execute();
         } catch (Exception e) {
+            System.out.println("Erorrr  löls dkösfö");
             loadScene("hello-view.fxml");
         }
         new CustomRequest("alarm_off", CustomRequest.REVIVER.SCANNER).execute();
+        System.out.println("Load done");
     }
 
     public void kost() throws IOException {

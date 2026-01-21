@@ -37,25 +37,28 @@ Handler: LoginHandler
 
 - Request (application/json):
   {
-  "id": long, // internal user ID
-  "time": long // epoch millis
+  "rfid": [int, int, int, int, ...] // raw UID bytes of the card
   }
 
 - Responses:
-    - 200 text/plain
-      "GOOD BOY"
-    - 400 text/plain
-      "BAD REQUEST: 400" (e.g., missing/invalid fields)
+    - 200 application/json
+      {
+      "cameIn": boolean, // true if this call registered an entry, false if it registered an exit
+      "time": number, // current account balance (Kontostand)
+      "name": string // user's full name
+      }
     - 405 text/plain
       "Method not allowed" (non-POST)
     - 410 text/plain
       "Can't parse JSON"
+    - 501 text/plain
+      "There is no user associated with this rfid card. Please register one or start crying." (user not found)
 
 - Long description:
-  Triggers a login event for a user by internal database ID at the given timestamp. The handler currently calls the
-  login twice (at time and time+1000), which is used by the app’s logic to register an in/out pair for testing or
-  bookkeeping. Use POST only; other methods return 405. Invalid JSON yields 410. If parameters are missing/invalid, 400
-  may be returned.
+  Authenticates a user by RFID card. The handler expects the raw RFID UID as an integer array, looks up the associated
+  user, toggles their attendance state via LoginManager, and responds with a JSON object containing whether the user
+  just came in or left, their current balance, and their full name. Use POST only; other methods return 405. Invalid
+  JSON yields 410. If no user is associated with the RFID, a 501 response is returned with a descriptive message.
 
 ### 2) POST /scanned
 
