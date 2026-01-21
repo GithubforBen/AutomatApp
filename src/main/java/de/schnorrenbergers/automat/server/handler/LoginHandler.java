@@ -5,6 +5,7 @@ import com.sun.net.httpserver.HttpHandler;
 import de.schnorrenbergers.automat.database.types.User;
 import de.schnorrenbergers.automat.manager.KontenManager;
 import de.schnorrenbergers.automat.manager.LoginManager;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -26,10 +27,20 @@ public class LoginHandler extends CustomHandler implements HttpHandler {
             jsonResponse.put("time", kontenManager.getKonto().getBalance());
             User user = kontenManager.getKonto().getUser();
             jsonResponse.put("name", user.getFullName());
+            jsonResponse.put("text", getText(user));
             respond(exchange, jsonResponse.toString());
         } catch (Exception e) {
             e.printStackTrace();
             respondDataNotFound(exchange, "There is no user associated with this rfid card. Please register one or start crying.");
         }
+    }
+
+    private JSONArray getText(User user) {
+        JSONArray array = new JSONArray();
+        array.put("Herzlich Willkommen,");
+        array.put(user.getFullName());
+        array.put("im MINT-Zentrum!");
+        array.put("User ID:" + user.getId());
+        return array;
     }
 }
