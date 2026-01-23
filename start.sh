@@ -1,5 +1,5 @@
 ln -s /home/ben/Documents/AutomatApp/start.sh /home/ben/Desktop/start
-cd /home/ben/Documents/AutomatApp
+cd /home/ben/Documents/AutomatApp || exit
 git pull
 sudo apt install tmux -y
 sudo apt install openjdk-21-jdk -y
