@@ -45,7 +45,8 @@ Handler: LoginHandler
       {
       "cameIn": boolean, // true if this call registered an entry, false if it registered an exit
       "time": number, // current account balance (Kontostand)
-      "name": string // user's full name
+      "name": string, // user's full name
+      "text": string[] // localized welcome/information lines intended for display
       }
     - 405 text/plain
       "Method not allowed" (non-POST)
@@ -57,8 +58,10 @@ Handler: LoginHandler
 - Long description:
   Authenticates a user by RFID card. The handler expects the raw RFID UID as an integer array, looks up the associated
   user, toggles their attendance state via LoginManager, and responds with a JSON object containing whether the user
-  just came in or left, their current balance, and their full name. Use POST only; other methods return 405. Invalid
-  JSON yields 410. If no user is associated with the RFID, a 501 response is returned with a descriptive message.
+  just came in or left, their current balance, their full name, and a localized array of text lines to display on the
+  client (e.g., greeting, full name, location string, and a "User ID:<id>" line). Use POST only; other methods return
+    405. Invalid JSON yields 410. If no user is associated with the RFID, a 501 response is returned with a descriptive
+         message.
 
 ### 2) POST /scanned
 
