@@ -123,7 +123,7 @@ public class Main extends Application {
         stage.setAlwaysOnTop(true);
     }
 
-    public void startWithouthPassword(Stage stage) throws Exception {
+    public void startWithoutPassword(Stage stage) throws Exception {
         instance = this;
         configurationManager = new ConfigurationManager();
         dimension = new Dimension2D(

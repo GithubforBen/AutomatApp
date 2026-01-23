@@ -70,7 +70,7 @@ public class HelloController implements Initializable {
             });
             if (website != null && dispenser != null && scanner != null) {
                 try {
-                    Main.getInstance().startWithouthPassword(Main.getInstance().getStage());
+                    Main.getInstance().startWithoutPassword(Main.getInstance().getStage());
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
