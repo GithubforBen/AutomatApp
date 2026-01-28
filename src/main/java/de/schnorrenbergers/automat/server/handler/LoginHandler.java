@@ -40,7 +40,7 @@ public class LoginHandler extends CustomHandler implements HttpHandler {
         array.put("Herzlich Willkommen,");
         array.put(user.getFullName());
         array.put("im MINT-Zentrum!");
-        array.put("User ID:" + user.getId());
+        array.put("Stunden:" + new KontenManager(user.getId()).getKonto().getBalanceRounded());
         return array;
     }
 }
