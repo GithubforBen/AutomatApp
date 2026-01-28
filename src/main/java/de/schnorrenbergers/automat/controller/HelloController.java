@@ -69,11 +69,13 @@ public class HelloController implements Initializable {
                         "Scanner: " + Objects.requireNonNullElse(finalScanner, "/") + "\n");
             });
             if (website != null && dispenser != null && scanner != null) {
-                try {
-                    Main.getInstance().startWithoutPassword(Main.getInstance().getStage());
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
+                Platform.runLater(() -> {
+                    try {
+                        Main.getInstance().startWithoutPassword(Main.getInstance().getStage());
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                });
             }
         }).start();
     }
