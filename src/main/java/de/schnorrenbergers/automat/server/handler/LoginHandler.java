@@ -38,9 +38,9 @@ public class LoginHandler extends CustomHandler implements HttpHandler {
     private JSONArray getText(User user) {
         JSONArray array = new JSONArray();
         array.put("Herzlich Willkommen,");
-        array.put(user.getFullName());
+        array.put(user.getFullName().substring(0, Math.min(user.getFullName().length(), 20)));
         array.put("im MINT-Zentrum!");
-        array.put("Stunden:" + new KontenManager(user.getId()).getKonto().getBalanceRounded());
+        array.put("Stunden: " + new KontenManager(user.getId()).getKonto().getBalanceRounded());
         return array;
     }
 }
