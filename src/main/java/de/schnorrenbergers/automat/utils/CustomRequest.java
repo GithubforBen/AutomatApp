@@ -76,6 +76,6 @@ public class CustomRequest {
     }
 
     public enum REVIVER {
-        WEBSITE, DISPENSER, SCANNER
+        WEBSITE, DISPENSER, SCANNER, STATION
     }
 }

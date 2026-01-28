@@ -233,8 +233,8 @@ public class Main extends Application {
             new CustomRequest("ping", CustomRequest.REVIVER.WEBSITE).execute();
             new CustomRequest("ping", CustomRequest.REVIVER.SCANNER).execute();
             new CustomRequest("ping", CustomRequest.REVIVER.DISPENSER).execute();
+            new CustomRequest("ping", CustomRequest.REVIVER.STATION).execute();
         } catch (Exception e) {
-            System.out.println("Erorrr  löls dkösfö");
             loadScene("hello-view.fxml");
         }
         //TODO: add new CustomRequest("alarm_off", CustomRequest.REVIVER.SCANNER).execute();
@@ -334,6 +334,7 @@ public class Main extends Application {
             case WEBSITE -> configurationManager.getString("website-url");
             case DISPENSER -> configurationManager.getString("dispenser-url");
             case SCANNER -> configurationManager.getString("scanner-url");
+            case STATION -> configurationManager.getString("station-url");
         };
     }
 

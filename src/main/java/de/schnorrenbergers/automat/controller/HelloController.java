@@ -58,15 +58,24 @@ public class HelloController implements Initializable {
                 scanner = null;
                 e.printStackTrace();
             }
+            String station;
+            try {
+                station = new CustomRequest("ping", CustomRequest.REVIVER.STATION).execute();
+            } catch (IOException e) {
+                station = null;
+                e.printStackTrace();
+            }
             String finalWebsite = website;
             String finalScanner = scanner;
             String finalDispenser = dispenser;
+            String finalStation = station;
             Platform.runLater(() -> {
                 button.setDisable(false);
-                button.setText("Verbindung wiederherstellen\n" +
+                button.setText("erneuter versuch\n" +
                         "Website: " + Objects.requireNonNullElse(finalWebsite, "/") + "\n" +
                         "Ausgabe: " + Objects.requireNonNullElse(finalDispenser, "/") + "\n" +
-                        "Scanner: " + Objects.requireNonNullElse(finalScanner, "/") + "\n");
+                        "Scanner: " + Objects.requireNonNullElse(finalScanner, "/") + "\n" +
+                        "Station: " + Objects.requireNonNullElse(finalStation, "/") + "\n");
             });
             if (website != null && dispenser != null && scanner != null) {
                 Platform.runLater(() -> {
