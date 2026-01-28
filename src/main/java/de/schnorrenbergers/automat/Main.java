@@ -35,6 +35,10 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * Für jeden der sich denkt, dass man das "nur mal kurz" fixt, NEIN lass ab. Selbst ich habe keine ahnung was hier wie geschieht.
+ * Das Projekt ist entstanden in "Ich mache mal ne richtige Datenbank und programm!" knapp 4500 Zeilen Code später weiß ich nicht mehr was wo was tut.
+ */
 public class Main extends Application {
     private static Main instance;
     private Stage stage;

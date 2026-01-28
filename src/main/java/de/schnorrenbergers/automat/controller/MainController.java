@@ -3,9 +3,8 @@ package de.schnorrenbergers.automat.controller;
 import de.schnorrenbergers.automat.Main;
 import de.schnorrenbergers.automat.manager.AvailabilityManager;
 import de.schnorrenbergers.automat.manager.ConfigurationManager;
+import de.schnorrenbergers.automat.manager.DispensationManager;
 import de.schnorrenbergers.automat.manager.KontenManager;
-import de.schnorrenbergers.automat.manager.StatisticManager;
-import de.schnorrenbergers.automat.utils.CustomRequest;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -19,7 +18,6 @@ import javafx.scene.text.Font;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.Arrays;
 import java.util.ResourceBundle;
 
 public class MainController implements Initializable {
@@ -121,6 +119,10 @@ public class MainController implements Initializable {
             }).start();
             return;
         }
+        if (!DispensationManager.canDispense()) {
+            setText("Bitte warten...", Color.RED, true);
+            return;
+        }
         try {
             KontenManager kontenManager = new KontenManager(Main.getInstance().getLastScan());
             ConfigurationManager configurationManager = new ConfigurationManager();
@@ -129,11 +131,7 @@ public class MainController implements Initializable {
             if (kontenManager.getKonto().getBalance() >= configurationManager.getInt("sweets._" + number + ".kost")
                     || kontenManager.getKonto().getBalance() == Integer.MIN_VALUE
                     || !Boolean.parseBoolean(Main.getInstance().getSettings().getSettingOrDefault("checkTime", String.valueOf(true)))) {
-                new CustomRequest("dispense", CustomRequest.REVIVER.DISPENSER).executeComplex("{\"nr\":" + number + ",\"cost\":" + configurationManager.getInt("sweets._" + number + ".kost") + ",\"usr\":" + Arrays.toString(Main.getInstance().getLastScan()) + "}");
-                Main.getInstance().setLastScan(null);
-                kontenManager.withdraw(configurationManager.getInt("sweets._" + number + ".kost"));
-                Main.getInstance().kost();
-                new StatisticManager().persistDispense(number);
+                DispensationManager.dispense(number, kontenManager, configurationManager);
             } else {
                 setText("Nicht genug Stunden", Color.RED, true);
             }
