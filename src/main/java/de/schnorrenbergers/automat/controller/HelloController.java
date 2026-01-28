@@ -77,7 +77,7 @@ public class HelloController implements Initializable {
                         "Scanner: " + Objects.requireNonNullElse(finalScanner, "/") + "\n" +
                         "Station: " + Objects.requireNonNullElse(finalStation, "/") + "\n");
             });
-            if (website != null && dispenser != null && scanner != null) {
+            if (website != null && dispenser != null && scanner != null && station != null) {
                 Platform.runLater(() -> {
                     try {
                         Main.getInstance().startWithoutPassword(Main.getInstance().getStage());
