@@ -222,7 +222,7 @@ public class Main extends Application {
             System.out.println("Erorrr  löls dkösfö");
             loadScene("hello-view.fxml");
         }
-        new CustomRequest("alarm_off", CustomRequest.REVIVER.SCANNER).execute();
+        //TODO: add new CustomRequest("alarm_off", CustomRequest.REVIVER.SCANNER).execute();
         System.out.println("Load done");
     }
 
