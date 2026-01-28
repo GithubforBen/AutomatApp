@@ -5,7 +5,7 @@ meta {
 }
 
 post {
-  url: http://127.0.1.1:8000/addStudent
+  url: http://192.168.188.46:8000/addStudent
   body: json
   auth: inherit
 }
@@ -13,19 +13,20 @@ post {
 body:json {
   {
     "address": {
-      "nr": 1,
-      "street": "Test",
-      "city": "Darmstadt",
-      "zip": 64342,
+      "nr": 24,
+      "street": "Adolf Kübel Straße",
+      "city": "Groß-Gerau",
+      "zip": 64521,
       "country": "Germany"
     },
-    "firstName": "David",
-    "lastName": "Glänzel",
+    "firstName": "Annika",
+    "lastName": "Reinhardt",
     "rfid": [
-      0,
-      1,
-      2,
-      3
+      53,
+      216,
+      230,
+      82,
+      89
     ],
     "gender": "OTHER",
     "birthday": 939393,

@@ -228,6 +228,13 @@ public class Main extends Application {
         stage.setTitle("Hello!");
         stage.setScene(scene);
         stage.show();
+        ping();
+        //TODO: add new CustomRequest("alarm_off", CustomRequest.REVIVER.SCANNER).execute();
+        System.out.println("Load done");
+    }
+
+    public void ping() {
+
         try {
             System.out.println("Ping");
             new CustomRequest("ping", CustomRequest.REVIVER.WEBSITE).execute();
@@ -237,8 +244,6 @@ public class Main extends Application {
         } catch (Exception e) {
             loadScene("hello-view.fxml");
         }
-        //TODO: add new CustomRequest("alarm_off", CustomRequest.REVIVER.SCANNER).execute();
-        System.out.println("Load done");
     }
 
     public void kost() throws IOException {
