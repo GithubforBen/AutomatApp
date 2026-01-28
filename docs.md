@@ -552,6 +552,7 @@ student names and attendance dates, with each row representing a student and eac
 
 - All responses with 200 OK status include a text message indicating success or the requested data.
 - JSON parsing errors result in a 410 status code with message "Can't parse JSON".
+- Documentation completely vibecoded with Claude Code
 - Method not allowed errors return a 405 status code with message "Method not allowed".
 - The API operates on port 8000 by default.
 - Authentication is handled via RFID scanning rather than traditional username/password.
