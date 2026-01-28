@@ -27,7 +27,7 @@ public class LoginHandler extends CustomHandler implements HttpHandler {
             jsonResponse.put("time", kontenManager.getKonto().getBalance());
             User user = kontenManager.getKonto().getUser();
             jsonResponse.put("name", user.getFullName());
-            jsonResponse.put("text", getText(user));
+            jsonResponse.put("text", getText(user, rfid));
             respond(exchange, jsonResponse.toString());
         } catch (Exception e) {
             e.printStackTrace();
@@ -35,9 +35,9 @@ public class LoginHandler extends CustomHandler implements HttpHandler {
         }
     }
 
-    private JSONArray getText(User user) {
+    private JSONArray getText(User user, boolean cameIn) {
         JSONArray array = new JSONArray();
-        array.put("Herzlich Willkommen,");
+        array.put(cameIn ? "Herzlich Willkommen," : "Auf Wiedersehen,");
         array.put(user.getFullName().substring(0, Math.min(user.getFullName().length(), 20)));
         array.put("im MINT-Zentrum!");
         array.put("Stunden: " + new KontenManager(user.getId()).getKonto().getBalanceRounded());
