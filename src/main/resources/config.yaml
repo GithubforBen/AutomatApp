@@ -27,7 +27,7 @@ sweets:
 # time it takes for a login to be invalidated
 invalidation-time: 14
 website-url: "http://127.0.0.1:8080"
-dispenser-url: "http://192.168.188.200"
+dispenser-url: "http://192.168.188.202"
 scanner-url: "http://192.168.188.201"
 default-logout-time: 10
 window-dimension:
