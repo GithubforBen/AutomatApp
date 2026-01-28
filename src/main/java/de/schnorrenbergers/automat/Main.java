@@ -50,6 +50,14 @@ public class Main extends Application {
     private StatisticManager handler;
     private ConfigurationManager configurationManager;
 
+    public static void main(String[] args) {
+        launch();
+    }
+
+    public static Main getInstance() {
+        return instance;
+    }
+
     /**
      * Used to Initialize all objects.
      *
@@ -66,8 +74,10 @@ public class Main extends Application {
         logoutTime = Integer.parseInt(settingsManager.getSettingOrDefault("logout", String.valueOf(logoutTime)));
         checkAvailability = Boolean.parseBoolean(settingsManager.getSettingOrDefault("availability", String.valueOf(false)));
         database.getSessionFactory().inTransaction((x) -> {
-            x.createSelectionQuery("from Student s", Student.class).getResultList().forEach(System.out::println);
-            if (!x.createSelectionQuery("from Student s", Student.class).getResultList().isEmpty()) return;
+            if (!x.createSelectionQuery("from Student s", Student.class).getResultList().isEmpty()) {
+                System.out.println("Database already initialized");
+                return;
+            }
             Wohnort wohnortT = new Wohnort(1, "s", "s", 456, "dsa");
             Wohnort wohnortS = new Wohnort(1, "s", "s", 4456, "dsa");
             try {
@@ -79,11 +89,11 @@ public class Main extends Application {
                 x.persist(teacher);
                 x.persist(kurs);
                 x.persist(student);
-                new KontenManager(new int[]{99, 253, 101, 0, 251}).deposit(1000);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
         });
+        new KontenManager(new int[]{99, 253, 101, 0, 251}).deposit(1000);
         if (server == null) server = new Server();
         Runtime.getRuntime().addShutdownHook(new Thread(this::shutdown));
     }
@@ -296,21 +306,23 @@ public class Main extends Application {
         });
     }
 
-    public void setCheckAvailability(boolean checkAvailability) {
-        this.checkAvailability = checkAvailability;
-        settingsManager.setSetting("availability", String.valueOf(checkAvailability));
-    }
-
     public int[] getLastScan() {
         return lastScan;
     }
 
-    public static void main(String[] args) {
-        launch();
-    }
-
-    public static Main getInstance() {
-        return instance;
+    public void setLastScan(int[] lastScan) {
+        this.lastScan = lastScan;
+        updateDisplay();
+        if (lastScan == null) return;
+        new Thread(() -> {
+            try {
+                Thread.sleep(1000L * logoutTime);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            if (lastScan == this.lastScan) this.lastScan = null;
+            updateDisplay();
+        }).start();
     }
 
     public String getUrl(CustomRequest.REVIVER reviver) {
@@ -331,21 +343,6 @@ public class Main extends Application {
 
     public Server getServer() {
         return server;
-    }
-
-    public void setLastScan(int[] lastScan) {
-        this.lastScan = lastScan;
-        updateDisplay();
-        if (lastScan == null) return;
-        new Thread(() -> {
-            try {
-                Thread.sleep(1000L * logoutTime);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-            if (lastScan == this.lastScan) this.lastScan = null;
-            updateDisplay();
-        }).start();
     }
 
     public int getLogoutTime() {
@@ -369,12 +366,21 @@ public class Main extends Application {
         return checkAvailability;
     }
 
+    public void setCheckAvailability(boolean checkAvailability) {
+        this.checkAvailability = checkAvailability;
+        settingsManager.setSetting("availability", String.valueOf(checkAvailability));
+    }
+
     public ScreenSaver getScreenSaver() {
         return screenSaver;
     }
 
     public Database getDatabase() {
         return database;
+    }
+
+    public void setDatabase(Database database) {
+        this.database = database;
     }
 
     public SettingsManager getSettings() {
@@ -391,9 +397,5 @@ public class Main extends Application {
 
     public ConfigurationManager getConfigurationManager() {
         return configurationManager;
-    }
-
-    public void setDatabase(Database database) {
-        this.database = database;
     }
 }

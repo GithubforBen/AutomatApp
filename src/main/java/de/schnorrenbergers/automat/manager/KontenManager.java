@@ -31,6 +31,7 @@ public class KontenManager {
         Main.getInstance().getDatabase().getSessionFactory().inTransaction(session -> {
             List<User> resultList = session.createSelectionQuery("from User u where u.rfid in :rfid", User.class)
                     .setParameter("rfid", rfid).getResultList();
+            session.createSelectionQuery("from User u", User.class).getResultList().forEach(System.out::println);
             this.id = resultList.getFirst().getId();
         });
     }
