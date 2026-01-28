@@ -79,6 +79,7 @@ public class Main extends Application {
                 x.persist(teacher);
                 x.persist(kurs);
                 x.persist(student);
+                new KontenManager(new int[]{99, 253, 101, 0, 251}).deposit(1000);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
