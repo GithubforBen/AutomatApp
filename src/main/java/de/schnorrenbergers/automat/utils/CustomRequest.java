@@ -60,6 +60,7 @@ public class CustomRequest {
         urlConnection.setRequestProperty("Content-Type", "application/json");
         urlConnection.setRequestProperty("Accept", "application/json");
         urlConnection.setConnectTimeout(1000);
+        urlConnection.setReadTimeout(1000 * 60);
         OutputStream outputStream = urlConnection.getOutputStream();
         outputStream.write(data.getBytes());
         outputStream.flush();
