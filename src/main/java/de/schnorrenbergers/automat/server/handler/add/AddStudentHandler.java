@@ -4,9 +4,9 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import de.schnorrenbergers.automat.Main;
 import de.schnorrenbergers.automat.database.types.Kurs;
-import de.schnorrenbergers.automat.database.types.Student;
 import de.schnorrenbergers.automat.database.types.types.Gender;
 import de.schnorrenbergers.automat.database.types.types.Wohnort;
+import de.schnorrenbergers.automat.manager.AddUserHandler;
 import de.schnorrenbergers.automat.server.handler.CustomHandler;
 import org.hibernate.Session;
 import org.json.JSONObject;
@@ -48,28 +48,19 @@ public class AddStudentHandler extends CustomHandler implements HttpHandler {
                     address.getString("city"),
                     address.getInt("zip"),
                     address.getString("country"));
-            //String firstName, String lastName, int[] rfid, Gender gender, Date age, Wohnort wohnort, Kurs[] kurse
-            Student student = new Student(
+            AddUserHandler.add(new AddUserHandler.UserAdd(
+                    wohnort,
                     jsonObject.getString("firstName"),
                     jsonObject.getString("lastName"),
-                    jsonObject.getJSONArray("rfid").toList().stream().mapToInt((x) -> {
-                        return Integer.parseInt(String.valueOf(x));
-                    }).toArray(),
                     Gender.valueOf(jsonObject.getString("gender")),
                     new Date(jsonObject.getLong("birthday")),
-                    wohnort,
                     jsonObject.getJSONArray("kurse").toList().stream().map((x) -> {
                         Session session = Main.getInstance().getDatabase().getSessionFactory().openSession();
                         Kurs k = session.get(Kurs.class, Long.valueOf(String.valueOf(x)));
                         session.close();
                         return k;
-                    }).collect(Collectors.toList())
-            );
-            Main.getInstance().getDatabase().getSessionFactory().inTransaction(session -> {
-                session.persist(wohnort);
-                session.persist(student);
-                session.flush();
-            });
+                    }).collect(Collectors.toList()
+                    )));
             respond(exchange, "Successfully added student");
         } catch (Exception e) {
             jsonError(exchange);

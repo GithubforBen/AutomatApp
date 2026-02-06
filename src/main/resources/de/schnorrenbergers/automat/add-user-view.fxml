@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+<AnchorPane xmlns:fx="http://javafx.com/fxml/1" prefHeight="800.0" prefWidth="480.0"
+            xmlns="http://javafx.com/javafx/17.0.12"
+            fx:controller="de.schnorrenbergers.automat.controller.AddUserController">
+    <children>
+        <VBox prefHeight="800.0" prefWidth="480.0">
+            <children>
+                <Label fx:id="nextUser" prefHeight="377.0" prefWidth="480.0" text="Nächster Nutzer: David G."
+                       textAlignment="CENTER" textOverrun="WORD_ELLIPSIS" wrapText="true">
+                    <font>
+                        <Font size="58.0"/>
+                    </font>
+                </Label>
+                <Label fx:id="announce" prefHeight="273.0" prefWidth="480.0"
+                       text="announce jkjkjkjlfjdlfjdlks jsfldjlsdjl" textAlignment="CENTER" wrapText="true">
+                    <font>
+                        <Font size="58.0"/>
+                    </font>
+                </Label>
+                <Button mnemonicParsing="false" onAction="#back" prefHeight="151.0" prefWidth="521.0" text="&lt;- Back"
+                        textAlignment="CENTER">
+                    <font>
+                        <Font size="45.0"/>
+                    </font>
+                </Button>
+            </children>
+        </VBox>
+    </children>
+</AnchorPane>

@@ -120,4 +120,9 @@ public class SettingsController implements Initializable {
         Main.getInstance().getScreenSaver().setLastMove(System.currentTimeMillis());
         Main.getInstance().ping();
     }
+
+    public void addUser(ActionEvent event) {
+        Main.getInstance().getScreenSaver().setLastMove(System.currentTimeMillis());
+        Main.getInstance().loadScene("add-user-view.fxml");
+    }
 }

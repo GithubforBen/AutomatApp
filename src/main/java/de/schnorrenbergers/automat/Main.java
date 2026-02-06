@@ -1,12 +1,10 @@
 package de.schnorrenbergers.automat;
 
 import atlantafx.base.theme.PrimerDark;
+import de.schnorrenbergers.automat.controller.AddUserController;
 import de.schnorrenbergers.automat.controller.MainController;
 import de.schnorrenbergers.automat.database.Database;
-import de.schnorrenbergers.automat.database.types.Kurs;
-import de.schnorrenbergers.automat.database.types.Student;
-import de.schnorrenbergers.automat.database.types.Teacher;
-import de.schnorrenbergers.automat.database.types.User;
+import de.schnorrenbergers.automat.database.types.*;
 import de.schnorrenbergers.automat.database.types.types.Day;
 import de.schnorrenbergers.automat.database.types.types.Gender;
 import de.schnorrenbergers.automat.database.types.types.Level;
@@ -320,8 +318,32 @@ public class Main extends Application {
     }
 
     public void setLastScan(int[] lastScan) {
-        this.lastScan = lastScan;
+        if ("add-user-view.fxml".equals(Main.getInstance().getStage().getScene().getUserData())) {
+            try {
+                Konto konto = new KontenManager(lastScan).getKonto();
+                AddUserController.lastScan = konto.getUser().getFullName();
+            } catch (Exception e) {
+                AddUserHandler.UserAdd peek = AddUserHandler.addQueue.poll();
+                if (peek == null) return;
+
+                Main.getInstance().getDatabase().getSessionFactory().inTransaction(session -> {
+                    session.persist(peek.getWohnort());
+                    session.persist(new Student(
+                            peek.getVorname(),
+                            peek.getNachname(),
+                            lastScan,
+                            peek.getGender(),
+                            peek.getDate(),
+                            peek.getWohnort(),
+                            peek.getKurse()
+                    ));
+                    session.flush();
+                });
+            }
+            return;
+        }
         updateDisplay();
+        this.lastScan = lastScan;
         if (lastScan == null) return;
         new Thread(() -> {
             try {
