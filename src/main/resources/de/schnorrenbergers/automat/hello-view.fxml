@@ -17,6 +17,8 @@
                     <children>
                         <ProgressIndicator layoutX="211.0" layoutY="224.0" prefHeight="120.0" prefWidth="154.0"
                                            scaleX="7.0" scaleY="7.0" AnchorPane.leftAnchor="211.0"/>
+                        <Button mnemonicParsing="false" onAction="#check" prefHeight="109.0" prefWidth="218.0"
+                                text="check"/>
                     </children>
                 </AnchorPane>
                 <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">

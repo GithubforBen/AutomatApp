@@ -11,7 +11,7 @@ public class CipherManager {
         return new SecretKeySpec(pass.getBytes(), "AES");
     }
 
-    public String encrypt(String password) throws Exception {
+    public String encrypt(String password) {
         return BCrypt.withDefaults().hashToString(12, password.toCharArray());
     }
 /*

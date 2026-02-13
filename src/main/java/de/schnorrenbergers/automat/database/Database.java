@@ -47,6 +47,7 @@ public class Database {
                 .addAnnotatedClass(Login.class)
                 .addAnnotatedClass(Konto.class)
                 .addAnnotatedClass(Sweet.class)
+                .addAnnotatedClass(de.schnorrenbergers.automat.database.types.auth.HMACToken.class)
                 .addAnnotatedClass(Attandance.class);
         sessionFactory = configuration
                 .buildSessionFactory();
@@ -56,8 +57,3 @@ public class Database {
         return sessionFactory;
     }
 }
-/*
-
-                .setProperty("connection.username", user)
-                .setProperty("connection.password", password)
- */

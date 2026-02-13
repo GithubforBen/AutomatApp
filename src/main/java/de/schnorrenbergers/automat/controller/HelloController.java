@@ -97,4 +97,8 @@ public class HelloController implements Initializable {
             throw new RuntimeException(e);
         }
     }
+
+    public void check(ActionEvent event) {
+        Main.getInstance().loadScene("hmac-view.fxml");
+    }
 }

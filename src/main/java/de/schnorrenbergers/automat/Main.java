@@ -11,6 +11,7 @@ import de.schnorrenbergers.automat.database.types.types.Level;
 import de.schnorrenbergers.automat.database.types.types.Wohnort;
 import de.schnorrenbergers.automat.manager.*;
 import de.schnorrenbergers.automat.server.Server;
+import de.schnorrenbergers.automat.spring.SpringApi;
 import de.schnorrenbergers.automat.utils.CustomRequest;
 import de.schnorrenbergers.automat.utils.types.ScreenSaver;
 import javafx.application.Application;
@@ -26,6 +27,8 @@ import javafx.scene.layout.Border;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
+import org.springframework.boot.SpringApplication;
+import org.springframework.context.ConfigurableApplicationContext;
 
 import java.io.IOException;
 import java.sql.Date;
@@ -51,6 +54,8 @@ public class Main extends Application {
     private SettingsManager settingsManager;
     private StatisticManager handler;
     private ConfigurationManager configurationManager;
+    private ConfigurableApplicationContext run;
+    private boolean initialized = false;
 
     public static void main(String[] args) {
         launch();
@@ -60,14 +65,12 @@ public class Main extends Application {
         return instance;
     }
 
-    /**
-     * Used to Initialize all objects.
-     *
-     * @throws IOException            Programm wont work.
-     * @throws SQLException           Programm wont work.
-     * @throws ClassNotFoundException Programm wont work.
-     */
     public void initialise() throws Exception {
+        if (initialized) {
+            System.out.println("Already initialized, skipping...");
+            return;
+        }
+    
         System.out.println("Initialize");
         logoutTime = configurationManager.getInt("default-logout-time");
         settingsManager = new SettingsManager();
@@ -96,11 +99,17 @@ public class Main extends Application {
             }
         });
         new KontenManager(new int[]{99, 253, 101, 0, 251}).deposit(1000);
-        if (server == null) server = new Server();
-        Runtime.getRuntime().addShutdownHook(new Thread(this::shutdown));
+
+        if (run == null) {
+            run = SpringApplication.run(SpringApi.class);
+        }
+
+        initialized = true;
     }
 
-    public void shutdown() {
+    @Override
+    public void stop() throws Exception {
+        run.close();
         try {
             configurationManager.save();
         } catch (IOException e) {

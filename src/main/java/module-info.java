@@ -44,6 +44,20 @@ module de.schnorrenbergers.automat {
     requires org.yaml.snakeyaml;
     requires bcrypt;
     requires java.desktop;
+    requires spring.boot;
+    requires spring.boot.autoconfigure;
+    requires spring.context;
+    requires spring.web;
+    requires spring.webmvc;
+    requires jakarta.servlet;
+    requires com.github.benmanes.caffeine;
+    requires spring.beans;
+    requires spring.core;
+    requires spring.security.crypto;
+    requires spring.security.core;
+    requires spring.security.web;
+    requires spring.security.config;
+    requires org.jspecify;
     //requires de.schnorrenbergers.automat;
     //requires de.schnorrenbergers.automat;
 
@@ -51,8 +65,11 @@ module de.schnorrenbergers.automat {
     exports de.schnorrenbergers.automat;
     exports de.schnorrenbergers.automat.controller;
     opens de.schnorrenbergers.automat.controller to javafx.fxml;
+    opens de.schnorrenbergers.automat.spring to spring.core, spring.beans, spring.context;
     opens de.schnorrenbergers.automat.database.types to org.hibernate.orm.core, jakarta.persistence, java.base;
+    opens de.schnorrenbergers.automat.database.types.auth to org.hibernate.orm.core, jakarta.persistence, java.base;
     exports de.schnorrenbergers.automat.utils.types to org.hibernate.orm.core, jakarta.persistence, java.base;
     opens de.schnorrenbergers.automat.database.types.types to jakarta.persistence, java.base, org.hibernate.orm.core;
     exports de.schnorrenbergers.automat.utils to jakarta.persistence, java.base, org.hibernate.orm.core;
+    opens de.schnorrenbergers.automat.spring.mappings to spring.core, spring.beans, spring.context, spring.web, spring.webmvc;
 }
