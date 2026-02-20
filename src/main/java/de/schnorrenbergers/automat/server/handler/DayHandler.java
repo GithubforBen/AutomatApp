@@ -7,6 +7,7 @@ import de.schnorrenbergers.automat.database.types.types.Day;
 import java.io.IOException;
 import java.util.Arrays;
 
+@Deprecated(forRemoval = true)
 public class DayHandler extends CustomHandler implements HttpHandler {
     @Override
     public void handle(HttpExchange exchange) throws IOException {

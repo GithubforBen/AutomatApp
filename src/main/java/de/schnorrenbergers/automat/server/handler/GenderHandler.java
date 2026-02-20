@@ -7,7 +7,7 @@ import de.schnorrenbergers.automat.database.types.types.Gender;
 import java.io.IOException;
 import java.util.Arrays;
 
-//JOKE
+@Deprecated(forRemoval = true)
 public class GenderHandler extends CustomHandler implements HttpHandler {
     @Override
     public void handle(HttpExchange exchange) throws IOException {

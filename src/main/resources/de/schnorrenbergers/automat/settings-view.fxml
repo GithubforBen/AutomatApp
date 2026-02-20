@@ -102,6 +102,8 @@
                                 <Font size="16.0"/>
                             </font>
                         </CheckBox>
+                        <Button mnemonicParsing="false" onAction="#hmac" prefHeight="132.0" prefWidth="254.0"
+                                text="HMAC"/>
                     </children>
                 </VBox>
                 <Button mnemonicParsing="false" onAction="#refresh" prefHeight="325.0" prefWidth="419.0" text="PING"
@@ -127,7 +129,8 @@
                     </children>
                 </VBox>
                 <Button mnemonicParsing="false" onAction="#addUser" prefHeight="475.0" prefWidth="460.0"
-                        text="Hinzufügen" textAlignment="CENTER" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                        text="Nutzer Hinzufügen" textAlignment="CENTER" wrapText="true" GridPane.columnIndex="1"
+                        GridPane.rowIndex="2">
                     <font>
                         <Font size="35.0"/>
                     </font>

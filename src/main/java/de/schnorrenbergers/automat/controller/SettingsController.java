@@ -24,6 +24,10 @@ public class SettingsController implements Initializable {
     public CheckBox checkTime;
     @FXML
     public CheckBox screensaver;
+    @FXML
+    public Slider slider_logout;
+    @FXML
+    public Text display;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -45,11 +49,6 @@ public class SettingsController implements Initializable {
             Main.getInstance().getScreenSaver().setDoSaver(screensaver.isSelected());
         });
     }
-
-    @FXML
-    public Slider slider_logout;
-    @FXML
-    public Text display;
 
     public void fullscreen(ActionEvent actionEvent) {
         Main.getInstance().getStage().setFullScreen(!Main.getInstance().getStage().isFullScreen());
@@ -124,5 +123,10 @@ public class SettingsController implements Initializable {
     public void addUser(ActionEvent event) {
         Main.getInstance().getScreenSaver().setLastMove(System.currentTimeMillis());
         Main.getInstance().loadScene("add-user-view.fxml");
+    }
+
+    public void hmac(ActionEvent event) {
+        Main.getInstance().getScreenSaver().setLastMove(System.currentTimeMillis());
+        Main.getInstance().loadScene("hmac-view.fxml");
     }
 }

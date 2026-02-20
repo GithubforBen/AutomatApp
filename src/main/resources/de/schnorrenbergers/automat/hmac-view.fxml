@@ -1,32 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.*?>
 <AnchorPane xmlns:fx="http://javafx.com/fxml/1" prefHeight="800.0" prefWidth="480.0"
             xmlns="http://javafx.com/javafx/17.0.12" fx:controller="de.schnorrenbergers.automat.controller.HMACController">
     <children>
         <VBox prefHeight="200.0" prefWidth="100.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
               AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
             <children>
-                <TextField fx:id="name" promptText="HMAC Name">
+                <TextField fx:id="name" prefHeight="130.0" promptText="HMAC Name">
                     <font>
                         <Font size="46.0"/>
                     </font>
                 </TextField>
-                <Label fx:id="text" prefHeight="18.0" prefWidth="556.0" text="Label" textAlignment="CENTER">
+                <Label fx:id="text" prefHeight="130.0" prefWidth="556.0" text="msg" textAlignment="CENTER"
+                       wrapText="true">
                     <font>
                         <Font size="38.0"/>
                     </font>
                 </Label>
-                <Button mnemonicParsing="false" onAction="#ok" prefHeight="201.0" prefWidth="613.0" text="OK">
+                <Button mnemonicParsing="false" onAction="#ok" prefHeight="130.0" prefWidth="480.0" text="Erstellen">
                     <font>
-                        <Font name="System Bold" size="96.0"/>
+                        <Font name="System Bold" size="26.0"/>
                     </font>
                 </Button>
-                <Button mnemonicParsing="false" onAction="#back" prefHeight="126.0" prefWidth="480.0" text="Zurück">
+                <ChoiceBox fx:id="drop" prefHeight="133.0" prefWidth="576.0"/>
+                <Button mnemonicParsing="false" onAction="#delete" prefHeight="130.0" prefWidth="510.0" text="Löschen">
+                    <font>
+                        <Font name="System Bold" size="26.0"/>
+                    </font>
+                </Button>
+                <Button mnemonicParsing="false" onAction="#back" prefHeight="147.0" prefWidth="480.0" text="Zurück">
                     <font>
                         <Font name="System Bold" size="26.0"/>
                     </font>
