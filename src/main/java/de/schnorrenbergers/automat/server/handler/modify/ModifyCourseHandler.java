@@ -12,6 +12,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 
+@Deprecated(forRemoval = true)
 public class ModifyCourseHandler extends CustomHandler implements HttpHandler {
 
     @Override

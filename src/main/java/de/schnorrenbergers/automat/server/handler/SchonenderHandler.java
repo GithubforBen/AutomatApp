@@ -6,6 +6,7 @@ import de.schnorrenbergers.automat.Main;
 
 import java.io.IOException;
 
+@Deprecated(forRemoval = true)
 public class SchonenderHandler extends CustomHandler implements HttpHandler {
     @Override
     public void handle(HttpExchange exchange) throws IOException {

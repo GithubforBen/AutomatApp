@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.sql.Date;
 import java.util.stream.Collectors;
 
+@Deprecated(forRemoval = true)
 public class AddStudentHandler extends CustomHandler implements HttpHandler {
 
     /**

@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.ArrayList;
 
@@ -35,10 +36,13 @@ public class HMACFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws IOException, ServletException {
 
-        String keyId = request.getHeader("X-API-KEY-ID");
-        String timestamp = request.getHeader("X-TIMESTAMP");
-        String nonce = request.getHeader("X-NONCE");
-        String signature = request.getHeader("X-SIGNATURE");
+        // Wrap the request so the body can be read multiple times (filter + controller)
+        CachedBodyHttpServletRequest wrappedRequest = new CachedBodyHttpServletRequest(request);
+
+        String keyId = wrappedRequest.getHeader("X-API-KEY-ID");
+        String timestamp = wrappedRequest.getHeader("X-TIMESTAMP");
+        String nonce = wrappedRequest.getHeader("X-NONCE");
+        String signature = wrappedRequest.getHeader("X-SIGNATURE");
 
         if (keyId == null || timestamp == null || nonce == null || signature == null) {
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Missing HMAC headers");
@@ -59,7 +63,17 @@ public class HMACFilter extends OncePerRequestFilter {
                 return;
             }
 
-            if (hmacService.verifySignature(keyId, timestamp, nonce, signature)) {
+            // Read the cached body without consuming it for downstream
+            byte[] bodyBytes = wrappedRequest.getCachedBody();
+            String body = new String(bodyBytes, StandardCharsets.UTF_8);
+
+            System.out.println("[DEBUG_LOG] Verifying signature for keyId: " + keyId);
+            System.out.println("[DEBUG_LOG] Timestamp: " + timestamp);
+            System.out.println("[DEBUG_LOG] Nonce: " + nonce);
+            System.out.println("[DEBUG_LOG] Signature: " + signature);
+            System.out.println("[DEBUG_LOG] Body: '" + body + "'");
+
+            if (hmacService.verifySignature(keyId, timestamp, nonce, signature, body)) {
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(keyId, null, new ArrayList<>());
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             } else {
@@ -71,6 +85,6 @@ public class HMACFilter extends OncePerRequestFilter {
             return;
         }
 
-        filterChain.doFilter(request, response);
+        filterChain.doFilter(wrappedRequest, response);
     }
 }

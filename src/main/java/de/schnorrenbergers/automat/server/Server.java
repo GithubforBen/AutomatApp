@@ -19,6 +19,7 @@ import java.net.InetSocketAddress;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 
+@Deprecated(forRemoval = true)
 public class Server {
     /**
      * Initializes and starts an HTTP server with multiple endpoint handlers.

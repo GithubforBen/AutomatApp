@@ -7,6 +7,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
+@Deprecated(forRemoval = true)
 public class CustomHandler {
     // Standard HTTP status codes
     protected static final int OK = 200;

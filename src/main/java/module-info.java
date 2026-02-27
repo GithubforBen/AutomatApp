@@ -72,4 +72,5 @@ module de.schnorrenbergers.automat {
     opens de.schnorrenbergers.automat.database.types.types to jakarta.persistence, java.base, org.hibernate.orm.core;
     exports de.schnorrenbergers.automat.utils to jakarta.persistence, java.base, org.hibernate.orm.core;
     opens de.schnorrenbergers.automat.spring.mappings to spring.core, spring.beans, spring.context, spring.web, spring.webmvc;
+    opens de.schnorrenbergers.automat.spring.mappings.enumerations to spring.core, spring.beans;
 }

@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.sql.Date;
 import java.util.List;
 
+@Deprecated(forRemoval = true)
 public class ModifyStudentHandler extends CustomHandler implements HttpHandler {
     @Override
     public void handle(HttpExchange exchange) throws IOException {

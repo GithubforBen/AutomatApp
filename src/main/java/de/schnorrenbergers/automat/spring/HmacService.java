@@ -31,14 +31,16 @@ public class HmacService {
         }
     }
 
-    public boolean verifySignature(String keyId, String timestamp, String nonce, String signature) {
+    public boolean verifySignature(String keyId, String timestamp, String nonce, String signature, String body) {
         HMACToken token = getTokenById(keyId);
         if (token == null) {
             return false;
         }
 
-        String data = keyId + ":" + timestamp + ":" + nonce;
+        String data = keyId + ":" + timestamp + ":" + nonce + ":" + (body == null ? "" : body);
+        System.out.println("[DEBUG_LOG] Data to sign: '" + data + "'");
         String expectedSignature = hmacSha256(data, token.secret);
+        System.out.println("[DEBUG_LOG] Expected Signature: " + expectedSignature);
 
         return expectedSignature.equals(signature);
     }

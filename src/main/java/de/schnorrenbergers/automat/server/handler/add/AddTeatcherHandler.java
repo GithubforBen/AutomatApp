@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.sql.Date;
 
+@Deprecated(forRemoval = true)
 public class AddTeatcherHandler extends CustomHandler implements HttpHandler {
 
     /**

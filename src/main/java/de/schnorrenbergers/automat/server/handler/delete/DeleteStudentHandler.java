@@ -10,6 +10,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 
+@Deprecated(forRemoval = true)
 public class DeleteStudentHandler extends CustomHandler implements HttpHandler {
 
     /**
