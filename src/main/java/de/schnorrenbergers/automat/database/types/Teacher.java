@@ -55,19 +55,21 @@ public class Teacher extends User {
 
 
     public static Teacher fromJSON(JSONObject jsonObject) throws Exception {
-        Teacher teacher = new Teacher(
-                jsonObject.getString("firstName"),
-                jsonObject.getString("lastName"),
-                jsonObject.getJSONArray("rfid").toList().stream().mapToInt((x) -> {
-                    return Integer.parseInt(String.valueOf(x));
-                }).toArray(),
-                Gender.valueOf(jsonObject.getString("gender")),
-                new Date(jsonObject.getLong("birthday")),
-                Wohnort.fromJson(jsonObject.getJSONObject("address")),
-                jsonObject.getString("email"),
-                jsonObject.getString("password"),
-                Level.valueOf(jsonObject.getString("level"))
-        );
+        Teacher teacher = new Teacher();
+        if (jsonObject.has("id")) {
+            teacher.setId(jsonObject.getLong("id"));
+        }
+        teacher.setFirstName(jsonObject.getString("firstName"));
+        teacher.setLastName(jsonObject.getString("lastName"));
+        teacher.setRfid(jsonObject.getJSONArray("rfid").toList().stream().mapToInt((x) -> {
+            return Integer.parseInt(String.valueOf(x));
+        }).toArray());
+        teacher.setGender(Gender.valueOf(jsonObject.getString("gender")));
+        teacher.setBirthday(new Date(jsonObject.getLong("birthday")));
+        teacher.setWohnort(Wohnort.fromJson(jsonObject.getJSONObject("wohnort")));
+        teacher.email = jsonObject.getString("mail");
+        teacher.password = jsonObject.getString("password");
+        teacher.level = Level.valueOf(jsonObject.getString("level"));
         return teacher;
     }
 

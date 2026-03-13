@@ -6,11 +6,11 @@ import de.schnorrenbergers.automat.database.types.types.Wohnort;
 
 import java.sql.Date;
 import java.util.List;
-import java.util.PriorityQueue;
 import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class AddUserHandler {
-    public static Queue<UserAdd> addQueue = new PriorityQueue();
+    public static Queue<UserAdd> addQueue = new ConcurrentLinkedQueue<>();
 
     public static void add(UserAdd add) {
         addQueue.add(add);
