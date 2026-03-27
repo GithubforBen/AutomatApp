@@ -49,6 +49,7 @@ public class Main extends Application {
     private int logoutTime;
     private boolean alarm = false;
     private boolean checkAvailability;
+    private boolean useLocalEndpoints = false;
     private ScreenSaver screenSaver;
     private Database database;
     private SettingsManager settingsManager;
@@ -366,12 +367,28 @@ public class Main extends Application {
     }
 
     public String getUrl(CustomRequest.REVIVER reviver) {
+        if (useLocalEndpoints) {
+            return switch (reviver) {
+                case WEBSITE -> "http://localhost:8080";
+                case DISPENSER -> "http://localhost:8081";
+                case SCANNER -> "http://localhost:8082";
+                case STATION -> "http://localhost:8083";
+            };
+        }
         return switch (reviver) {
             case WEBSITE -> configurationManager.getString("website-url");
             case DISPENSER -> configurationManager.getString("dispenser-url");
             case SCANNER -> configurationManager.getString("scanner-url");
             case STATION -> configurationManager.getString("station-url");
         };
+    }
+
+    public boolean isUseLocalEndpoints() {
+        return useLocalEndpoints;
+    }
+
+    public void setUseLocalEndpoints(boolean useLocalEndpoints) {
+        this.useLocalEndpoints = useLocalEndpoints;
     }
 
     public Stage getStage() {

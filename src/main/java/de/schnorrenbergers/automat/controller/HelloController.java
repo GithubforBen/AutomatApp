@@ -11,7 +11,6 @@ import javafx.scene.control.SplitPane;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.Objects;
 import java.util.ResourceBundle;
 
 public class HelloController implements Initializable {
@@ -27,7 +26,8 @@ public class HelloController implements Initializable {
         button.setDisable(false);
         for (SplitPane.Divider divider : pane.getDividers()) {
             divider.positionProperty().addListener((observable, oldValue, newValue) -> {
-                pane.setDividerPosition(0, 0.6967418546365914);
+                System.out.println(oldValue.doubleValue());
+                pane.setDividerPosition(0, 0.5902255639097744);
             });
             button.setText("Verbindung wiederherstellen");
         }
@@ -49,21 +49,18 @@ public class HelloController implements Initializable {
                 dispenser = new CustomRequest("ping", CustomRequest.REVIVER.DISPENSER).execute();
             } catch (Exception e) {
                 dispenser = null;
-                e.printStackTrace();
             }
             String scanner;
             try {
                 scanner = new CustomRequest("ping", CustomRequest.REVIVER.SCANNER).execute();
             } catch (IOException e) {
                 scanner = null;
-                e.printStackTrace();
             }
             String station;
             try {
                 station = new CustomRequest("ping", CustomRequest.REVIVER.STATION).execute();
             } catch (IOException e) {
                 station = null;
-                e.printStackTrace();
             }
             String finalWebsite = website;
             String finalScanner = scanner;
@@ -71,11 +68,11 @@ public class HelloController implements Initializable {
             String finalStation = station;
             Platform.runLater(() -> {
                 button.setDisable(false);
-                button.setText("erneuter versuch\n" +
-                        "Website: " + Objects.requireNonNullElse(finalWebsite, "/") + "\n" +
-                        "Ausgabe: " + Objects.requireNonNullElse(finalDispenser, "/") + "\n" +
-                        "Scanner: " + Objects.requireNonNullElse(finalScanner, "/") + "\n" +
-                        "Station: " + Objects.requireNonNullElse(finalStation, "/") + "\n");
+                button.setText("Erneuter versuch?\n" +
+                        "Website: " + (finalWebsite != null ? "✓" : "❌") + "\n" +
+                        "Ausgabe: " + (finalDispenser != null ? "✓" : "❌") + "\n" +
+                        "Scanner: " + (finalScanner != null ? "✓" : "❌") + "\n" +
+                        "Station: " + (finalStation != null ? "✓" : "❌") + "\n");
             });
             if (website != null && dispenser != null && scanner != null && station != null) {
                 Platform.runLater(() -> {
@@ -96,6 +93,11 @@ public class HelloController implements Initializable {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public void connectLocal(ActionEvent actionEvent) {
+        Main.getInstance().setUseLocalEndpoints(true);
+        reconnect(actionEvent);
     }
 
     public void check(ActionEvent event) {

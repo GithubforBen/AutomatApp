@@ -76,6 +76,6 @@ public class LoginManager {
         List<Login> login = session.createSelectionQuery("from Login l", Login.class).getResultList();
         List<Student> students = session.createSelectionQuery("from Student s", Student.class).getResultList();
         session.close();
-        return new int[]{login.size(), students.size() - login.size()};
+        return new int[]{login.size(), Math.max(students.size() - login.size(), 0)};
     }
 }
