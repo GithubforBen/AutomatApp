@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.util.Base64;
 
 @Component
@@ -41,7 +42,7 @@ public class HmacService {
         String data = keyId + ":" + timestamp + ":" + nonce + ":" + (body == null ? "" : body);
         String expectedSignature = hmacSha256(data, token.secret);
 
-        return expectedSignature.equals(signature);
+        return MessageDigest.isEqual(expectedSignature.getBytes(), signature.getBytes());
     }
 }
 

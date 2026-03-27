@@ -19,7 +19,7 @@ import java.util.List;
 public class CourseController {
 
     @PostMapping(value = "/add", produces = MediaType.TEXT_PLAIN_VALUE)
-    public ResponseEntity<String> addCourse(@RequestBody(required = false) String body) {
+    public ResponseEntity<String> addCourse(@RequestBody(required = true) String body) {
         JSONObject jsonObject = parseJson(body);
         if (jsonObject == null) {
             return jsonError();
@@ -40,8 +40,6 @@ public class CourseController {
                 List<Kurs> resultList = session.createSelectionQuery("from Kurs k where k.name = :name AND k.day = :day", Kurs.class)
                         .setParameter("name", kurs.getName())
                         .setParameter("day", kurs.getDay()).getResultList();
-
-                if (resultList.size() != 1) throw new RuntimeException("The Course already exists!");
                 System.out.println("Created course: " + resultList.getFirst());
                 created.append(resultList.getFirst());
             });

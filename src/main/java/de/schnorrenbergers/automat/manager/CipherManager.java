@@ -11,22 +11,7 @@ public class CipherManager {
         return new SecretKeySpec(pass.getBytes(), "AES");
     }
 
-    public String encrypt(String password) {
+    public String hashPassword(String password) {
         return BCrypt.withDefaults().hashToString(12, password.toCharArray());
     }
-/*
-    public String decrypt(String encryptedValue, String pass) throws Exception {
-        Key key = generateKey(pass);
-        Cipher c = Cipher.getInstance("AES");
-        c.init(Cipher.DECRYPT_MODE, key);
-        byte[] decordedValue = Base64.getDecoder().decode(encryptedValue);
-        byte[] decValue = c.doFinal(decordedValue);
-        return new String(decValue);
-    }
-
-    public byte[] hash(String pass) throws NoSuchAlgorithmException {
-        MessageDigest md = MessageDigest.getInstance("SHA-512");
-        return md.digest(pass.getBytes());
-    }
- */
 }

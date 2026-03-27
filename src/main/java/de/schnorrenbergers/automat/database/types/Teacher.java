@@ -28,7 +28,7 @@ public class Teacher extends User {
     public Teacher(String firstName, String lastName, int[] rfid, Gender gender, Date age, Wohnort wohnort, String email, String password, Level level) throws Exception {
         super(firstName, lastName, rfid, gender, age, wohnort);
         this.email = email;
-        this.password = new CipherManager().encrypt(password);
+        this.password = new CipherManager().hashPassword(password);
         this.level = level;
     }
 
@@ -50,7 +50,7 @@ public class Teacher extends User {
     }
 
     public void setPassword(String password) throws Exception {
-        this.password = new CipherManager().encrypt(password);
+        this.password = new CipherManager().hashPassword(password);
     }
 
 

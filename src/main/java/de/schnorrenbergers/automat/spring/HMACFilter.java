@@ -29,8 +29,8 @@ public class HMACFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
-        //TODO: add important security functions
-        return path.equals("/api/pineg");
+        //Required so the activity of the system can be tested
+        return path.equals("/api/ping");
     }
 
     @Override
@@ -66,12 +66,6 @@ public class HMACFilter extends OncePerRequestFilter {
             // Read the cached body without consuming it for downstream
             byte[] bodyBytes = wrappedRequest.getCachedBody();
             String body = new String(bodyBytes, StandardCharsets.UTF_8);
-
-            System.out.println("[DEBUG_LOG] Verifying signature for keyId: " + keyId);
-            System.out.println("[DEBUG_LOG] Timestamp: " + timestamp);
-            System.out.println("[DEBUG_LOG] Nonce: " + nonce);
-            System.out.println("[DEBUG_LOG] Signature: " + signature);
-            System.out.println("[DEBUG_LOG] Body: '" + body + "'");
 
             if (hmacService.verifySignature(keyId, timestamp, nonce, signature, body)) {
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(keyId, null, new ArrayList<>());
