@@ -26,7 +26,6 @@ public class HelloController implements Initializable {
         button.setDisable(false);
         for (SplitPane.Divider divider : pane.getDividers()) {
             divider.positionProperty().addListener((observable, oldValue, newValue) -> {
-                System.out.println(oldValue.doubleValue());
                 pane.setDividerPosition(0, 0.5902255639097744);
             });
             button.setText("Verbindung wiederherstellen");
