@@ -27,7 +27,8 @@ public class CustomRequest {
         URL url = new URL(urlString);
         URLConnection urlConnection = url.openConnection();
         urlConnection.setConnectTimeout(1000);
-        BufferedReader br = new BufferedReader(new InputStreamReader(url.openStream()));
+        urlConnection.setReadTimeout(1000);
+        BufferedReader br = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
         StringBuilder sb = new StringBuilder();
         br.lines().forEach(sb::append);
         br.close();
@@ -39,7 +40,8 @@ public class CustomRequest {
             URL url = new URL(Main.getInstance().getUrl(reviver) + "/ping");
             URLConnection urlConnection = url.openConnection();
             urlConnection.setConnectTimeout(1000);
-            BufferedReader br = new BufferedReader(new InputStreamReader(url.openStream()));
+            urlConnection.setReadTimeout(1000);
+            BufferedReader br = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
             StringBuilder sb = new StringBuilder();
             br.lines().forEach(sb::append);
             br.close();

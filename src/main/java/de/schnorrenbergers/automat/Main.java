@@ -242,16 +242,17 @@ public class Main extends Application {
     }
 
     public void ping() {
-
-        try {
-            System.out.println("Ping");
-            new CustomRequest("ping", CustomRequest.REVIVER.WEBSITE).execute();
-            new CustomRequest("ping", CustomRequest.REVIVER.SCANNER).execute();
-            new CustomRequest("ping", CustomRequest.REVIVER.DISPENSER).execute();
-            new CustomRequest("ping", CustomRequest.REVIVER.STATION).execute();
-        } catch (Exception e) {
-            loadScene("hello-view.fxml");
-        }
+        new Thread(() -> {
+            try {
+                System.out.println("Ping");
+                new CustomRequest("ping", CustomRequest.REVIVER.WEBSITE).execute();
+                new CustomRequest("ping", CustomRequest.REVIVER.SCANNER).execute();
+                new CustomRequest("ping", CustomRequest.REVIVER.DISPENSER).execute();
+                new CustomRequest("ping", CustomRequest.REVIVER.STATION).execute();
+            } catch (Exception e) {
+                Platform.runLater(() -> loadScene("hello-view.fxml"));
+            }
+        }).start();
     }
 
     public void kost() throws IOException {
