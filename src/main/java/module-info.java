@@ -41,6 +41,7 @@ module de.schnorrenbergers.automat {
     requires jakarta.persistence;
 
     requires java.naming;
+    requires java.instrument;
     requires org.yaml.snakeyaml;
     requires bcrypt;
     requires java.desktop;
