@@ -223,6 +223,7 @@ public class Main extends Application {
                 IOException e) {
             throw new RuntimeException(e);
         }
+        scene.setUserData(sceneName);
         stage.setFullScreen(fullScreen);
         stage.setScene(scene);
         stage.setFullScreen(fullScreen);
