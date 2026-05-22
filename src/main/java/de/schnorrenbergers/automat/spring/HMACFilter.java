@@ -27,13 +27,6 @@ public class HMACFilter extends OncePerRequestFilter {
     private NonceStore nonceStore;
 
     @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) {
-        String path = request.getRequestURI();
-        //Required so the activity of the system can be tested
-        return path.equals("/api/ping");
-    }
-
-    @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws IOException, ServletException {
 
         // Wrap the request so the body can be read multiple times (filter + controller)
