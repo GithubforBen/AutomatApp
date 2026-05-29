@@ -140,6 +140,11 @@ public class StudentController {
                 konto.setBalance(json.getDouble("hours"));
                 manager.updateKonto(konto);
             }
+            // Evict before merge when rfid is changing: int[] dirty-checking via reference
+            // equality is unreliable, so detaching forces Hibernate to issue a full UPDATE.
+            if (json.has("rfid")) {
+                session.evict(student);
+            }
             session.getTransaction().begin();
             session.merge(student);
             session.getTransaction().commit();
