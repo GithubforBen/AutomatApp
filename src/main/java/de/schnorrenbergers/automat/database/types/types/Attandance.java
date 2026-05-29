@@ -24,6 +24,7 @@ public class Attandance {
         this.month = month;
         this.year = year;
         this.login = login;
+        this.type = type;
     }
 
     public void logout(long logout) {

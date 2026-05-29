@@ -2,10 +2,7 @@ package de.schnorrenbergers.automat.database.types;
 
 import de.schnorrenbergers.automat.Main;
 import de.schnorrenbergers.automat.database.types.types.Attandance;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.*;
 import org.hibernate.Session;
 
 import java.util.ArrayList;
@@ -22,7 +19,7 @@ public class Konto {
     private Long userId;
     private double balance;
     private boolean isInfinite;
-    @OneToMany
+    @OneToMany(cascade = CascadeType.ALL)
     private List<Attandance> attendances;
 
     public Konto(Long userId, double balance, boolean isInfinite) {
