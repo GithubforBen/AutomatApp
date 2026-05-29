@@ -1,6 +1,7 @@
 package de.schnorrenbergers.automat.spring.controllers;
 
 import de.schnorrenbergers.automat.Main;
+import de.schnorrenbergers.automat.database.types.Kurs;
 import de.schnorrenbergers.automat.database.types.Teacher;
 import de.schnorrenbergers.automat.database.types.types.Gender;
 import de.schnorrenbergers.automat.database.types.types.Level;
@@ -102,7 +103,17 @@ public class TeacherController {
         } finally {
             session.close();
         }
-        Main.getInstance().getDatabase().getSessionFactory().inTransaction((session1 -> session1.remove(session1.get(Teacher.class, id))));
+        Main.getInstance().getDatabase().getSessionFactory().inTransaction(session1 -> {
+            Teacher teacher = session1.get(Teacher.class, id);
+            List<Kurs> courses = session1.createSelectionQuery(
+                            "from Kurs k where :t member of k.tutor", Kurs.class)
+                    .setParameter("t", teacher).getResultList();
+            for (Kurs k : courses) {
+                k.getTutor().remove(teacher);
+                session1.merge(k);
+            }
+            session1.remove(teacher);
+        });
         return okText("Successfully deleted teacher");
     }
 
@@ -114,12 +125,11 @@ public class TeacherController {
         }
         try {
             Teacher teacher = Teacher.fromJSON(jsonObject);
+            boolean[] notFound = {false};
             Main.getInstance().getDatabase().getSessionFactory().inTransaction(session -> {
                 Teacher existing = session.get(Teacher.class, teacher.getId());
                 if (existing == null) {
-                    session.persist(teacher.getWohnort());
-                    session.persist(teacher);
-                    session.flush();
+                    notFound[0] = true;
                     return;
                 }
                 if (teacher.equals(existing)) {
@@ -129,6 +139,9 @@ public class TeacherController {
                 session.merge(teacher);
                 session.flush();
             });
+            if (notFound[0]) {
+                return badRequest();
+            }
             return okText("Successfully added teacher");
         } catch (Exception e) {
             e.printStackTrace();

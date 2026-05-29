@@ -1,11 +1,13 @@
 package de.schnorrenbergers.automat.spring.controllers;
 
 import de.schnorrenbergers.automat.Main;
+import de.schnorrenbergers.automat.database.types.Konto;
 import de.schnorrenbergers.automat.database.types.Kurs;
 import de.schnorrenbergers.automat.database.types.Student;
 import de.schnorrenbergers.automat.database.types.types.Gender;
 import de.schnorrenbergers.automat.database.types.types.Wohnort;
 import de.schnorrenbergers.automat.manager.AddUserHandler;
+import de.schnorrenbergers.automat.manager.KontenManager;
 import org.hibernate.Session;
 import org.json.JSONObject;
 import org.springframework.http.MediaType;
@@ -131,6 +133,12 @@ public class StudentController {
                     }
                 }).toList();
                 student.setKurse(kurse1);
+            }
+            if (json.has("hours")) {
+                KontenManager manager = new KontenManager(id);
+                Konto konto = manager.getKonto();
+                konto.setBalance(json.getDouble("hours"));
+                manager.updateKonto(konto);
             }
             session.getTransaction().begin();
             session.merge(student);

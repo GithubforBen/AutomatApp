@@ -2,6 +2,7 @@ package de.schnorrenbergers.automat.spring.controllers;
 
 import de.schnorrenbergers.automat.Main;
 import de.schnorrenbergers.automat.database.types.Kurs;
+import de.schnorrenbergers.automat.database.types.Student;
 import de.schnorrenbergers.automat.database.types.Teacher;
 import de.schnorrenbergers.automat.database.types.types.Day;
 import org.hibernate.Session;
@@ -127,8 +128,30 @@ public class CourseController {
                 }
                 kurs.getTutor().remove(teacher);
             }
+            List<Student> studentsToMerge = new ArrayList<>();
+            if (json.has("addStudent")) {
+                Student student = session.get(Student.class, Long.valueOf(json.getString("addStudent")));
+                if (student == null) {
+                    return badRequest();
+                }
+                if (student.getKurse().stream().noneMatch(k -> k.getId().equals(kurs.getId()))) {
+                    student.getKurse().add(kurs);
+                    studentsToMerge.add(student);
+                }
+            }
+            if (json.has("removeStudent")) {
+                Student student = session.get(Student.class, Long.valueOf(json.getString("removeStudent")));
+                if (student == null) {
+                    return badRequest();
+                }
+                student.getKurse().removeIf(k -> k.getId().equals(kurs.getId()));
+                studentsToMerge.add(student);
+            }
             session.getTransaction().begin();
             session.merge(kurs);
+            for (Student s : studentsToMerge) {
+                session.merge(s);
+            }
             session.getTransaction().commit();
         } finally {
             session.close();

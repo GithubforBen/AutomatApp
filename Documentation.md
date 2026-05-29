@@ -175,6 +175,10 @@ Retrieves attendance records for a specific user ID.
 
 ## Teacher
 
+> **Route names:** Every endpoint below exists under both its canonical path (e.g. `/teacher/add`) and a legacy
+> camelCase alias (e.g. `/teacher/addTeacher`). The aliases delegate directly to the canonical handlers and are
+> interchangeable. The canonical names are used throughout this document.
+
 ### POST /teacher/add
 
 Creates a new teacher. Use `email` and `address` keys.
@@ -241,6 +245,11 @@ Removes a teacher by ID.
   {"id":1}
   ```
 * **Response (200 OK):** `Successfully deleted teacher`
+* **Error cases:**
+  * Teacher id not found → `400`
+* **Cascade behaviour (Option A):** Before deletion the teacher is automatically detached from every course they
+  tutor. Affected courses remain in the database but will have one fewer entry (possibly zero) in their `tutor`
+  array.
 
 ### POST /teacher/modify
 
@@ -271,6 +280,8 @@ Updates an existing teacher. Requires full JSON object including `id`.
   }
   ```
 * **Response (200 OK):** `Successfully added teacher`
+* **Error cases:**
+  * Teacher id not found → `400` (the endpoint no longer creates a new teacher when the id is absent)
 
 ## Student
 
@@ -372,7 +383,11 @@ Performs a partial update on a student. Requires `id`.
     "lastName": "NewLast"
   }
   ```
-* **Supported Fields:** `firstName`, `lastName`, `gender`, `rfid`, `birthday`, `wohnort`, `kurse`.
+* **Supported Fields:** `firstName`, `lastName`, `gender`, `rfid`, `birthday`, `wohnort`, `kurse`, `hours`.
+* **`hours` semantics (Option A):** A plain number (e.g. `42.5`). Replaces the student's current hour balance
+  (`Konto.balance`). Negative values are valid (a student can owe hours). The `GET /student/all` response
+  serialises this as a single-element array (`"hours":[42.5]`) — that is an artefact of the serialiser, not a
+  true array.
 * **Response (200 OK):** `Successfully modified Student`
 
 ## Course (Kurs)
@@ -444,9 +459,14 @@ Updates a course. Supports partial updates and teacher list modification.
     "name": "Advanced Robotics",
     "day": "METTWOCH",
     "addTeacher": "3",
-    "removeTeacher": "1"
+    "removeTeacher": "1",
+    "addStudent": "10",
+    "removeStudent": "12"
   }
   ```
+* **`addStudent` / `removeStudent`:** Optional. Each is a student id (string). Enrolls or unenrols the student
+  in this course by updating the student's course list. Both operations are idempotent — adding an already-enrolled
+  student or removing a non-member is a no-op (200). Unknown student id → `400`.
 * **Response (200 OK):** `Successfully deleted Kurs` (Note: server returns this text for modify as well)
 
 ## CSV Export
