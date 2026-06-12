@@ -23,6 +23,23 @@ public class DispensationManager {
         } - 1;
     }
 
+    /**
+     * Inverse of {@link #map(int)}: converts the ESP32-reported dispense slot (`nr`)
+     * back to the corresponding Sweet type / button index.
+     */
+    public static int unmap(int nr) {
+        return switch (nr) {
+            case 0 -> 2;
+            case 1 -> 1;
+            case 2 -> 4;
+            case 3 -> 3;
+            case 4 -> 0;
+            case 5 -> 5;
+            case 6 -> 6;
+            default -> -1;
+        };
+    }
+
     public static void dispense(int number, KontenManager kontenManager, ConfigurationManager configurationManager) {
         if (canDispense()) dispenser = new Thread(() -> {
             try {
@@ -33,8 +50,9 @@ public class DispensationManager {
                 new CustomRequest("dispense", CustomRequest.REVIVER.DISPENSER).executeComplex("{\"nr\":" + map(number) + ",\"cost\":" + configurationManager.getInt("sweets._" + number + ".kost") + ",\"usr\":" + Arrays.toString(Main.getInstance().getLastScan()) + "}");
             } catch (IOException e) {
                 throw new RuntimeException(e);
+            } finally {
+                dispenser = null;
             }
-            dispenser = null;
         });
         dispenser.start();
     }

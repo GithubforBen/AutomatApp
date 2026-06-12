@@ -535,6 +535,27 @@ Manually adds an attendance record.
   ```
 * **Response (200 OK):** `Successfully added attendance`
 
+## Dispenser
+
+Called by the dispenser hardware (ESP32) to report the outcome of a dispense attempt.
+
+### POST /dispense/failed
+
+Called when a dispense did not produce a stop signal, i.e. the sweet was not actually
+dispensed. The corresponding Sweet is deactivated (stock set to 0) so it is greyed out
+in the UI (when availability checking is enabled) until it is refilled via the
+"Nachfüllung" admin screen.
+
+* **Request Body:**
+  ```json
+  {"nr": 2}
+  ```
+  `nr` is the dispenser slot id as sent in the original `/dispense` request to the
+  dispenser; it is mapped back to the corresponding Sweet.
+* **Response (200 OK):** `success`
+* **Response (400):** `BAD REQUEST: 400` if `nr` does not map to a known Sweet
+* **Response (410):** `Can't parse JSON` if the body is missing or invalid
+
 ## Enum Reference Tables
 
 ### Gender

@@ -53,6 +53,66 @@ public class AvailabilityManager {
     }
 
     /**
+     * Sets the absolute stock amount for a specific type of sweet, overwriting any previous value.
+     * If the sweet type does not exist, a new record is created provided the sweet type is valid.
+     * If multiple records exist for the given sweet type, all records are removed, and no update occurs.
+     *
+     * @param sweet  the type of sweet to update. Must be an integer within the valid range (0 to 7).
+     * @param amount the new stock amount. Negative values are clamped to 0.
+     */
+    public void setAmount(int sweet, int amount) {
+        Main.getInstance().getDatabase().getSessionFactory().inTransaction(session -> {
+            List<Sweet> sweets = session.createSelectionQuery("from Sweet s where s.type = :sweet", Sweet.class).setParameter("sweet", sweet).getResultList();
+            if (sweets.isEmpty()) {
+                if (sweet > -1 && sweet < 8) {
+                    session.persist(new Sweet(sweet, Math.max(amount, 0)));
+                    return;
+                }
+                Logger.getGlobal().warning("Invalid sweet type: " + sweet);
+                return;
+            }
+            if (sweets.size() != 1) {
+                alert(sweet);
+                Main.getInstance().getDatabase().getSessionFactory().inTransaction(transaction -> {
+                    sweets.forEach(session::remove);
+                });
+                return;
+            }
+            Sweet first = sweets.getFirst();
+            first.setAmount(Math.max(amount, 0));
+            session.merge(first);
+        });
+    }
+
+    /**
+     * Deactivates a sweet by setting its stock amount to 0, so that
+     * {@link #checkAvailability(int)} returns {@code false} until it is refilled
+     * (e.g. via the "Nachfüllung" admin UI).
+     *
+     * @param sweet the type of sweet to deactivate.
+     */
+    public void disableSweet(int sweet) {
+        setAmount(sweet, 0);
+    }
+
+    /**
+     * Returns the current stock amount for a specific type of sweet, without creating or
+     * modifying any records. Used to display the remaining stock in the UI.
+     *
+     * @param sweet the type of sweet to look up.
+     * @return the stock amount, or {@code 0} if no single record exists for the sweet type.
+     */
+    public int getAmount(int sweet) {
+        Session session = Main.getInstance().getDatabase().getSessionFactory().openSession();
+        List<Sweet> select = session.createSelectionQuery("from Sweet s where s.type = :sweet", Sweet.class).setParameter("sweet", sweet).getResultList();
+        session.close();
+        if (select.size() != 1) {
+            return 0;
+        }
+        return select.getFirst().getAmount();
+    }
+
+    /**
      * Checks the availability of a specific type of sweet. If no record exists for the specified sweet,
      * a new record is created with a default amount of 0, provided the sweet type is valid (within the valid range).
      * If multiple records exist for the same sweet type, they are removed, and the availability check will return false.

@@ -43,6 +43,20 @@ public class MainController implements Initializable {
     private Button btn_8;
     @FXML
     private Label text;
+    @FXML
+    private Label stock_1;
+    @FXML
+    private Label stock_2;
+    @FXML
+    private Label stock_3;
+    @FXML
+    private Label stock_4;
+    @FXML
+    private Label stock_5;
+    @FXML
+    private Label stock_6;
+    @FXML
+    private Label stock_7;
 
     public void button1(ActionEvent actionEvent) {
         click(0);
@@ -96,6 +110,14 @@ public class MainController implements Initializable {
 
     public Button[] getBtns() {
         return new Button[]{btn_1, btn_2, btn_3, btn_4, btn_5, btn_6, btn_7, btn_8};
+    }
+
+    /**
+     * Returns the overlay labels (one per sweet, indices 0-6) used to display the remaining
+     * stock and deactivation status directly on top of the corresponding button.
+     */
+    public Label[] getStockLabels() {
+        return new Label[]{stock_1, stock_2, stock_3, stock_4, stock_5, stock_6, stock_7};
     }
 
     /**

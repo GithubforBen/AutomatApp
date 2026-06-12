@@ -92,46 +92,37 @@ public class AdminController implements Initializable {
      * <ul>
      *     <li>Adds a positive quantity of the item when {@code positive} is 0.</li>
      *     <li>Adds a negative quantity of the item when {@code positive} is 1.</li>
-     *     <liExecutes a custom "re-enable" request when {@code positive} is 2.</li>
+     *     <li>Sets the absolute stock amount (re-enabling a deactivated sweet) when {@code positive} is 2.</li>
      * </ul>
-     * Updates the screen saver's last user interaction timestamp to the current system time and handles potential
-     * input-output exceptions during execution.
+     * Updates the screen saver's last user interaction timestamp to the current system time.
      *
      * @param type the type of item to be processed, represented as an integer identifier.
      */
     public void fill(int type) {
         Main.getInstance().getScreenSaver().setLastMove(System.currentTimeMillis());
         AvailabilityManager availabilityManager = new AvailabilityManager();
-        System.out.println("ill" + positive);
-        if (positive == 0)
-            availabilityManager.addSweet(type, (int) slider.getValue());
-        else if (positive == 1)
-            availabilityManager.addSweet(type, (int) slider.getValue() * -1);
-        else if (positive == 2) {
-            //TODO: what does this there new CustomRequest("re-enable").executeComplex("{\"name\":\"" + new ConfigurationManager().getString("sweets._" + type + ".name") + "\"}");
-        } else {
-            positive = 0;
+        switch (positive) {
+            case 0 -> availabilityManager.addSweet(type, (int) slider.getValue());
+            case 1 -> availabilityManager.addSweet(type, (int) slider.getValue() * -1);
+            case 2 -> availabilityManager.setAmount(type, (int) slider.getValue());
         }
     }
 
     /**
-     * Handles the toggling of a button's state and its associated text representation.
-     * This method updates the screen saver's last interaction timestamp and cycles through three states:
-     * "+" when positive is 0, "-" when positive is 1, and "Reaktivieren" when positive is reset to 0.
+     * Handles the toggling of the fill mode button. Cycles through three states:
+     * "+" (add stock, {@code positive == 0}), "-" (remove stock, {@code positive == 1}),
+     * and "Reaktivieren" (set absolute stock / re-enable, {@code positive == 2}).
+     * Updates the screen saver's last interaction timestamp.
      *
      * @param actionEvent the event that triggered this method, typically a button press
      */
     public void plus(ActionEvent actionEvent) {
         Main.getInstance().getScreenSaver().setLastMove(System.currentTimeMillis());
-        if (positive == 0) {
-            plus.setText("+");
-            positive += 1;
-        } else if (positive == 1) {
-            plus.setText("-");
-            positive += 1;
-        } else {
-            positive = 0;
-            plus.setText("Reaktivieren");
-        }
+        positive = (positive + 1) % 3;
+        plus.setText(switch (positive) {
+            case 0 -> "+";
+            case 1 -> "-";
+            default -> "Reaktivieren";
+        });
     }
 }

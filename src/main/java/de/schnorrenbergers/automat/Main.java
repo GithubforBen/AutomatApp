@@ -22,6 +22,7 @@ import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContentDisplay;
+import javafx.scene.control.Label;
 import javafx.scene.image.*;
 import javafx.scene.layout.Border;
 import javafx.scene.paint.Color;
@@ -256,28 +257,50 @@ public class Main extends Application {
         }).start();
     }
 
+    /**
+     * Refreshes all sweet buttons' text/images/disabled-state and stock overlay labels.
+     * Runs on the JavaFX application thread via {@link Platform#runLater}, since this is
+     * also called from background threads (the dispense worker thread and the
+     * {@code /dispense/failed} Spring request thread).
+     */
     public void kost() throws IOException {
-        for (int i = 0; i < MainController.getMainController().getBtns().length; i++) {
-            Button btn = MainController.getMainController().getBtns()[i];
+        Platform.runLater(() -> {
+            AvailabilityManager availabilityManager = new AvailabilityManager();
+            for (int i = 0; i < MainController.getMainController().getBtns().length; i++) {
+                Button btn = MainController.getMainController().getBtns()[i];
 
-            btn.setContentDisplay(ContentDisplay.RIGHT);
-            btn.setFont(new Font(40));
-            btn.setText(configurationManager.getInt("sweets._" + i + ".kost") + ":");
-            Image image = new Image(Objects.requireNonNull(getClass().getResourceAsStream(getImage(i))));
+                btn.setContentDisplay(ContentDisplay.RIGHT);
+                btn.setFont(new Font(40));
+                btn.setText(configurationManager.getInt("sweets._" + i + ".kost") + ":");
+                Image image = new Image(Objects.requireNonNull(getClass().getResourceAsStream(getImage(i))));
 
-            if (checkAvailability && !new AvailabilityManager().checkAvailability(i)) {
-                image = convertToGrayscale(image);
-                btn.setDisable(true);
+                boolean available = availabilityManager.checkAvailability(i);
+                if (checkAvailability && !available) {
+                    image = convertToGrayscale(image);
+                    btn.setDisable(true);
+                }
+
+                ImageView imageView = new ImageView(image);
+                imageView.setFitHeight(187);
+                imageView.setFitWidth(200);
+                btn.setPadding(Insets.EMPTY);
+                btn.setBorder(Border.EMPTY);
+                btn.setGraphic(imageView);
+                if (i == 7) btn.setText("");
+
+                if (i < 7) {
+                    Label stockLabel = MainController.getMainController().getStockLabels()[i];
+                    int amount = availabilityManager.getAmount(i);
+                    if (available) {
+                        stockLabel.setText("Vorrat: " + amount);
+                        stockLabel.setTextFill(Color.WHITE);
+                    } else {
+                        stockLabel.setText("Deaktiviert");
+                        stockLabel.setTextFill(Color.web("#ff5555"));
+                    }
+                }
             }
-
-            ImageView imageView = new ImageView(image);
-            imageView.setFitHeight(187);
-            imageView.setFitWidth(200);
-            btn.setPadding(Insets.EMPTY);
-            btn.setBorder(Border.EMPTY);
-            btn.setGraphic(imageView);
-            if (i == 7) btn.setText("");
-        }
+        });
     }
 
     private String getImage(int id) {
