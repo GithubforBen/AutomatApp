@@ -1,6 +1,7 @@
 package de.schnorrenbergers.automat.database.types.types;
 
 public enum Gender {
+    /*
     ABINARY,
     AGENDER,
     AGENDERFLUID,
@@ -120,4 +121,17 @@ public enum Gender {
     YURI,
     YURIGENDER,
     ZENGENDER
+     */
+
+    FEMALE,
+    MALE,
+    NON_BINARY,
+    AGENDER,
+    BIGENDER,
+    GENDERFLUID,
+    GENDERQUEER,
+    TRANSGENDER,
+    CISGENDER,
+    INTERSEX,
+    TWO_SPIRIT
 }
