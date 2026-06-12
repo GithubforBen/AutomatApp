@@ -9,6 +9,7 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
+import java.time.Instant;
 
 public class CustomRequest {
 
@@ -41,6 +42,10 @@ public class CustomRequest {
             URLConnection urlConnection = url.openConnection();
             urlConnection.setConnectTimeout(1000);
             urlConnection.setReadTimeout(1000);
+            // Lets the dispenser (boot.py) sync its RTC from this server's clock if its own
+            // NTP sync failed, since that's the same clock HMACFilter's timestamp check
+            // (Instant.now()) is compared against anyway.
+            urlConnection.setRequestProperty("X-Unix-Time", String.valueOf(Instant.now().getEpochSecond()));
             BufferedReader br = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
             StringBuilder sb = new StringBuilder();
             br.lines().forEach(sb::append);
