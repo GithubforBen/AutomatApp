@@ -38,7 +38,7 @@ public class HMACFilter extends OncePerRequestFilter {
         String signature = wrappedRequest.getHeader("X-SIGNATURE");
 
         if (keyId == null || timestamp == null || nonce == null || signature == null) {
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Missing HMAC headers");
+            sendAuthError(response, HttpServletResponse.SC_UNAUTHORIZED, "Missing HMAC headers");
             return;
         }
 
@@ -47,12 +47,12 @@ public class HMACFilter extends OncePerRequestFilter {
             long now = Instant.now().getEpochSecond();
 
             if (Math.abs(now - ts) > MAX_SKEW_SECONDS) {
-                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Timestamp out of range");
+                sendAuthError(response, HttpServletResponse.SC_UNAUTHORIZED, "Timestamp out of range");
                 return;
             }
 
             if (nonceStore.isReplay(keyId, nonce)) {
-                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Replay attack detected");
+                sendAuthError(response, HttpServletResponse.SC_UNAUTHORIZED, "Replay attack detected");
                 return;
             }
 
@@ -64,14 +64,28 @@ public class HMACFilter extends OncePerRequestFilter {
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(keyId, null, new ArrayList<>());
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             } else {
-                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid signature");
+                sendAuthError(response, HttpServletResponse.SC_UNAUTHORIZED, "Invalid signature");
                 return;
             }
         } catch (NumberFormatException e) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid timestamp");
+            sendAuthError(response, HttpServletResponse.SC_BAD_REQUEST, "Invalid timestamp");
             return;
         }
 
         filterChain.doFilter(wrappedRequest, response);
+    }
+
+    /**
+     * Writes the status and message directly to the response instead of calling
+     * {@link HttpServletResponse#sendError}. {@code sendError} triggers Spring Boot's
+     * {@code /error} dispatch, which re-enters this same security filter chain; since that
+     * request is anonymous and {@code anyRequest().authenticated()} rejects it, the original
+     * status and message get overwritten with a bare 403 from {@code Http403ForbiddenEntryPoint},
+     * hiding the actual rejection reason from the caller.
+     */
+    private void sendAuthError(HttpServletResponse response, int status, String message) throws IOException {
+        response.setStatus(status);
+        response.setContentType("text/plain;charset=UTF-8");
+        response.getWriter().write(message);
     }
 }

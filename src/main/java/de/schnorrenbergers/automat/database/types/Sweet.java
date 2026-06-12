@@ -3,6 +3,7 @@ package de.schnorrenbergers.automat.database.types;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
+import org.hibernate.annotations.ColumnDefault;
 
 @Entity
 public class Sweet {
@@ -22,6 +23,15 @@ public class Sweet {
      */
     private int type;
     private int amount;
+
+    /**
+     * Whether this sweet has been deactivated (e.g. because the dispenser reported a failed
+     * dispense). Independent of {@link #amount}: a slot can be deactivated while still having
+     * stock, and running out of stock does not set this flag. Cleared via "Reaktivieren" in the
+     * admin UI.
+     */
+    @ColumnDefault("false")
+    private boolean disabled;
 
     public Sweet() {
 
@@ -54,5 +64,13 @@ public class Sweet {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public boolean isDisabled() {
+        return disabled;
+    }
+
+    public void setDisabled(boolean disabled) {
+        this.disabled = disabled;
     }
 }

@@ -27,9 +27,27 @@ public class AdminController implements Initializable {
         setAlarmBTNColor();
         List<Button> buttons = pane.getChildren().stream().filter(node -> node instanceof Button).map(node -> (Button) node).toList().reversed();
         for (int i = 0; i < 7; i++) {
-            buttons.get(i).setText(new ConfigurationManager().getString("sweets._" + i + ".name"));
             int finalI = i;
             buttons.get(i).setOnAction(event -> fill(finalI));
+        }
+        refreshButtons();
+    }
+
+    /**
+     * Updates each sweet button's label with its current stock ("Vorrat") and, if the slot was
+     * deactivated by a failed dispense, with its "Deaktiviert" status instead.
+     */
+    private void refreshButtons() {
+        AvailabilityManager availabilityManager = new AvailabilityManager();
+        List<Button> buttons = pane.getChildren().stream().filter(node -> node instanceof Button).map(node -> (Button) node).toList().reversed();
+        for (int i = 0; i < 7; i++) {
+            String name = new ConfigurationManager().getString("sweets._" + i + ".name");
+            int amount = availabilityManager.getAmount(i);
+            if (availabilityManager.isDisabled(i)) {
+                buttons.get(i).setText(name + "\nDeaktiviert (Vorrat: " + amount + ")");
+            } else {
+                buttons.get(i).setText(name + "\nVorrat: " + amount);
+            }
         }
     }
 
@@ -104,8 +122,12 @@ public class AdminController implements Initializable {
         switch (positive) {
             case 0 -> availabilityManager.addSweet(type, (int) slider.getValue());
             case 1 -> availabilityManager.addSweet(type, (int) slider.getValue() * -1);
-            case 2 -> availabilityManager.setAmount(type, (int) slider.getValue());
+            case 2 -> {
+                availabilityManager.setAmount(type, (int) slider.getValue());
+                availabilityManager.enableSweet(type);
+            }
         }
+        refreshButtons();
     }
 
     /**

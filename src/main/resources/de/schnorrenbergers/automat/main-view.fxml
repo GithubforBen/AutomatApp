@@ -18,70 +18,28 @@
                 <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
             </rowConstraints>
             <children>
-                <StackPane>
-                    <children>
-                        <Button fx:id="btn_1" contentDisplay="RIGHT" graphicTextGap="0.0" mnemonicParsing="false"
-                                onAction="#button1" prefHeight="194.0" prefWidth="324.0" text="1">
-                            <font>
-                                <Font size="40.0"/>
-                            </font>
-                        </Button>
-                        <Label fx:id="stock_1" mouseTransparent="true" StackPane.alignment="BOTTOM_CENTER"
-                               style="-fx-background-color: rgba(0,0,0,0.55); -fx-padding: 2 8 2 8; -fx-font-size: 14;"/>
-                    </children>
-                </StackPane>
-                <StackPane GridPane.columnIndex="1">
-                    <children>
-                        <Button fx:id="btn_2" mnemonicParsing="false" onAction="#button2" prefHeight="198.0"
-                                prefWidth="329.0" text="2"/>
-                        <Label fx:id="stock_2" mouseTransparent="true" StackPane.alignment="BOTTOM_CENTER"
-                               style="-fx-background-color: rgba(0,0,0,0.55); -fx-padding: 2 8 2 8; -fx-font-size: 14;"/>
-                    </children>
-                </StackPane>
-                <StackPane GridPane.rowIndex="1">
-                    <children>
-                        <Button fx:id="btn_3" mnemonicParsing="false" onAction="#button3" prefHeight="187.0"
-                                prefWidth="240.0" text="3"/>
-                        <Label fx:id="stock_3" mouseTransparent="true" StackPane.alignment="BOTTOM_CENTER"
-                               style="-fx-background-color: rgba(0,0,0,0.55); -fx-padding: 2 8 2 8; -fx-font-size: 14;"/>
-                    </children>
-                </StackPane>
-                <StackPane GridPane.columnIndex="1" GridPane.rowIndex="1">
-                    <children>
-                        <Button fx:id="btn_4" mnemonicParsing="false" onAction="#button4" prefHeight="187.0"
-                                prefWidth="240.0" text="4">
-                            <font>
-                                <Font size="40.0"/>
-                            </font>
-                        </Button>
-                        <Label fx:id="stock_4" mouseTransparent="true" StackPane.alignment="BOTTOM_CENTER"
-                               style="-fx-background-color: rgba(0,0,0,0.55); -fx-padding: 2 8 2 8; -fx-font-size: 14;"/>
-                    </children>
-                </StackPane>
-                <StackPane GridPane.rowIndex="2">
-                    <children>
-                        <Button fx:id="btn_5" mnemonicParsing="false" onAction="#button5" prefHeight="258.0"
-                                prefWidth="396.0" text="5"/>
-                        <Label fx:id="stock_5" mouseTransparent="true" StackPane.alignment="BOTTOM_CENTER"
-                               style="-fx-background-color: rgba(0,0,0,0.55); -fx-padding: 2 8 2 8; -fx-font-size: 14;"/>
-                    </children>
-                </StackPane>
-                <StackPane GridPane.columnIndex="1" GridPane.rowIndex="2">
-                    <children>
-                        <Button fx:id="btn_6" mnemonicParsing="false" onAction="#button6" prefHeight="242.0"
-                                prefWidth="375.0" text="6"/>
-                        <Label fx:id="stock_6" mouseTransparent="true" StackPane.alignment="BOTTOM_CENTER"
-                               style="-fx-background-color: rgba(0,0,0,0.55); -fx-padding: 2 8 2 8; -fx-font-size: 14;"/>
-                    </children>
-                </StackPane>
-                <StackPane GridPane.rowIndex="3">
-                    <children>
-                        <Button fx:id="btn_7" mnemonicParsing="false" onAction="#button7" prefHeight="284.0"
-                                prefWidth="392.0" text="7"/>
-                        <Label fx:id="stock_7" mouseTransparent="true" StackPane.alignment="BOTTOM_CENTER"
-                               style="-fx-background-color: rgba(0,0,0,0.55); -fx-padding: 2 8 2 8; -fx-font-size: 14;"/>
-                    </children>
-                </StackPane>
+                <Button fx:id="btn_1" contentDisplay="RIGHT" graphicTextGap="0.0" mnemonicParsing="false"
+                        onAction="#button1" prefHeight="194.0" prefWidth="324.0" text="1">
+                    <font>
+                        <Font size="40.0"/>
+                    </font>
+                </Button>
+                <Button fx:id="btn_2" mnemonicParsing="false" onAction="#button2" prefHeight="198.0"
+                        prefWidth="329.0" text="2" GridPane.columnIndex="1"/>
+                <Button fx:id="btn_3" mnemonicParsing="false" onAction="#button3" prefHeight="187.0"
+                        prefWidth="240.0" text="3" GridPane.rowIndex="1"/>
+                <Button fx:id="btn_4" mnemonicParsing="false" onAction="#button4" prefHeight="187.0"
+                        prefWidth="240.0" text="4" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                    <font>
+                        <Font size="40.0"/>
+                    </font>
+                </Button>
+                <Button fx:id="btn_5" mnemonicParsing="false" onAction="#button5" prefHeight="258.0"
+                        prefWidth="396.0" text="5" GridPane.rowIndex="2"/>
+                <Button fx:id="btn_6" mnemonicParsing="false" onAction="#button6" prefHeight="242.0"
+                        prefWidth="375.0" text="6" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+                <Button fx:id="btn_7" mnemonicParsing="false" onAction="#button7" prefHeight="284.0"
+                        prefWidth="392.0" text="7" GridPane.rowIndex="3"/>
                 <Button fx:id="btn_8" mnemonicParsing="false" onAction="#button8" prefHeight="245.0" prefWidth="355.0"
                         text="8" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
             </children>

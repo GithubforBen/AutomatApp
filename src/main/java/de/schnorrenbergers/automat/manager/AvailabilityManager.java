@@ -85,14 +85,49 @@ public class AvailabilityManager {
     }
 
     /**
-     * Deactivates a sweet by setting its stock amount to 0, so that
-     * {@link #checkAvailability(int)} returns {@code false} until it is refilled
-     * (e.g. via the "Nachfüllung" admin UI).
+     * Deactivates a sweet independently of its stock amount, so that
+     * {@link #checkAvailability(int)} returns {@code false} until it is reactivated via
+     * {@link #enableSweet(int)} (e.g. the "Reaktivieren" button in the admin UI).
      *
      * @param sweet the type of sweet to deactivate.
      */
     public void disableSweet(int sweet) {
-        setAmount(sweet, 0);
+        setDisabled(sweet, true);
+    }
+
+    /**
+     * Clears the deactivation flag set by {@link #disableSweet(int)}.
+     *
+     * @param sweet the type of sweet to reactivate.
+     */
+    public void enableSweet(int sweet) {
+        setDisabled(sweet, false);
+    }
+
+    private void setDisabled(int sweet, boolean disabled) {
+        Main.getInstance().getDatabase().getSessionFactory().inTransaction(session -> {
+            List<Sweet> sweets = session.createSelectionQuery("from Sweet s where s.type = :sweet", Sweet.class).setParameter("sweet", sweet).getResultList();
+            if (sweets.isEmpty()) {
+                if (sweet > -1 && sweet < 8) {
+                    Sweet newSweet = new Sweet(sweet, 0);
+                    newSweet.setDisabled(disabled);
+                    session.persist(newSweet);
+                    return;
+                }
+                Logger.getGlobal().warning("Invalid sweet type: " + sweet);
+                return;
+            }
+            if (sweets.size() != 1) {
+                alert(sweet);
+                Main.getInstance().getDatabase().getSessionFactory().inTransaction(transaction -> {
+                    sweets.forEach(session::remove);
+                });
+                return;
+            }
+            Sweet first = sweets.getFirst();
+            first.setDisabled(disabled);
+            session.merge(first);
+        });
     }
 
     /**
@@ -113,13 +148,31 @@ public class AvailabilityManager {
     }
 
     /**
+     * Returns whether a sweet has been deactivated via {@link #disableSweet(int)}, without
+     * creating or modifying any records. Used to display the deactivation status in the admin UI.
+     *
+     * @param sweet the type of sweet to look up.
+     * @return {@code true} if the sweet is deactivated, {@code false} otherwise (including if no
+     * record exists for the sweet type).
+     */
+    public boolean isDisabled(int sweet) {
+        Session session = Main.getInstance().getDatabase().getSessionFactory().openSession();
+        List<Sweet> select = session.createSelectionQuery("from Sweet s where s.type = :sweet", Sweet.class).setParameter("sweet", sweet).getResultList();
+        session.close();
+        if (select.size() != 1) {
+            return false;
+        }
+        return select.getFirst().isDisabled();
+    }
+
+    /**
      * Checks the availability of a specific type of sweet. If no record exists for the specified sweet,
      * a new record is created with a default amount of 0, provided the sweet type is valid (within the valid range).
      * If multiple records exist for the same sweet type, they are removed, and the availability check will return false.
      *
      * @param sweet the type of sweet to check the availability for. It must be an integer representing the sweet type.
-     * @return {@code true} if the sweet is available (amount greater than 0);
-     * {@code false} if the sweet is unavailable, invalid, or if multiple records are found and removed.
+     * @return {@code true} if the sweet is available (not deactivated and amount greater than 0);
+     * {@code false} if the sweet is unavailable, deactivated, invalid, or if multiple records are found and removed.
      */
     public boolean checkAvailability(int sweet) {
         if (sweet == 7) return true;
@@ -141,7 +194,8 @@ public class AvailabilityManager {
             });
             return false;
         }
-        return select.getFirst().getAmount() > 0;
+        Sweet first = select.getFirst();
+        return !first.isDisabled() && first.getAmount() > 0;
     }
 
     /**

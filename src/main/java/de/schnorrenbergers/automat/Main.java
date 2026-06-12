@@ -22,7 +22,6 @@ import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContentDisplay;
-import javafx.scene.control.Label;
 import javafx.scene.image.*;
 import javafx.scene.layout.Border;
 import javafx.scene.paint.Color;
@@ -258,7 +257,7 @@ public class Main extends Application {
     }
 
     /**
-     * Refreshes all sweet buttons' text/images/disabled-state and stock overlay labels.
+     * Refreshes all sweet buttons' text/images/disabled-state.
      * Runs on the JavaFX application thread via {@link Platform#runLater}, since this is
      * also called from background threads (the dispense worker thread and the
      * {@code /dispense/failed} Spring request thread).
@@ -274,8 +273,7 @@ public class Main extends Application {
                 btn.setText(configurationManager.getInt("sweets._" + i + ".kost") + ":");
                 Image image = new Image(Objects.requireNonNull(getClass().getResourceAsStream(getImage(i))));
 
-                boolean available = availabilityManager.checkAvailability(i);
-                if (checkAvailability && !available) {
+                if (checkAvailability && !availabilityManager.checkAvailability(i)) {
                     image = convertToGrayscale(image);
                     btn.setDisable(true);
                 }
@@ -287,18 +285,6 @@ public class Main extends Application {
                 btn.setBorder(Border.EMPTY);
                 btn.setGraphic(imageView);
                 if (i == 7) btn.setText("");
-
-                if (i < 7) {
-                    Label stockLabel = MainController.getMainController().getStockLabels()[i];
-                    int amount = availabilityManager.getAmount(i);
-                    if (available) {
-                        stockLabel.setText("Vorrat: " + amount);
-                        stockLabel.setTextFill(Color.WHITE);
-                    } else {
-                        stockLabel.setText("Deaktiviert");
-                        stockLabel.setTextFill(Color.web("#ff5555"));
-                    }
-                }
             }
         });
     }
