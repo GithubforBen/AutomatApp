@@ -23,7 +23,7 @@ public class GetAllTeatchersHandler extends CustomHandler implements HttpHandler
                 Wohnort wohnort = new Wohnort(7, "test", "test", 678, "Germany");
                 Teacher teacher = null;
                 try {
-                    teacher = new Teacher("Jon", "Doe", new int[]{100, 100, 100, 100}, Gender.OTHER, new Date(1999, 02, 01), wohnort, "test@gmail.com", "test", Level.ADMIN);
+                    teacher = new Teacher("Jon", "Doe", new int[]{100, 100, 100, 100}, Gender.AGENDER, new Date(1999, 02, 01), wohnort, "test@gmail.com", "test", Level.ADMIN);
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }

@@ -51,6 +51,7 @@ public class Database {
                 .addAnnotatedClass(Attandance.class);
         sessionFactory = configuration
                 .buildSessionFactory();
+        GenderMigration.run(sessionFactory);
     }
 
     public SessionFactory getSessionFactory() {

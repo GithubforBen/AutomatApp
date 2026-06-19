@@ -64,7 +64,7 @@ public class TeacherController {
             if (session.createQuery("from Teacher t", Teacher.class).getResultList().isEmpty()) {
                 Wohnort wohnort = new Wohnort(7, "test", "test", 678, "Germany");
                 try {
-                    Teacher teacher = new Teacher("Jon", "Doe", new int[]{100, 100, 100, 100}, Gender.OTHER, new Date(1999, 2, 1), wohnort, "test@gmail.com", "test", Level.ADMIN);
+                    Teacher teacher = new Teacher("Jon", "Doe", new int[]{100, 100, 100, 100}, Gender.AGENDER, new Date(1999, 2, 1), wohnort, "test@gmail.com", "test", Level.ADMIN);
                     session.persist(wohnort);
                     session.persist(teacher);
                 } catch (Exception e) {
