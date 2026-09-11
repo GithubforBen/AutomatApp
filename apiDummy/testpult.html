@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Testpult</title>
+<link rel="icon" href="data:,">
+<style>
+    :root {
+        --ground: #edf0e8;
+        --panel: #fbfcf9;
+        --line: #d5dccb;
+        --ink: #1e261a;
+        --muted: #5f6b57;
+        --accent: #5b8a2c;
+        --accent-strong: #3f6320;
+        --accent-soft: #e3edd6;
+        --lcd-bg: #16210f;
+        --lcd-ink: #a8e063;
+        --lcd-dim: #3d5226;
+        --ok: #27ae60;
+        --warn: #e67e22;
+        --bad: #c0392b;
+        --mono: ui-monospace, "JetBrains Mono", "DejaVu Sans Mono", monospace;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+        margin: 0;
+        background: var(--ground);
+        color: var(--ink);
+        font: 14px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif;
+    }
+
+    button, input { font: inherit; color: inherit; }
+
+    :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+    kbd {
+        font-family: var(--mono);
+        font-size: 11px;
+        padding: 1px 5px;
+        border: 1px solid currentColor;
+        border-radius: 4px;
+        opacity: .7;
+    }
+
+    /* ---------- Kopfzeile ---------- */
+
+    header {
+        display: flex;
+        align-items: center;
+        gap: 24px;
+        flex-wrap: wrap;
+        padding: 14px 24px;
+        background: var(--panel);
+        border-bottom: 1px solid var(--line);
+    }
+
+    header h1 {
+        margin: 0;
+        font-size: 19px;
+        letter-spacing: -.01em;
+    }
+
+    #services {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-left: auto;
+    }
+
+    .service {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 5px 10px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        background: #fff;
+        font-size: 13px;
+        white-space: nowrap;
+    }
+
+    .service .port { font-family: var(--mono); font-size: 11.5px; color: var(--muted); }
+
+    .dot {
+        width: 9px; height: 9px;
+        border-radius: 50%;
+        background: var(--line);
+        flex: none;
+    }
+    .dot.up { background: var(--ok); }
+    .dot.down { background: var(--bad); }
+
+    .switch {
+        position: relative;
+        width: 30px; height: 17px;
+        border-radius: 999px;
+        border: none;
+        background: var(--line);
+        cursor: pointer;
+        padding: 0;
+        flex: none;
+    }
+    .switch::after {
+        content: "";
+        position: absolute;
+        top: 2px; left: 2px;
+        width: 13px; height: 13px;
+        border-radius: 50%;
+        background: #fff;
+        transition: transform .15s;
+    }
+    .switch[aria-checked="true"] { background: var(--accent); }
+    .switch[aria-checked="true"]::after { transform: translateX(13px); }
+
+    /* ---------- Raster ---------- */
+
+    main {
+        display: grid;
+        grid-template-columns: minmax(280px, 1fr) minmax(340px, 1.15fr) minmax(300px, 1fr);
+        gap: 18px;
+        padding: 18px 24px 24px;
+        align-items: start;
+    }
+
+    @media (max-width: 1100px) {
+        main { grid-template-columns: 1fr; }
+    }
+
+    section {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        min-width: 0;
+    }
+
+    section h2 {
+        margin: 0;
+        font-size: 15px;
+    }
+
+    .section-head {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 10px;
+    }
+
+    .hint { margin: 0; color: var(--muted); font-size: 12.5px; }
+
+    .field {
+        width: 100%;
+        padding: 8px 10px;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: #fff;
+    }
+
+    .btn {
+        padding: 7px 12px;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: #fff;
+        cursor: pointer;
+        white-space: nowrap;
+    }
+    .btn:hover { background: var(--accent-soft); }
+
+    .link-btn {
+        border: none;
+        background: none;
+        color: var(--accent-strong);
+        cursor: pointer;
+        padding: 0;
+        font-size: 12.5px;
+    }
+    .link-btn:hover { text-decoration: underline; }
+
+    /* ---------- Kartenliste ---------- */
+
+    #card-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        max-height: 52vh;
+        overflow-y: auto;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #fff;
+    }
+
+    #card-list li + li { border-top: 1px solid var(--line); }
+
+    .card-row {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 2px 10px;
+        width: 100%;
+        padding: 9px 12px;
+        border: none;
+        background: none;
+        text-align: left;
+        cursor: pointer;
+    }
+    .card-row:hover { background: #f3f6ee; }
+    .card-row[aria-pressed="true"] {
+        background: var(--accent-soft);
+        box-shadow: inset 3px 0 0 var(--accent);
+    }
+
+    .card-name { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .card-bytes { font-family: var(--mono); font-size: 12px; color: var(--muted); align-self: center; }
+    .card-meta { grid-column: 1 / -1; font-size: 12px; color: var(--muted); }
+
+    .empty { padding: 14px 12px; color: var(--muted); }
+
+    .own-card { display: flex; gap: 8px; }
+    .own-card .field { font-family: var(--mono); }
+
+    details.no-card { font-size: 12.5px; color: var(--muted); }
+    details.no-card summary { cursor: pointer; }
+    details.no-card p { margin: 6px 0 0; }
+
+    /* ---------- Scannen ---------- */
+
+    #selected {
+        border: 1px dashed var(--line);
+        border-radius: 8px;
+        padding: 14px;
+        background: #fff;
+    }
+    #selected .bytes {
+        font-family: var(--mono);
+        font-size: 22px;
+        letter-spacing: .02em;
+    }
+    #selected .who { color: var(--muted); margin-top: 2px; }
+
+    .scan-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+
+    .scan-btn {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        align-items: start;
+        gap: 4px 8px;
+        padding: 14px 16px;
+        border: none;
+        border-radius: 8px;
+        background: var(--accent);
+        color: #fff;
+        cursor: pointer;
+        text-align: left;
+    }
+    .scan-btn:hover { background: var(--accent-strong); }
+    .scan-btn:disabled { background: #a9b59e; cursor: not-allowed; }
+    .scan-btn strong { font-size: 15.5px; }
+    .scan-btn span { grid-column: 1 / -1; font-size: 12.5px; opacity: .9; }
+    .scan-btn kbd { margin-top: 2px; }
+
+    .display-title {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        font-size: 13px;
+        color: var(--muted);
+        margin-bottom: 6px;
+    }
+
+    .lcd {
+        background: var(--lcd-bg);
+        border-radius: 8px;
+        padding: 14px 16px;
+        font-family: var(--mono);
+        font-size: 17px;
+        line-height: 1.5;
+        color: var(--lcd-ink);
+        box-shadow: inset 0 0 0 3px #0c1307, inset 0 0 22px rgba(0, 0, 0, .5);
+        overflow-x: auto;
+    }
+    .lcd .row { white-space: pre; min-height: 1.5em; }
+    .lcd.idle { color: var(--lcd-dim); }
+
+    .pill {
+        display: inline-block;
+        padding: 1px 8px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 600;
+        color: #fff;
+        background: var(--muted);
+    }
+    .pill.in { background: var(--ok); }
+    .pill.out { background: var(--accent-strong); }
+    .pill.err { background: var(--bad); }
+
+    #automat-result { margin: 0; font-size: 13px; color: var(--muted); min-height: 1.4em; }
+    #automat-result.err { color: var(--bad); }
+
+    /* ---------- Protokoll ---------- */
+
+    .segmented {
+        display: inline-flex;
+        border: 1px solid var(--line);
+        border-radius: 7px;
+        overflow: hidden;
+        background: #fff;
+    }
+    .segmented button {
+        border: none;
+        background: none;
+        padding: 6px 12px;
+        cursor: pointer;
+        font-size: 13px;
+    }
+    .segmented button + button { border-left: 1px solid var(--line); }
+    .segmented button[aria-pressed="true"] { background: var(--accent); color: #fff; }
+    .segmented button.jam[aria-pressed="true"] { background: var(--warn); }
+
+    #feed {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        max-height: 64vh;
+        overflow-y: auto;
+        font-size: 13px;
+    }
+    #feed li {
+        display: grid;
+        grid-template-columns: auto auto 1fr;
+        gap: 8px;
+        padding: 7px 0 7px 10px;
+        border-left: 3px solid var(--line);
+        margin-bottom: 4px;
+    }
+    #feed li.ok { border-left-color: var(--ok); }
+    #feed li.warn { border-left-color: var(--warn); }
+    #feed li.bad { border-left-color: var(--bad); }
+    #feed .time { font-family: var(--mono); font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+    #feed .src { font-weight: 600; }
+
+    @media (prefers-reduced-motion: reduce) {
+        .switch::after { transition: none; }
+    }
+</style>
+</head>
+<body>
+<header>
+    <h1>Testpult</h1>
+    <div id="services" aria-live="polite">
+        <span class="service"><span class="dot" id="svc-backend"></span>Backend <span class="port">8000</span></span>
+        <span class="service"><span class="dot" id="svc-website"></span>Website <span class="port">8080</span></span>
+    </div>
+</header>
+
+<main>
+    <!-- Karte wählen -->
+    <section aria-labelledby="h-cards">
+        <div class="section-head">
+            <h2 id="h-cards">Karte wählen</h2>
+            <button class="link-btn" id="reload-cards" type="button">neu laden</button>
+        </div>
+        <input class="field" id="search" type="search" placeholder="Name oder Kartennummer suchen" autocomplete="off">
+        <ul id="card-list"><li class="empty">Lade Karten…</li></ul>
+        <details class="no-card" id="no-card" hidden>
+            <summary></summary>
+            <p></p>
+        </details>
+
+        <label class="hint" for="own-bytes">Andere Kartennummer (Bytes 0 bis 255)</label>
+        <div class="own-card">
+            <input class="field" id="own-bytes" placeholder="z.B. 99 253 101 0 251" autocomplete="off">
+            <button class="btn" id="own-apply" type="button">Nehmen</button>
+        </div>
+        <button class="btn" id="new-card" type="button">Neue, unbenutzte Karte <kbd>N</kbd></button>
+        <p class="hint">
+            Person mit Karte anlegen: auf der Website vormerken, am Automaten
+            „Nutzer hinzufügen“ öffnen, hier eine neue Karte nehmen und am
+            Automaten scannen.
+        </p>
+    </section>
+
+    <!-- Scannen -->
+    <section aria-labelledby="h-scan">
+        <h2 id="h-scan">Scannen</h2>
+        <div id="selected">
+            <div class="bytes" id="sel-bytes">keine Karte gewählt</div>
+            <div class="who" id="sel-who">Links eine Karte auswählen.</div>
+        </div>
+
+        <div class="scan-actions">
+            <button class="scan-btn" id="scan-automat" type="button" disabled>
+                <strong>Am Automaten</strong><kbd>A</kbd>
+                <span>Kaufen, Nutzer anlegen</span>
+            </button>
+            <button class="scan-btn" id="scan-station" type="button" disabled>
+                <strong>An der Station</strong><kbd>S</kbd>
+                <span>Kommen und Gehen buchen</span>
+            </button>
+        </div>
+
+        <div>
+            <div class="display-title">
+                <span>Anzeige der Station</span>
+                <span id="station-state"></span>
+            </div>
+            <div class="lcd idle" id="lcd" aria-live="polite">
+                <div class="row">                    </div>
+                <div class="row">   Karte vorhalten  </div>
+                <div class="row">                    </div>
+                <div class="row">                    </div>
+            </div>
+        </div>
+
+        <div>
+            <div class="display-title"><span>Automat</span></div>
+            <p id="automat-result">Was nach dem Scan passiert, siehst du im Automatenfenster.</p>
+        </div>
+    </section>
+
+    <!-- Protokoll -->
+    <section aria-labelledby="h-feed">
+        <div class="section-head">
+            <h2 id="h-feed">Was die Geräte erreicht</h2>
+            <button class="link-btn" id="clear-feed" type="button">leeren</button>
+        </div>
+        <div>
+            <div class="display-title"><span>Ausgabe</span></div>
+            <div class="segmented" role="group" aria-label="Verhalten der Ausgabe">
+                <button type="button" data-mode="ok" aria-pressed="true">klappt</button>
+                <button type="button" data-mode="jam" class="jam" aria-pressed="false">klemmt</button>
+            </div>
+            <p class="hint" style="margin-top:6px">Klemmt sie, meldet sie den Fehlschlag ans Backend und das Fach wird gesperrt.</p>
+        </div>
+        <ul id="feed"></ul>
+    </section>
+</main>
+
+<script>
+    const $ = (sel) => document.querySelector(sel);
+    const LCD_WIDTH = 20;
+    const SOURCE_LABELS = {
+        ausgabe: "Ausgabe", scanner: "Scanner", station: "Station",
+        automat: "Automat", testpult: "Testpult",
+    };
+
+    let cardData = { cards: [], withoutCard: [] };
+    let selected = null;          // { rfid: [...], holders: [...] }
+    let lastEventId = 0;
+    let busy = false;
+
+    // ---------- Hilfen ----------
+
+    const fmtBytes = (rfid) => rfid.join(" ");
+    const sameCard = (a, b) => a && b && a.length === b.length && a.every((v, i) => v === b[i]);
+
+    function parseBytes(raw) {
+        const parts = raw.split(/[\s,;]+/).filter(Boolean);
+        if (!parts.length) return null;
+        const bytes = parts.map(Number);
+        return bytes.every((b) => Number.isInteger(b) && b >= 0 && b <= 255) ? bytes : null;
+    }
+
+    function holdersText(holders) {
+        if (!holders || !holders.length) return "gehört niemandem";
+        if (holders.length === 1) return holders[0].name;
+        return `${holders[0].name} und ${holders.length - 1} weitere`;
+    }
+
+    function holderMeta(holders) {
+        if (!holders || !holders.length) return "";
+        if (holders.length > 1) return `${holders.length} Personen teilen sich diese Karte`;
+        const h = holders[0];
+        const parts = [h.admin ? "Admin" : h.type];
+        if (h.courses && h.courses.length) parts.push(h.courses.join(", "));
+        return parts.join(", ");
+    }
+
+    function holdersFor(rfid) {
+        const hit = cardData.cards.find((c) => sameCard(c.rfid, rfid));
+        return hit ? hit.holders : [];
+    }
+
+    async function getJson(url, options) {
+        const res = await fetch(url, options);
+        const json = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(json.error || `HTTP ${res.status}`);
+        return json;
+    }
+
+    function postJson(url, body) {
+        return getJson(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body),
+        });
+    }
+
+    // ---------- Karten ----------
+
+    async function loadCards() {
+        const list = $("#card-list");
+        try {
+            cardData = await getJson("/api/cards");
+        } catch (err) {
+            list.innerHTML = "";
+            const li = document.createElement("li");
+            li.className = "empty";
+            li.textContent = `Kartenliste nicht verfügbar: ${err.message}. Eigene Kartennummern gehen trotzdem.`;
+            list.appendChild(li);
+            return;
+        }
+        renderCards();
+        renderWithoutCard();
+        if (selected) select(selected.rfid);
+    }
+
+    function renderCards() {
+        const list = $("#card-list");
+        const q = $("#search").value.trim().toLowerCase();
+        const matches = cardData.cards.filter((c) =>
+            !q || fmtBytes(c.rfid).includes(q) ||
+            c.holders.some((h) => h.name.toLowerCase().includes(q)));
+
+        list.innerHTML = "";
+        if (!matches.length) {
+            const li = document.createElement("li");
+            li.className = "empty";
+            li.textContent = q ? "Keine Karte passt zur Suche." : "Noch keine Karten vergeben.";
+            list.appendChild(li);
+            return;
+        }
+        for (const card of matches) {
+            const li = document.createElement("li");
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "card-row";
+            btn.setAttribute("aria-pressed", String(!!selected && sameCard(selected.rfid, card.rfid)));
+            btn.innerHTML = `<span class="card-name"></span><span class="card-bytes"></span><span class="card-meta"></span>`;
+            btn.querySelector(".card-name").textContent = holdersText(card.holders);
+            btn.querySelector(".card-bytes").textContent = fmtBytes(card.rfid);
+            btn.querySelector(".card-meta").textContent = holderMeta(card.holders);
+            btn.addEventListener("click", () => select(card.rfid));
+            li.appendChild(btn);
+            list.appendChild(li);
+        }
+    }
+
+    function renderWithoutCard() {
+        const box = $("#no-card");
+        const people = cardData.withoutCard || [];
+        box.hidden = !people.length;
+        if (!people.length) return;
+        box.querySelector("summary").textContent =
+            people.length === 1 ? "1 Person ohne Karte" : `${people.length} Personen ohne Karte`;
+        box.querySelector("p").textContent = people.map((p) => p.name).join(", ");
+    }
+
+    function select(rfid) {
+        selected = { rfid, holders: holdersFor(rfid) };
+        try { localStorage.setItem("testpult.card", JSON.stringify(rfid)); } catch (e) { /* egal */ }
+        $("#sel-bytes").textContent = fmtBytes(rfid);
+        const meta = holderMeta(selected.holders);
+        $("#sel-who").textContent = selected.holders.length
+            ? holdersText(selected.holders) + (meta ? ` (${meta})` : "")
+            : "Unbekannte Karte, gehört niemandem";
+        $("#scan-automat").disabled = false;
+        $("#scan-station").disabled = false;
+        renderCards();
+    }
+
+    function applyOwnBytes() {
+        const input = $("#own-bytes");
+        const rfid = parseBytes(input.value);
+        if (!rfid) {
+            input.setCustomValidity("Nur Zahlen von 0 bis 255, durch Leerzeichen getrennt.");
+            input.reportValidity();
+            return;
+        }
+        input.setCustomValidity("");
+        select(rfid);
+    }
+
+    async function newCard() {
+        try {
+            const { rfid } = await getJson("/api/random_card");
+            $("#own-bytes").value = fmtBytes(rfid);
+            select(rfid);
+        } catch (err) {
+            $("#sel-who").textContent = `Keine neue Karte: ${err.message}`;
+        }
+    }
+
+    // ---------- Scannen ----------
+
+    function showLcd(lines, idle = false) {
+        const lcd = $("#lcd");
+        lcd.classList.toggle("idle", idle);
+        const rows = lcd.querySelectorAll(".row");
+        rows.forEach((row, i) => {
+            const text = (lines[i] || "").slice(0, LCD_WIDTH);
+            row.textContent = text.padEnd(LCD_WIDTH, " ");
+        });
+    }
+
+    function wrap(text, width) {
+        const lines = [];
+        let line = "";
+        for (const word of text.split(/\s+/)) {
+            if ((line + " " + word).trim().length > width) {
+                if (line) lines.push(line);
+                line = word;
+            } else {
+                line = (line + " " + word).trim();
+            }
+        }
+        if (line) lines.push(line);
+        return lines;
+    }
+
+    async function scan(where) {
+        if (!selected || busy) return;
+        busy = true;
+        const btn = where === "automat" ? $("#scan-automat") : $("#scan-station");
+        btn.disabled = true;
+        try {
+            const res = await postJson("/api/scan", { where, rfid: selected.rfid });
+            if (where === "station") showStationResult(res);
+            else showAutomatResult(res);
+        } catch (err) {
+            if (where === "station") {
+                showLcd(wrap(err.message, LCD_WIDTH));
+                setStationState("Fehler", "err");
+            } else {
+                showAutomatError(err.message);
+            }
+        } finally {
+            busy = false;
+            btn.disabled = false;
+            pollState();
+            // Ein Scan unter "Nutzer hinzufügen" legt eine Person an - dann
+            // soll sie gleich in der Liste auftauchen.
+            if (where === "automat") setTimeout(loadCards, 1200);
+        }
+    }
+
+    function setStationState(text, kind) {
+        const el = $("#station-state");
+        el.innerHTML = "";
+        if (!text) return;
+        const pill = document.createElement("span");
+        pill.className = `pill ${kind}`;
+        pill.textContent = text;
+        el.appendChild(pill);
+    }
+
+    function showStationResult(res) {
+        const p = res.parsed;
+        if (p && Array.isArray(p.text)) {
+            showLcd(p.text);
+            setStationState(p.cameIn ? "kommt" : "geht", p.cameIn ? "in" : "out");
+            return;
+        }
+        const msg = res.error || res.body || "keine Antwort";
+        // Die Website antwortet bei unbekannten Karten mit "login failed".
+        showLcd(msg === "login failed" ? ["Karte unbekannt", "", "(Antwort: login", "failed)"] : wrap(msg, LCD_WIDTH));
+        setStationState("abgelehnt", "err");
+    }
+
+    function showAutomatResult(res) {
+        const el = $("#automat-result");
+        if (!res.ok) {
+            showAutomatError(res.error || `Website antwortet mit HTTP ${res.status}`);
+            return;
+        }
+        el.classList.remove("err");
+        const time = new Date().toLocaleTimeString("de-DE");
+        el.textContent = `${time}: Karte ${fmtBytes(selected.rfid)} an den Automaten geschickt. Was passiert, zeigt das Automatenfenster.`;
+    }
+
+    function showAutomatError(msg) {
+        const el = $("#automat-result");
+        el.classList.add("err");
+        el.textContent = `Scan nicht angekommen: ${msg}`;
+    }
+
+    // ---------- Geräte und Protokoll ----------
+
+    function ago(seconds) {
+        if (seconds < 60) return `vor ${Math.round(seconds)} s`;
+        if (seconds < 3600) return `vor ${Math.round(seconds / 60)} min`;
+        return `vor ${Math.round(seconds / 3600)} h`;
+    }
+
+    function renderDevices(devices, now) {
+        const box = $("#services");
+        for (const [name, dev] of Object.entries(devices)) {
+            let chip = document.getElementById(`dev-${name}`);
+            if (!chip) {
+                chip = document.createElement("span");
+                chip.className = "service";
+                chip.id = `dev-${name}`;
+                chip.innerHTML = `<span class="dot"></span><span class="label"></span><span class="port"></span>
+                    <button type="button" class="switch" role="switch"></button>`;
+                chip.querySelector(".label").textContent = dev.label;
+                chip.querySelector(".port").textContent = dev.port;
+                const sw = chip.querySelector(".switch");
+                sw.setAttribute("aria-label", `${dev.label} an oder aus`);
+                sw.addEventListener("click", () => {
+                    const next = sw.getAttribute("aria-checked") !== "true";
+                    postJson("/api/device", { name, online: next }).then(pollState);
+                });
+                box.appendChild(chip);
+            }
+            chip.querySelector(".dot").className = "dot " + (dev.online ? "up" : "down");
+            chip.querySelector(".switch").setAttribute("aria-checked", String(dev.online));
+            chip.title = !dev.online
+                ? `${dev.label} ist ausgeschaltet. Der Automat merkt das bei seiner nächsten Anfrage.`
+                : dev.lastPing
+                    ? `Zuletzt vom Automaten angepingt ${ago(now - dev.lastPing)}`
+                    : "Vom Automaten noch nicht angepingt";
+        }
+    }
+
+    function renderEvents(events) {
+        const feed = $("#feed");
+        for (const ev of events) {
+            // Zwei Abfragen können sich überholen - schon Gezeigtes überspringen.
+            if (ev.id <= lastEventId) continue;
+            const li = document.createElement("li");
+            li.className = ev.level;
+            li.innerHTML = `<span class="time"></span><span class="src"></span><span class="text"></span>`;
+            li.querySelector(".time").textContent = new Date(ev.t * 1000).toLocaleTimeString("de-DE");
+            li.querySelector(".src").textContent = SOURCE_LABELS[ev.source] || ev.source;
+            li.querySelector(".text").textContent = ev.text;
+            if (ev.detail) li.title = JSON.stringify(ev.detail);
+            feed.prepend(li);
+            lastEventId = Math.max(lastEventId, ev.id);
+        }
+        while (feed.children.length > 200) feed.lastChild.remove();
+    }
+
+    function renderMode(mode) {
+        document.querySelectorAll(".segmented button").forEach((b) =>
+            b.setAttribute("aria-pressed", String(b.dataset.mode === mode)));
+    }
+
+    async function pollState() {
+        try {
+            const s = await getJson(`/api/state?since=${lastEventId}`);
+            renderDevices(s.devices, s.now);
+            renderEvents(s.events);
+            renderMode(s.dispenseMode);
+        } catch (e) { /* Testpult kurz weg - nächster Durchlauf */ }
+    }
+
+    async function pollServices() {
+        try {
+            const s = await getJson("/api/services");
+            for (const key of ["backend", "website"]) {
+                const dot = $(`#svc-${key}`);
+                dot.className = "dot " + (s[key] ? "up" : "down");
+                dot.parentElement.title = s[key] ? "läuft" : "nicht erreichbar";
+            }
+        } catch (e) { /* egal */ }
+    }
+
+    // ---------- Verdrahtung ----------
+
+    $("#search").addEventListener("input", renderCards);
+    $("#search").addEventListener("keydown", (e) => {
+        if (e.key !== "Enter") return;
+        const first = $("#card-list .card-row");
+        if (first) { first.click(); e.target.blur(); }
+    });
+    $("#reload-cards").addEventListener("click", loadCards);
+    $("#own-apply").addEventListener("click", applyOwnBytes);
+    $("#own-bytes").addEventListener("keydown", (e) => { if (e.key === "Enter") applyOwnBytes(); });
+    $("#own-bytes").addEventListener("input", (e) => e.target.setCustomValidity(""));
+    $("#new-card").addEventListener("click", newCard);
+    $("#scan-automat").addEventListener("click", () => scan("automat"));
+    $("#scan-station").addEventListener("click", () => scan("station"));
+    $("#clear-feed").addEventListener("click", () => { $("#feed").innerHTML = ""; });
+    document.querySelectorAll(".segmented button").forEach((b) =>
+        b.addEventListener("click", () => postJson("/api/dispense_mode", { mode: b.dataset.mode }).then(pollState)));
+
+    document.addEventListener("keydown", (e) => {
+        if (e.ctrlKey || e.metaKey || e.altKey) return;
+        const typing = ["INPUT", "TEXTAREA"].includes(document.activeElement.tagName);
+        if (typing) return;
+        const key = e.key.toLowerCase();
+        if (key === "a") scan("automat");
+        else if (key === "s") scan("station");
+        else if (key === "n") newCard();
+        else if (key === "/") { e.preventDefault(); $("#search").focus(); }
+    });
+
+    try {
+        const saved = JSON.parse(localStorage.getItem("testpult.card") || "null");
+        if (Array.isArray(saved) && saved.length) select(saved);
+    } catch (e) { /* egal */ }
+
+    loadCards();
+    pollState();
+    pollServices();
+    setInterval(pollState, 1000);
+    setInterval(pollServices, 4000);
+</script>
+</body>
+</html>
