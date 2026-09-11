@@ -7,6 +7,8 @@ import de.schnorrenbergers.automat.database.types.User;
 import org.hibernate.Session;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class LoginManager {
 
@@ -30,6 +32,8 @@ public class LoginManager {
                 transaction.persist(new Login(userId, time));
                 List<Login> selectLogin = transaction.createSelectionQuery("from Login l", Login.class).getResultList();
             });
+            // Anwesend ist man ab dem Kommen - nicht erst, wenn man wieder geht.
+            new KontenManager(userId).checkIn(time);
             return true;
         }
         Main.getInstance().getDatabase().getSessionFactory().inTransaction((transaction) -> {
@@ -39,7 +43,7 @@ public class LoginManager {
         ConfigurationManager configurationManager = Main.getInstance().getConfigurationManager();
         if (attendance < 1000L * 60 * 60 * configurationManager.getInt("invalidation-time")) {
             new KontenManager(userId).deposit((double) attendance / 60 / 60 / 1000L);
-            new KontenManager(userId).attend(time);
+            new KontenManager(userId).checkOut(time);
             session.close();
             return false;
         }
@@ -76,6 +80,10 @@ public class LoginManager {
         List<Login> login = session.createSelectionQuery("from Login l", Login.class).getResultList();
         List<Student> students = session.createSelectionQuery("from Student s", Student.class).getResultList();
         session.close();
-        return new int[]{login.size(), Math.max(students.size() - login.size(), 0)};
+        // Auch Lehrkräfte melden sich an der Station an - die dürfen weder als
+        // anwesende noch (über die Differenz) als fehlende Schüler zählen.
+        Set<Long> studentIds = students.stream().map(Student::getId).collect(Collectors.toSet());
+        long present = login.stream().map(Login::getUserId).filter(studentIds::contains).distinct().count();
+        return new int[]{(int) present, (int) Math.max(students.size() - present, 0)};
     }
 }

@@ -39,6 +39,8 @@ module de.schnorrenbergers.automat {
     requires jdk.httpserver;
     requires org.hibernate.orm.core;
     requires jakarta.persistence;
+    // H2-Werkzeuge zum Umschlüsseln der Datenbank (DatabaseSetup).
+    requires com.h2database;
 
     requires java.naming;
     requires java.instrument;

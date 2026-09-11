@@ -35,6 +35,7 @@ import java.sql.Date;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Für jeden der sich denkt, dass man das "nur mal kurz" fixt, NEIN lass ab. Selbst ich habe keine ahnung was hier wie geschieht.
@@ -79,11 +80,13 @@ public class Main extends Application {
         handler = new StatisticManager();
         logoutTime = Integer.parseInt(settingsManager.getSettingOrDefault("logout", String.valueOf(logoutTime)));
         checkAvailability = Boolean.parseBoolean(settingsManager.getSettingOrDefault("availability", String.valueOf(false)));
+        AtomicBoolean seeded = new AtomicBoolean(false);
         database.getSessionFactory().inTransaction((x) -> {
             if (!x.createSelectionQuery("from Student s", Student.class).getResultList().isEmpty()) {
                 System.out.println("Database already initialized");
                 return;
             }
+            seeded.set(true);
             Wohnort wohnortT = new Wohnort(1, "s", "s", 456, "dsa");
             Wohnort wohnortS = new Wohnort(1, "s", "s", 4456, "dsa");
             try {
@@ -99,7 +102,11 @@ public class Main extends Application {
                 throw new RuntimeException(e);
             }
         });
-        new KontenManager(new int[]{99, 253, 101, 0, 251}).deposit(1000);
+        // Startguthaben nur für die frisch angelegten Testdaten - früher bekam
+        // die Testkarte bei jedem Start weitere 1000 Stunden.
+        if (seeded.get()) {
+            new KontenManager(new int[]{99, 253, 101, 0, 251}).deposit(1000);
+        }
 
         if (run == null) {
             run = SpringApplication.run(SpringApi.class);
@@ -342,8 +349,11 @@ public class Main extends Application {
         if ("add-user-view.fxml".equals(Main.getInstance().getStage().getScene().getUserData())) {
             try {
                 Konto konto = new KontenManager(lastScan).getKonto();
-                AddUserController.lastScan = konto.getUser().getFullName();
+                AddUserController.showKnownCard(konto.getUser().getFullName());
             } catch (Exception e) {
+                // Während die Bestätigung steht, ist der nächste Nutzer noch nicht
+                // zu sehen - die Karte würde also jemandem Unbekanntem zugeordnet.
+                if (AddUserController.isConfirming()) return;
                 AddUserHandler.UserAdd peek = AddUserHandler.addQueue.poll();
                 if (peek == null) return;
 
@@ -360,11 +370,14 @@ public class Main extends Application {
                     ));
                     session.flush();
                 });
+                AddUserController.confirmAdded(peek.getVorname() + " " + peek.getNachname());
             }
             return;
         }
-        updateDisplay();
+        // Erst merken, dann anzeigen - updateDisplay() liest this.lastScan. In der
+        // alten Reihenfolge zeigte der erste Scan nichts und der zweite den Namen.
         this.lastScan = lastScan;
+        updateDisplay();
         if (lastScan == null) return;
         new Thread(() -> {
             try {

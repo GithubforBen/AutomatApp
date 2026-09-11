@@ -31,6 +31,17 @@ public class Attandance {
         this.logout = logout;
     }
 
+    /**
+     * @param month 1-12, wie überall in der Datenbank (nicht 0-11 wie bei java.util.Date)
+     */
+    public boolean isOn(int day, int month, int year) {
+        return this.day == day && this.month == month && this.year == year;
+    }
+
+    public void setType(Type type) {
+        this.type = type;
+    }
+
     public double attandance() {
         return (logout - login) / 1000.0 / 60.0 / 60.0;
     }

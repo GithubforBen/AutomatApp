@@ -110,7 +110,7 @@ public class AdminController implements Initializable {
      * <ul>
      *     <li>Adds a positive quantity of the item when {@code positive} is 0.</li>
      *     <li>Adds a negative quantity of the item when {@code positive} is 1.</li>
-     *     <li>Sets the absolute stock amount (re-enabling a deactivated sweet) when {@code positive} is 2.</li>
+     *     <li>Re-enables a deactivated sweet without touching its stock when {@code positive} is 2.</li>
      * </ul>
      * Updates the screen saver's last user interaction timestamp to the current system time.
      *
@@ -122,10 +122,9 @@ public class AdminController implements Initializable {
         switch (positive) {
             case 0 -> availabilityManager.addSweet(type, (int) slider.getValue());
             case 1 -> availabilityManager.addSweet(type, (int) slider.getValue() * -1);
-            case 2 -> {
-                availabilityManager.setAmount(type, (int) slider.getValue());
-                availabilityManager.enableSweet(type);
-            }
+            // Nur die Sperre aufheben - der Vorrat bleibt, wie er ist. Früher wurde
+            // er hier auf den Reglerwert (meist 1) überschrieben.
+            case 2 -> availabilityManager.enableSweet(type);
         }
         refreshButtons();
     }
@@ -133,7 +132,7 @@ public class AdminController implements Initializable {
     /**
      * Handles the toggling of the fill mode button. Cycles through three states:
      * "+" (add stock, {@code positive == 0}), "-" (remove stock, {@code positive == 1}),
-     * and "Reaktivieren" (set absolute stock / re-enable, {@code positive == 2}).
+     * and "Reaktivieren" (re-enable, stock unchanged, {@code positive == 2}).
      * Updates the screen saver's last interaction timestamp.
      *
      * @param actionEvent the event that triggered this method, typically a button press

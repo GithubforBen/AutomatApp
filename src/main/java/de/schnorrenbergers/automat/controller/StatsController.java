@@ -9,8 +9,10 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.chart.BarChart;
+import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.PieChart;
 import javafx.scene.chart.XYChart;
+import javafx.util.StringConverter;
 import org.hibernate.Session;
 import org.json.JSONObject;
 
@@ -44,6 +46,33 @@ public class StatsController implements Initializable {
         chartData.getData().add(new XYChart.Data<>("Anwesend", attendance[0]));
         chartData.getData().add(new XYChart.Data<>("Abwesend", attendance[1]));
         chart.getData().addAll(chartData);
+        useWholeNumbers((NumberAxis) chart.getYAxis(), Math.max(attendance[0], attendance[1]));
+    }
+
+    /**
+     * Es gibt nur ganze Schüler*innen: Die automatische Skalierung wählt bei
+     * kleinen Zahlen aber Schritte wie 0,5 oder 0,25. Deshalb die Achse selbst
+     * in ganzen Schritten einteilen (höchstens etwa zehn Striche).
+     */
+    static void useWholeNumbers(NumberAxis axis, int max) {
+        int top = Math.max(1, max);
+        int step = Math.max(1, (int) Math.ceil(top / 10.0));
+        axis.setAutoRanging(false);
+        axis.setLowerBound(0);
+        axis.setUpperBound(Math.ceil((double) top / step) * step);
+        axis.setTickUnit(step);
+        axis.setMinorTickCount(0);
+        axis.setTickLabelFormatter(new StringConverter<>() {
+            @Override
+            public String toString(Number number) {
+                return String.valueOf(number.intValue());
+            }
+
+            @Override
+            public Number fromString(String string) {
+                return Integer.parseInt(string);
+            }
+        });
     }
 
     public void back(ActionEvent actionEvent) {

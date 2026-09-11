@@ -1,0 +1,98 @@
+/* "Nutzer hinzufügen" am Automaten. Alle Farben kommen aus dem AtlantaFX-Theme
+   (PrimerDark, gesetzt in Main), damit die Ansicht zum Rest der App passt.
+   Farbe steht nur für den Zustand: grün = angelegt, gelb = Karte gehört schon
+   jemandem, blau (Akzent) = wartet auf den nächsten Scan. */
+
+.add-user {
+    -fx-background-color: -color-bg-default;
+}
+
+.title {
+    -fx-font-size: 28px;
+    -fx-text-fill: -color-fg-muted;
+    -fx-alignment: center;
+}
+
+.panel {
+    -fx-background-color: -color-bg-subtle;
+    -fx-background-radius: 18;
+    -fx-border-color: -color-accent-emphasis;
+    -fx-border-width: 3;
+    -fx-border-radius: 18;
+    -fx-padding: 28;
+}
+
+.panel .label {
+    -fx-alignment: center;
+    -fx-text-alignment: center;
+}
+
+.caption {
+    -fx-font-size: 30px;
+    -fx-text-fill: -color-fg-muted;
+}
+
+.name {
+    -fx-font-size: 50px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -color-fg-emphasis;
+}
+
+.hint {
+    -fx-font-size: 26px;
+    -fx-text-fill: -color-accent-fg;
+}
+
+/* Niemand vorgemerkt */
+.panel.state-empty {
+    -fx-border-color: -color-border-default;
+}
+
+.panel.state-empty .caption {
+    -fx-font-size: 36px;
+    -fx-text-fill: -color-fg-default;
+}
+
+.panel.state-empty .hint {
+    -fx-text-fill: -color-fg-muted;
+}
+
+/* Gerade angelegt - bleibt 5 Sekunden stehen */
+.panel.state-added {
+    -fx-background-color: -color-success-emphasis;
+    -fx-border-color: -color-success-emphasis;
+}
+
+.panel.state-added .caption {
+    -fx-font-size: 64px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -color-fg-emphasis;
+}
+
+.panel.state-added .name {
+    -fx-font-size: 40px;
+    -fx-font-weight: normal;
+    -fx-text-fill: -color-fg-emphasis;
+}
+
+/* Karte gehört schon jemandem */
+.panel.state-known {
+    -fx-background-color: -color-warning-emphasis;
+    -fx-border-color: -color-warning-emphasis;
+}
+
+.panel.state-known .caption,
+.panel.state-known .name,
+.panel.state-known .hint {
+    -fx-text-fill: -color-fg-emphasis;
+}
+
+.panel.state-known .name {
+    -fx-font-size: 44px;
+}
+
+/* Normaler Theme-Knopf wie auf den anderen Seiten, nur groß genug zum Tippen. */
+.back {
+    -fx-pref-height: 110px;
+    -fx-font-size: 34px;
+}

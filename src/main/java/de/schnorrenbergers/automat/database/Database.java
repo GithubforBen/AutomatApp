@@ -4,6 +4,7 @@ import de.schnorrenbergers.automat.database.types.*;
 import de.schnorrenbergers.automat.database.types.types.Attandance;
 import de.schnorrenbergers.automat.database.types.types.Wohnort;
 import org.hibernate.SessionFactory;
+import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.cfg.Configuration;
 
 public class Database {
@@ -31,12 +32,15 @@ public class Database {
      * throughout the application lifecycle.
      */
     public Database(String user, String filePW, String userPW) {
+        // Nicht ausgeben: das ist der Schlüssel der verschlüsselten Datenbank.
         String password = filePW + " " + userPW;
-        System.out.println(password);
+        // Die Schlüssel müssen die sein, die Hibernate liest: "connection.username"
+        // ohne Präfix wurde stillschweigend ignoriert, und es galt das feste
+        // Passwort aus hibernate.cfg.xml.
         Configuration configuration = new Configuration().configure()
                 .setProperty("show_sql", true)
-                .setProperty("connection.username", user)
-                .setProperty("connection.password", password)
+                .setProperty(AvailableSettings.JAKARTA_JDBC_USER, user)
+                .setProperty(AvailableSettings.JAKARTA_JDBC_PASSWORD, password)
                 .addAnnotatedClass(Setting.class)
                 .addAnnotatedClass(User.class)
                 .addAnnotatedClass(Kurs.class)

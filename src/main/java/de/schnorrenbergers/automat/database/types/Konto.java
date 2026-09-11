@@ -5,8 +5,10 @@ import de.schnorrenbergers.automat.database.types.types.Attandance;
 import jakarta.persistence.*;
 import org.hibernate.Session;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -84,34 +86,57 @@ public class Konto {
         return ((int) (balance * 10)) / 10.0;
     }
 
-    public void attend(long l) {
-        if (attendances == null) {
-            attendances = new ArrayList<>();
-            System.out.println("Attendance list is empty it was fixed but it might be a type of problem.");
+    /**
+     * Kommen an der Station: ab jetzt zählt der Tag als anwesend - auch wenn er
+     * vorher als entschuldigt oder abwesend eingetragen war.
+     */
+    public void checkIn(long time) {
+        Attandance today = attendanceOn(time);
+        if (today == null) {
+            LocalDate date = toDate(time);
+            getAttendancesOrCreate().add(new Attandance(date.getDayOfMonth(), date.getMonthValue(), date.getYear(), time, Attandance.Type.NORMAL));
+            return;
         }
-        Date date = new Date(l);
-        for (Attandance attendance : attendances) {
-            if (attendance.getDay() == date.getDay() && attendance.getMonth() == date.getMonth() && attendance.getYear() == date.getYear()) {
-                attendance.logout(l);
-                return;
-            }
-        }
-        attendances.add(new Attandance(date.getDay(), date.getMonth(), date.getYear(), l, Attandance.Type.NORMAL));
+        today.setType(Attandance.Type.NORMAL);
     }
 
-    public void gone(long l) {
+    /**
+     * Gehen an der Station. Normalerweise gibt es vom Kommen schon einen Eintrag;
+     * fehlt er (z.B. bei Altdaten), wird der Tag trotzdem als anwesend erfasst.
+     */
+    public void checkOut(long time) {
+        Attandance today = attendanceOn(time);
+        if (today == null) {
+            checkIn(time);
+            today = attendanceOn(time);
+        }
+        today.setType(Attandance.Type.NORMAL);
+        today.logout(time);
+    }
+
+    private Attandance attendanceOn(long time) {
+        // Früher standen hier Date.getDay()/getMonth()/getYear() - das sind
+        // Wochentag, Monat ab 0 und Jahr ab 1900, also völlig andere Werte als
+        // die, mit denen die Website Anwesenheiten speichert und sucht.
+        LocalDate date = toDate(time);
+        for (Attandance attendance : getAttendancesOrCreate()) {
+            if (attendance.isOn(date.getDayOfMonth(), date.getMonthValue(), date.getYear())) {
+                return attendance;
+            }
+        }
+        return null;
+    }
+
+    private List<Attandance> getAttendancesOrCreate() {
         if (attendances == null) {
             attendances = new ArrayList<>();
             System.out.println("Attendance list is empty it was fixed but it might be a type of problem.");
         }
-        Date date = new Date(l);
-        for (Attandance attendance : attendances) {
-            if (attendance.getDay() == date.getDay() && attendance.getMonth() == date.getMonth() && attendance.getYear() == date.getYear()) {
-                attendance.logout(l);
-                return;
-            }
-        }
-        attendances.add(new Attandance(date.getDay(), date.getMonth(), date.getYear(), l, Attandance.Type.NORMAL));
+        return attendances;
+    }
+
+    private static LocalDate toDate(long time) {
+        return Instant.ofEpochMilli(time).atZone(ZoneId.systemDefault()).toLocalDate();
     }
 
     public User getUser() {

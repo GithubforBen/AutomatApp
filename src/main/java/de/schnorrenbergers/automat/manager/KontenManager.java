@@ -6,6 +6,9 @@ import de.schnorrenbergers.automat.database.types.User;
 import de.schnorrenbergers.automat.database.types.types.Attandance;
 import org.hibernate.Session;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.List;
 
 public class KontenManager {
@@ -31,7 +34,8 @@ public class KontenManager {
         Main.getInstance().getDatabase().getSessionFactory().inTransaction(session -> {
             List<User> resultList = session.createSelectionQuery("from User u where u.rfid in :rfid", User.class)
                     .setParameter("rfid", rfid).getResultList();
-            session.createSelectionQuery("from User u", User.class).getResultList().forEach(System.out::println);
+            // Hier wurden früher bei jedem Scan alle Nutzer samt Kursen geladen
+            // und ins Log geschrieben - reine Debug-Ausgabe, die jeden Scan bremst.
             this.id = resultList.getFirst().getId();
         });
     }
@@ -112,7 +116,7 @@ public class KontenManager {
      * month, and year. If a match is found, the method returns {@code true}.
      *
      * @param day   the day of the month to check for attendance (1-31).
-     * @param month the zero-based month of the year to check for attendance (0-11).
+     * @param month the month of the year to check for attendance (1-12).
      * @param year  the year to check for attendance (e.g., 2023).
      * @return {@code true} if an attendance record exists for the specified date;
      * {@code false} otherwise.
@@ -127,9 +131,63 @@ public class KontenManager {
     }
 
     /**
-     * Adds a users attandance to the Users record.
+     * Kommen an der Station: vermerkt den Tag als anwesend.
      */
-    public void attend(long l) {
-        getKonto().attend(l);
+    public void checkIn(long time) {
+        Konto konto = getKonto();
+        konto.checkIn(time);
+        updateKonto(konto);
+    }
+
+    /**
+     * Gehen an der Station: vermerkt die Uhrzeit des Gehens am heutigen Eintrag.
+     */
+    public void checkOut(long time) {
+        // Früher wurde hier nur die Kopie aus getKonto() geändert und nie
+        // gespeichert - an der Station erfasste Anwesenheiten gingen verloren.
+        Konto konto = getKonto();
+        konto.checkOut(time);
+        updateKonto(konto);
+    }
+
+    /**
+     * Setzt den Anwesenheitsstatus eines Tages von Hand (Website). Vorhandene
+     * Einträge dieses Tages werden ersetzt statt ergänzt, damit ein Tag nie
+     * gleichzeitig "entschuldigt" und "anwesend" ist.
+     *
+     * @param type neuer Status, oder {@code null}, um den Eintrag zu entfernen
+     */
+    public void setAttendance(LocalDate date, Attandance.Type type) {
+        int day = date.getDayOfMonth(), month = date.getMonthValue(), year = date.getYear();
+        Main.getInstance().getDatabase().getSessionFactory().inTransaction(session -> {
+            List<Konto> found = session.createSelectionQuery("from Konto k left join fetch k.attendances where k.userId = :id", Konto.class)
+                    .setParameter("id", id).getResultList();
+            Konto konto;
+            if (found.isEmpty()) {
+                konto = new Konto(id, 0, false);
+                session.persist(konto);
+            } else {
+                konto = found.getFirst();
+            }
+
+            List<Attandance> sameDay = new ArrayList<>(konto.getAttendances().stream()
+                    .filter(a -> a.isOn(day, month, year)).toList());
+            // Ein echter Stationseintrag (mit Kommen/Gehen-Zeit) bleibt erhalten,
+            // wenn der Tag ohnehin "anwesend" werden soll.
+            Attandance keep = type == Attandance.Type.NORMAL
+                    ? sameDay.stream().filter(a -> a.getType() == Attandance.Type.NORMAL).findFirst().orElse(null)
+                    : null;
+            sameDay.remove(keep);
+            konto.getAttendances().removeAll(sameDay);
+            sameDay.forEach(session::remove);
+
+            if (type != null && keep == null) {
+                long start = date.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
+                Attandance attendance = new Attandance(day, month, year, start, type);
+                attendance.logout(start);
+                session.persist(attendance);
+                konto.getAttendances().add(attendance);
+            }
+        });
     }
 }

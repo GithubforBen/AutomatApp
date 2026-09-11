@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -30,11 +31,38 @@ public class AttendanceController {
         List<Attandance> attendances = kontenManager.getKonto().getAttendances();
         JSONObject response = new JSONObject();
         response.put("attendances", attendances.stream().map((a) -> new JSONObject()
+                .put("id", a.getId())
                 .put("day", a.getDay())
                 .put("month", a.getMonth())
                 .put("year", a.getYear())
                 .put("type", a.getType().toString())).toList());
         return okJson(response.toString());
+    }
+
+    /**
+     * Setzt den Status eines Tages und ersetzt dabei alle vorhandenen Einträge
+     * dieses Tages. Body: {@code {"id", "year", "month" (1-12), "day",
+     * "type": "NORMAL" | "EXCUSED" | "AWAY" | "NONE"}} - NONE entfernt den Eintrag.
+     */
+    @PostMapping(value = "/set", produces = MediaType.TEXT_PLAIN_VALUE)
+    public ResponseEntity<String> set(@RequestBody(required = false) String body) {
+        JSONObject json = parseJson(body);
+        if (json == null) {
+            return jsonError();
+        }
+        try {
+            long id = json.getLong("id");
+            if (id == 0) {
+                return badRequest();
+            }
+            LocalDate date = LocalDate.of(json.getInt("year"), json.getInt("month"), json.getInt("day"));
+            String type = json.getString("type");
+            new KontenManager(id).setAttendance(date, "NONE".equals(type) ? null : Attandance.Type.valueOf(type));
+            return ResponseEntity.ok().contentType(MediaType.TEXT_PLAIN).body("Successfully set attendance");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return badRequest();
+        }
     }
 
     private JSONObject parseJson(String body) {
