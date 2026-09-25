@@ -56,6 +56,9 @@ public class HMACController implements Initializable {
         }));
         text.setText(name.getText() + ":" + secret);
         TextInputDialog dialog = new TextInputDialog("127.0.0.1");
+        // Ohne Besitzer öffnet sich der Dialog hinter dem Automatenfenster
+        // (das ist "always on top") und ist am Gerät unsichtbar.
+        dialog.initOwner(Main.getInstance().getStage());
         dialog.setTitle("IP Address");
         dialog.setHeaderText("Enter netcat IP Address run nc -l 12345");
         dialog.setContentText("IP Address:");
