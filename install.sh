@@ -6,7 +6,9 @@
 #   * Automat als Autostart-Eintrag der Desktop-Sitzung (braucht einen Bildschirm)
 #
 # Aufruf (als normaler Benutzer, nicht als root):
-#   bash install.sh              installieren bzw. aktualisieren
+#   bash install.sh              installieren (erneut ausführen = alles neu einrichten)
+#   bash install.sh update       nur aktualisieren: Code holen, bauen, neu starten
+#                                (dasselbe macht "Automat aktualisieren" auf dem Desktop)
 #   bash install.sh hmac         Verbindung Website <-> Automat (neu) einrichten
 #   bash install.sh admin        Admin-Zugang der Website festlegen
 #   bash install.sh uninstall    Autostart und Dienst entfernen (Daten bleiben)
@@ -39,6 +41,9 @@ SERVICE="automat-website"
 SERVICE_FILE="/etc/systemd/system/$SERVICE.service"
 AUTOSTART_FILE="$HOME/.config/autostart/automat.desktop"
 MENU_FILE="$HOME/.local/share/applications/automat.desktop"
+UPDATER="$BIN_DIR/automat-update.sh"
+UPDATE_MENU_FILE="$HOME/.local/share/applications/automat-update.desktop"
+SUDOERS_FILE="/etc/sudoers.d/automat-website"
 MAIN_CLASS="de.schnorrenbergers.automat.BetterMain"
 
 BACKEND_URL="http://127.0.0.1:8000"
@@ -56,6 +61,8 @@ JDK_HOME=""
 UI=""
 NEW_PASSWORD=""
 ADMIN_MISSING=0
+START_FAILED=0
+UPDATE_CONFIRMED=0
 
 trap 'SUDO_PW=""; NEW_PASSWORD=""' EXIT
 trap 'on_error $LINENO' ERR
@@ -86,9 +93,9 @@ choose_ui() {
 tty_read() {
     local silent=$1 answer
     if has_tty; then
-        if [[ $silent == 1 ]]; then IFS= read -rs answer </dev/tty; echo >/dev/tty; else IFS= read -r answer </dev/tty; fi
+        if [[ $silent == 1 ]]; then IFS= read -rs answer </dev/tty || true; echo >/dev/tty; else IFS= read -r answer </dev/tty || true; fi
     else
-        if [[ $silent == 1 ]]; then IFS= read -rs answer; else IFS= read -r answer; fi
+        if [[ $silent == 1 ]]; then IFS= read -rs answer || true; else IFS= read -r answer || true; fi
     fi
     printf '%s' "$answer"
 }
@@ -300,6 +307,9 @@ ensure_java() {
 sync_repo() {  # URL Zweig Ordner
     local url=$1 branch=$2 dir=$3
     if [[ -d $dir/.git ]]; then
+        # Der CSV-Export der Website überschreibt diese (versionierte) Datei bei
+        # jedem Export - das ist keine echte Änderung und darf das Update nicht blockieren.
+        [[ $dir == "$WEB_DIR" ]] && git -C "$dir" checkout -q -- src/students.csv 2>/dev/null || true
         if [[ -n $(git -C "$dir" status --porcelain --untracked-files=no) ]]; then
             note "$(basename "$dir"): lokale Änderungen vorhanden - nicht aktualisiert"
             return
@@ -334,7 +344,8 @@ stop_automat() {
 build_automat() {
     step "Automat bauen (dauert beim ersten Mal einige Minuten)"
     if automat_running; then
-        ui_confirm "$TITLE" "Der Automat läuft gerade. Für das Update muss er kurz beendet werden."$'\n\n'"Jetzt beenden?" ||
+        ((UPDATE_CONFIRMED)) ||
+            ui_confirm "$TITLE" "Der Automat läuft gerade. Für das Update muss er kurz beendet werden."$'\n\n'"Jetzt beenden?" ||
             cancelled
         stop_automat
     fi
@@ -372,14 +383,18 @@ write_launcher() {
 cd "$APP_DIR" || exit 1
 mkdir -p "$LOG_DIR"
 exec 9>"$LOG_DIR/automat.lock"
-flock -n 9 || exit 0   # läuft schon
 log="$LOG_DIR/automat.log"
+if ! flock -n 9; then
+    echo "\$(date '+%F %T') Automat läuft schon - nicht noch einmal gestartet" >>"\$log"
+    exit 0
+fi
 while true; do
     [[ -f \$log && \$(stat -c %s "\$log") -gt 10485760 ]] && mv "\$log" "\$log.1"
     echo "\$(date '+%F %T') Automat startet" >>"\$log"
     "$JDK_HOME/bin/java" -cp "target/classes:target/lib/*" $MAIN_CLASS >>"\$log" 2>&1 && break
-    echo "\$(date '+%F %T') Automat beendet mit Code \$? - Neustart in 5 s" >>"\$log"
-    sleep 5
+    code=\$?   # sofort sichern - \$(date) unten würde \$? überschreiben
+    echo "\$(date '+%F %T') Automat beendet mit Code \$code - Neustart in 5 s" >>"\$log"
+    sleep 5 9>&-   # ohne Sperre: wird das Skript hier beendet, blockiert sonst "sleep" den nächsten Start
 done
 EOF
     chmod +x "$LAUNCHER"
@@ -398,18 +413,61 @@ Categories=Utility;
 X-GNOME-Autostart-enabled=true
 EOF
     )
-    if [[ $SKIP_SYSTEM == 1 ]]; then
-        note "Autostart-Eintrag übersprungen (AUTOMAT_SKIP_SYSTEM=1), Startskript: $LAUNCHER"
-        return
-    fi
     printf '%s\n' "$entry" >"$AUTOSTART_FILE"
     printf '%s\n' "$entry" >"$MENU_FILE"
     note "Automat: $AUTOSTART_FILE"
+    write_update_button
+}
+
+desktop_dir() {
+    local dir
+    dir=$(xdg-user-dir DESKTOP 2>/dev/null || true)
+    [[ -n $dir && $dir != "$HOME" ]] || dir="$HOME/Desktop"
+    printf '%s' "$dir"
+}
+
+# "Automat aktualisieren" auf dem Desktop und im Menü: öffnet ein Terminal mit
+# dem Fortschritt; Rückfragen und Passwörter kommen als Dialogfenster.
+write_update_button() {
+    cat >"$UPDATER" <<EOF
+#!/usr/bin/env bash
+# Von install.sh erzeugt: "Automat aktualisieren" auf dem Desktop.
+bash "$APP_DIR/install.sh" update
+code=\$?
+echo
+if [[ \$code == 0 ]]; then echo "Fertig."; else echo "Aktualisierung fehlgeschlagen (Code \$code) - Protokoll: $LOG"; fi
+read -rp "Enter schließt dieses Fenster. " _
+EOF
+    chmod +x "$UPDATER"
+
+    local desktop entry
+    desktop=$(desktop_dir)
+    mkdir -p "$desktop" "$(dirname "$UPDATE_MENU_FILE")"
+    entry=$(
+        cat <<EOF
+[Desktop Entry]
+Type=Application
+Name=Automat aktualisieren
+Comment=Holt die neueste Version von Automat und Website und startet beide neu
+Exec="$UPDATER"
+Icon=system-software-update
+Terminal=true
+Categories=Utility;
+EOF
+    )
+    printf '%s\n' "$entry" >"$desktop/automat-update.desktop"
+    printf '%s\n' "$entry" >"$UPDATE_MENU_FILE"
+    chmod +x "$desktop/automat-update.desktop"
+    # GNOME startet Desktop-Dateien sonst erst nach "Starten erlauben".
+    gio set "$desktop/automat-update.desktop" metadata::trusted true 2>/dev/null || true
+    note "Knopf zum Aktualisieren: $desktop/automat-update.desktop"
 }
 
 write_service() {
     if [[ $SKIP_SYSTEM == 1 ]]; then note "Website-Dienst übersprungen (AUTOMAT_SKIP_SYSTEM=1)"; return; fi
-    as_root tee "$SERVICE_FILE" >/dev/null <<EOF
+    local unit
+    unit=$(
+        cat <<EOF
 [Unit]
 Description=B.A.M.B.I. Website
 After=network-online.target
@@ -428,14 +486,49 @@ RestartSec=5
 [Install]
 WantedBy=multi-user.target
 EOF
-    run as_root systemctl daemon-reload
-    run as_root systemctl enable "$SERVICE" || fail "Der Website-Dienst konnte nicht aktiviert werden."
-    note "Website: systemd-Dienst $SERVICE"
+    )
+    # Unverändert (der Normalfall beim Aktualisieren): kein sudo nötig.
+    if [[ -f $SERVICE_FILE && $(cat "$SERVICE_FILE") == "$unit" ]] && systemctl is-enabled --quiet "$SERVICE" 2>/dev/null; then
+        note "Website: systemd-Dienst $SERVICE (unverändert)"
+    else
+        need_root
+        printf '%s\n' "$unit" | as_root tee "$SERVICE_FILE" >/dev/null
+        run as_root systemctl daemon-reload
+        run as_root systemctl enable "$SERVICE" || fail "Der Website-Dienst konnte nicht aktiviert werden."
+        note "Website: systemd-Dienst $SERVICE"
+    fi
+    write_sudoers
+}
+
+# Erlaubt genau einen Befehl ohne Passwort: den Website-Dienst neu starten.
+# Damit fragt "Automat aktualisieren" im Normalfall nicht nach dem Passwort.
+write_sudoers() {
+    local systemctl rule tmp
+    systemctl=$(command -v systemctl)
+    rule="$USER ALL=(root) NOPASSWD: $systemctl restart $SERVICE"
+    [[ -f $SUDOERS_FILE ]] && sudo -n -l "$systemctl" restart "$SERVICE" >/dev/null 2>&1 && return 0
+    need_root
+    tmp=$(mktemp)
+    printf '# Von install.sh (Automat) angelegt: Website nach Updates ohne Passwort neu starten.\n%s\n' "$rule" >"$tmp"
+    if as_root visudo -cqf "$tmp"; then
+        run as_root install -m 0440 -o root -g root "$tmp" "$SUDOERS_FILE"
+        note "sudo-Regel: Website-Neustart ohne Passwort"
+    else
+        note "sudo-Regel nicht angelegt (visudo lehnt sie ab)"
+    fi
+    rm -f "$tmp"
 }
 
 restart_website() {
     if [[ $SKIP_SYSTEM == 1 ]]; then return; fi
+    # Dank sudo-Regel meist ohne Passwort; sonst einmal nachfragen.
+    if sudo -n systemctl restart "$SERVICE" 2>/dev/null; then
+        note "Website neu gestartet"
+        return
+    fi
+    need_root
     run as_root systemctl restart "$SERVICE" || fail "Der Website-Dienst startet nicht (journalctl -u $SERVICE)."
+    note "Website neu gestartet"
 }
 
 kiosk_settings() {
@@ -448,16 +541,61 @@ kiosk_settings() {
     fi
 }
 
+# Gibt die Anzeige-Variablen der Desktop-Sitzung dieses Benutzers aus (eine
+# KEY=VALUE-Zeile je Variable) - auch wenn das Skript per SSH läuft. Dann
+# kommen sie aus einem Prozess, der am Bildschirm des Geräts läuft; ein per
+# SSH weitergeleitetes X-Display wäre der falsche Bildschirm.
+desktop_env() {
+    local vars="DISPLAY|WAYLAND_DISPLAY|XDG_RUNTIME_DIR|XAUTHORITY|DBUS_SESSION_BUS_ADDRESS"
+    if has_display && [[ -z ${SSH_CONNECTION:-} ]]; then
+        env | grep -E "^($vars)="
+        return 0
+    fi
+    local pid environ
+    for pid in $(pgrep -u "$(id -u)"); do
+        environ=$(tr '\0' '\n' 2>/dev/null <"/proc/$pid/environ") || continue
+        grep -qE '^(DISPLAY|WAYLAND_DISPLAY)=' <<<"$environ" || continue
+        grep -q '^SSH_CONNECTION=' <<<"$environ" && continue
+        grep -E "^($vars)=" <<<"$environ"
+        return 0
+    done
+    return 1
+}
+
 start_automat() {
     automat_running && return 0
-    if ! has_display; then
-        note "Kein Bildschirm in dieser Sitzung - der Automat startet bei der nächsten Anmeldung."
+    local session_env=()
+    mapfile -t session_env < <(desktop_env)
+    if ((${#session_env[@]} == 0)); then
+        note "Niemand ist am Bildschirm des Geräts angemeldet - der Automat startet bei der nächsten Anmeldung."
         return 1
     fi
-    setsid "$LAUNCHER" >/dev/null 2>&1 </dev/null &
-    local i
-    for i in $(seq 20); do automat_running && break; sleep 0.5; done
-    note "Automat gestartet"
+
+    local log="$LOG_DIR/automat.log" before=0
+    [[ -f $log ]] && before=$(wc -l <"$log")
+    env -u SSH_CONNECTION -u SSH_CLIENT -u SSH_TTY "${session_env[@]}" setsid "$LAUNCHER" >/dev/null 2>&1 </dev/null &
+
+    # Stürzt die App ab, dann in den ersten Sekunden - und das Startskript
+    # startet sie im Kreis neu. Das erkennen, statt ewig auf sie zu warten.
+    local i crashed=0
+    for i in $(seq 24); do
+        sleep 0.5
+        if tail -n +"$((before + 1))" "$log" 2>/dev/null | grep -q 'beendet mit Code'; then
+            crashed=1
+            break
+        fi
+    done
+    if ((crashed)) || ! automat_running; then
+        local details
+        details=$(tail -n +"$((before + 1))" "$log" 2>/dev/null | grep -v '^\s*at ' | tail -n 12 || true)
+        [[ -n $details ]] || details="(keine Ausgabe - läuft vielleicht schon ein Automat?)"
+        stop_automat
+        START_FAILED=1
+        ui_error "Automat startet nicht" "Der Automat ist gleich nach dem Start abgestürzt."$'\n\n'"Letzte Zeilen aus $log:"$'\n'"$details"
+        note "Automat abgestürzt, siehe $log"
+        return 1
+    fi
+    note "Automat gestartet (Bildschirm: $(printf '%s\n' "${session_env[@]}" | grep -E '^(WAYLAND_DISPLAY|DISPLAY)=' | tr '\n' ' '))"
 }
 
 # ---------------------------------------------------------------------------
@@ -565,13 +703,21 @@ setup_hmac() {
     step "Verbindung Website ↔ Automat"
     local intro choice key_id secret status
     intro="Die Website braucht einen Schlüssel, den der Automat erzeugt. Dafür muss der Automat laufen und entsperrt sein."
-    if ! automat_running; then
-        intro+=$'\n\n'"Der Automat läuft gerade nicht. Starte ihn und lege beim ersten Start das Datenbank-Passwort fest - oder richte die Verbindung später ein."
+    if ! automat_running && ((START_FAILED == 0)) && start_automat; then
+        ui_info "Automat" "Der Automat ist gestartet. Falls er nach dem Datenbank-Passwort fragt: jetzt am Automaten eingeben (beim ersten Start zweimal) und warten, bis die Süßigkeiten zu sehen sind."$'\n\n'"Dann hier auf OK."
     fi
-    choice=$(ui_choice "Verbindung Website ↔ Automat" "$intro" \
-        empfangen "Schlüssel vom Automaten empfangen (empfohlen)" \
-        einfuegen "Schlüssel selbst einfügen" \
-        spaeter "Später einrichten") || choice=spaeter
+    if automat_running; then
+        choice=$(ui_choice "Verbindung Website ↔ Automat" "$intro" \
+            empfangen "Schlüssel vom Automaten empfangen (empfohlen)" \
+            einfuegen "Schlüssel selbst einfügen" \
+            spaeter "Später einrichten") || choice=spaeter
+    else
+        # Ohne laufenden Automaten käme nie ein Schlüssel an.
+        intro+=$'\n\n'"Der Automat läuft nicht, daher kann der Schlüssel jetzt nicht empfangen werden."
+        choice=$(ui_choice "Verbindung Website ↔ Automat" "$intro" \
+            einfuegen "Schlüssel selbst einfügen" \
+            spaeter "Später einrichten") || choice=spaeter
+    fi
     if [[ $choice == spaeter ]]; then
         note "übersprungen - später mit: bash $APP_DIR/install.sh hmac"
         return 1
@@ -792,7 +938,7 @@ summary() {
         text+="Noch offen: ersten Admin-Zugang anlegen - einfach die Website öffnen. Bis dahin kann das jede Person im Netzwerk tun."$'\n\n'
     fi
     text+="Beim ersten Start fragt der Automat nach einem neuen Datenbank-Passwort (mindestens 10 Ziffern). Gut merken - ohne es sind die Daten verloren."$'\n\n'
-    text+="Aktualisieren: bash $APP_DIR/install.sh"$'\n'
+    text+="Aktualisieren: Knopf \"Automat aktualisieren\" auf dem Desktop (oder bash $APP_DIR/install.sh update)"$'\n'
     text+="Protokolle: $LOG_DIR"
     ui_info "$TITLE" "$text"
     printf '\n%s\n' "$text"
@@ -825,6 +971,44 @@ cmd_install() {
     summary
 }
 
+# Schlanke Aktualisierung (auch für Installationen mit der ersten Version
+# dieses Skripts): holt erst das eigene Repository und startet dann die neue
+# Version von install.sh, damit Verbesserungen am Update selbst sofort gelten.
+cmd_update() {
+    [[ -d $APP_DIR/.git && -d $WEB_DIR/.git ]] ||
+        fail "Keine Installation in $INSTALL_DIR gefunden - zuerst: bash install.sh"
+    if [[ ${AUTOMAT_UPDATE_STAGE:-} != 2 ]]; then
+        step "Installer aktualisieren"
+        sync_repo "$APP_REPO" "$APP_BRANCH" "$APP_DIR"
+        exec env AUTOMAT_UPDATE_STAGE=2 bash "$APP_DIR/install.sh" update
+    fi
+
+    local question="Automat und Website aktualisieren?"
+    automat_running && question+=$'\n\n'"Der Automat wird dafür kurz beendet und danach neu gestartet. Beim Start fragt er nach dem Datenbank-Passwort."
+    ui_confirm "$TITLE" "$question" || cancelled
+    UPDATE_CONFIRMED=1
+
+    ensure_java
+    step "Quellcode laden"
+    sync_repo "$APP_REPO" "$APP_BRANCH" "$APP_DIR"
+    sync_repo "$WEB_REPO" "$WEB_BRANCH" "$WEB_DIR"
+    build_automat
+    setup_website
+    write_launcher
+    write_service
+    step "Neu starten"
+    restart_website
+    start_automat || true
+
+    local text
+    text="Aktualisiert."$'\n\n'
+    text+="Automat: $(git -C "$APP_DIR" log -1 --format='%h %s' | cut -c1-70)"$'\n'
+    text+="Website: $(git -C "$WEB_DIR" log -1 --format='%h %s' | cut -c1-70)"
+    automat_running && text+=$'\n\n'"Jetzt am Automaten das Datenbank-Passwort eingeben."
+    ui_info "$TITLE" "$text"
+    printf '\n%s\n' "$text"
+}
+
 cmd_hmac() {
     [[ -x $WEB_DIR/.venv/bin/python ]] || fail "Die Website ist noch nicht installiert - zuerst: bash install.sh"
     need_root
@@ -843,10 +1027,10 @@ cmd_uninstall() {
     need_root
     step "Deinstallieren"
     stop_automat
-    rm -f "$AUTOSTART_FILE" "$MENU_FILE" "$LAUNCHER"
+    rm -f "$AUTOSTART_FILE" "$MENU_FILE" "$LAUNCHER" "$UPDATER" "$UPDATE_MENU_FILE" "$(desktop_dir)/automat-update.desktop"
     if [[ $SKIP_SYSTEM != 1 ]]; then
         run as_root systemctl disable --now "$SERVICE" || true
-        run as_root rm -f "$SERVICE_FILE"
+        run as_root rm -f "$SERVICE_FILE" "$SUDOERS_FILE"
         run as_root systemctl daemon-reload
     fi
     ui_info "$TITLE" "Autostart und Website-Dienst sind entfernt."$'\n\n'"Die Daten liegen weiter in $INSTALL_DIR. Zum vollständigen Entfernen den Ordner löschen - damit ist auch die Datenbank weg."
@@ -856,12 +1040,13 @@ main() {
     local command=${1:-install}
     prepare "$command"
     case $command in
-        install | update) cmd_install ;;
+        install) cmd_install ;;
+        update) cmd_update ;;
         hmac) cmd_hmac ;;
         admin) cmd_admin ;;
         uninstall) cmd_uninstall ;;
-        -h | --help | help) sed -n '2,24p' "$0" | sed 's/^# \{0,1\}//' ;;
-        *) echo "Unbekannter Befehl: $command (install, hmac, admin, uninstall)" >&2; exit 1 ;;
+        -h | --help | help) sed -n '2,26p' "$0" | sed 's/^# \{0,1\}//' ;;
+        *) echo "Unbekannter Befehl: $command (install, update, hmac, admin, uninstall)" >&2; exit 1 ;;
     esac
 }
 
