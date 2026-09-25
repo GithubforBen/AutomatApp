@@ -29,7 +29,9 @@ public class AvailabilityManager {
             List<Sweet> sweets = session.createSelectionQuery("from Sweet s where s.type = :sweet", Sweet.class).setParameter("sweet", sweet).getResultList();
             if (sweets.isEmpty()) {
                 if (sweet > -1 && sweet < 8) {
-                    session.persist(new Sweet(sweet, amount));
+                    // Wie unten: nie unter 0 - sonst stand nach einem Verkauf aus
+                    // einem noch nie befüllten Fach "Vorrat: -1" da.
+                    session.persist(new Sweet(sweet, Math.max(amount, 0)));
                     return;
                 }
                 Logger.getGlobal().warning("Invalid sweet type: " + sweet);
