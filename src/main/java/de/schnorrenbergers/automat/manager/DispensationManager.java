@@ -44,7 +44,10 @@ public class DispensationManager {
         if (canDispense()) dispenser = new Thread(() -> {
             try {
                 Main.getInstance().setLastScan(null);
-                kontenManager.withdraw(configurationManager.getInt("sweets._" + number + ".kost"));
+                // Lehrkräfte und Admins haben unbegrenzt Stunden - nichts abziehen.
+                if (!kontenManager.hasUnlimitedHours()) {
+                    kontenManager.withdraw(configurationManager.getInt("sweets._" + number + ".kost"));
+                }
                 Main.getInstance().kost();
                 new StatisticManager().persistDispense(number);
                 new CustomRequest("dispense", CustomRequest.REVIVER.DISPENSER).executeComplex("{\"nr\":" + map(number) + ",\"cost\":" + configurationManager.getInt("sweets._" + number + ".kost") + ",\"usr\":" + Arrays.toString(Main.getInstance().getLastScan()) + "}");

@@ -311,7 +311,9 @@ public class Main extends Application {
                 MainController.getMainController().setText("Unbekannte Karte", Color.WHITE, true);
                 return;
             }
-            MainController.getMainController().setText(id.getFirst().getFullName() + ":" + new KontenManager(lastScan).getKonto().getBalanceRounded() + "h", Color.WHITE, true);
+            KontenManager konten = new KontenManager(lastScan);
+            String hours = konten.hasUnlimitedHours() ? " ∞" : konten.getKonto().getBalanceRounded() + "h";
+            MainController.getMainController().setText(id.getFirst().getFullName() + ":" + hours, Color.WHITE, true);
         });
     }
 

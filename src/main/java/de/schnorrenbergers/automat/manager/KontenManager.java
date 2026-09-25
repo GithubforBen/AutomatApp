@@ -2,6 +2,7 @@ package de.schnorrenbergers.automat.manager;
 
 import de.schnorrenbergers.automat.Main;
 import de.schnorrenbergers.automat.database.types.Konto;
+import de.schnorrenbergers.automat.database.types.Teacher;
 import de.schnorrenbergers.automat.database.types.User;
 import de.schnorrenbergers.automat.database.types.types.Attandance;
 import org.hibernate.Session;
@@ -128,6 +129,15 @@ public class KontenManager {
             }
         }
         return false;
+    }
+
+    /**
+     * Lehrkräfte (auch Admins) und als unbegrenzt markierte Konten bekommen am
+     * Automaten Süßigkeiten ohne Stundenprüfung und ohne Abzug.
+     */
+    public boolean hasUnlimitedHours() {
+        Konto konto = getKonto();
+        return konto.isInfinite() || konto.getUser() instanceof Teacher;
     }
 
     /**

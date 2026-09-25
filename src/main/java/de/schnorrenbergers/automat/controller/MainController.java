@@ -128,7 +128,8 @@ public class MainController implements Initializable {
             ConfigurationManager configurationManager = new ConfigurationManager();
             AvailabilityManager availabilityManager = new AvailabilityManager();
             availabilityManager.addSweet(number, -1);
-            if (kontenManager.getKonto().getBalance() >= configurationManager.getInt("sweets._" + number + ".kost")
+            if (kontenManager.hasUnlimitedHours()
+                    || kontenManager.getKonto().getBalance() >= configurationManager.getInt("sweets._" + number + ".kost")
                     || kontenManager.getKonto().getBalance() == Integer.MIN_VALUE
                     || !Boolean.parseBoolean(Main.getInstance().getSettings().getSettingOrDefault("checkTime", String.valueOf(true)))) {
                 DispensationManager.dispense(number, kontenManager, configurationManager);
