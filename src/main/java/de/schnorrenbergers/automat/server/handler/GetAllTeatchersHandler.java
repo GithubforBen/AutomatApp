@@ -19,17 +19,7 @@ public class GetAllTeatchersHandler extends CustomHandler implements HttpHandler
     public void handle(HttpExchange exchange) throws IOException {
         List<Teacher> teachers = new ArrayList<>();
         Main.getInstance().getDatabase().getSessionFactory().inTransaction(session -> {
-            if (session.createQuery("from Teacher t", Teacher.class).getResultList().isEmpty()) {
-                Wohnort wohnort = new Wohnort(7, "test", "test", 678, "Germany");
-                Teacher teacher = null;
-                try {
-                    teacher = new Teacher("Jon", "Doe", new int[]{100, 100, 100, 100}, Gender.AGENDER, new Date(1999, 02, 01), wohnort, "test@gmail.com", "test", Level.ADMIN);
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-                session.persist(wohnort);
-                session.persist(teacher);
-            }
+            // Kein automatischer Standard-Admin mehr (siehe TeacherController.createFirstAdmin).
             teachers.addAll(session.createSelectionQuery("from Teacher t", Teacher.class).getResultList());
         });
         StringBuilder response = new StringBuilder();

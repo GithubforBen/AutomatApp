@@ -60,19 +60,11 @@ public class TeacherController {
     @GetMapping(value = "/all", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> allTeachers() {
         List<Teacher> teachers = new ArrayList<>();
-        Main.getInstance().getDatabase().getSessionFactory().inTransaction(session -> {
-            if (session.createQuery("from Teacher t", Teacher.class).getResultList().isEmpty()) {
-                Wohnort wohnort = new Wohnort(7, "test", "test", 678, "Germany");
-                try {
-                    Teacher teacher = new Teacher("Jon", "Doe", new int[]{100, 100, 100, 100}, Gender.AGENDER, new Date(1999, 2, 1), wohnort, "test@gmail.com", "test", Level.ADMIN);
-                    session.persist(wohnort);
-                    session.persist(teacher);
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            }
-            teachers.addAll(session.createSelectionQuery("from Teacher t", Teacher.class).getResultList());
-        });
+        // Früher wurde hier bei leerer Datenbank ein Admin "Jon Doe" mit bekanntem
+        // Passwort angelegt. Den ersten Admin legt jetzt die erste Person selbst an
+        // (siehe createFirstAdmin).
+        Main.getInstance().getDatabase().getSessionFactory().inTransaction(session ->
+                teachers.addAll(session.createSelectionQuery("from Teacher t", Teacher.class).getResultList()));
         StringBuilder response = new StringBuilder();
         response.append("{ \"teachers\": [");
         teachers.forEach(teacher -> {
@@ -146,6 +138,73 @@ public class TeacherController {
         } catch (Exception e) {
             e.printStackTrace();
             return jsonError();
+        }
+    }
+
+    /**
+     * Gibt an, ob es schon mindestens eine Lehrkraft gibt. Solange nicht, darf
+     * sich die erste Person über {@link #createFirstAdmin(String)} einen
+     * Admin-Zugang anlegen.
+     */
+    @GetMapping(value = "/exists", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<String> exists() {
+        return okJson(new JSONObject().put("exists", countTeachers() > 0).toString());
+    }
+
+    /**
+     * Legt den ersten Admin-Zugang an - aber nur, solange es noch gar keine
+     * Lehrkraft gibt. Prüfen und Anlegen passieren gemeinsam (synchronized und in
+     * einer Transaktion), damit nicht zwei Personen gleichzeitig "die erste" sind.
+     * Body: firstName, lastName, email, password (Klartext, wird gehasht), gender.
+     * Antwort: die neue Lehrkraft als JSON; 409, wenn es schon eine gibt.
+     */
+    @PostMapping(value = "/createFirstAdmin", produces = MediaType.APPLICATION_JSON_VALUE)
+    public synchronized ResponseEntity<String> createFirstAdmin(@RequestBody(required = false) String body) {
+        JSONObject json = parseJson(body);
+        if (json == null) {
+            return jsonError();
+        }
+        String firstName = json.optString("firstName").trim();
+        String lastName = json.optString("lastName").trim();
+        String email = json.optString("email").trim();
+        String password = json.optString("password");
+        Gender gender;
+        try {
+            gender = Gender.valueOf(json.optString("gender"));
+        } catch (IllegalArgumentException e) {
+            return badRequest();
+        }
+        if (firstName.isEmpty() || lastName.isEmpty() || !email.contains("@") || password.length() < 8) {
+            return badRequest();
+        }
+
+        Teacher[] created = {null};
+        Main.getInstance().getDatabase().getSessionFactory().inTransaction(session -> {
+            Long count = session.createSelectionQuery("select count(*) from Teacher t", Long.class).getSingleResult();
+            if (count > 0) {
+                return;
+            }
+            try {
+                Wohnort wohnort = new Wohnort(0, "", "", 0, "Deutschland");
+                Teacher teacher = new Teacher(firstName, lastName, new int[0], gender,
+                        new Date(0), wohnort, email, password, Level.ADMIN);
+                session.persist(wohnort);
+                session.persist(teacher);
+                session.flush();
+                created[0] = teacher;
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+        if (created[0] == null) {
+            return ResponseEntity.status(409).contentType(MediaType.TEXT_PLAIN).body("A teacher already exists");
+        }
+        return okJson(created[0].toJSON().toString());
+    }
+
+    private long countTeachers() {
+        try (Session session = Main.getInstance().getDatabase().getSessionFactory().openSession()) {
+            return session.createSelectionQuery("select count(*) from Teacher t", Long.class).getSingleResult();
         }
     }
 

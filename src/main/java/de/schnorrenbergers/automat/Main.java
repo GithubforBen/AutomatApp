@@ -5,10 +5,6 @@ import de.schnorrenbergers.automat.controller.AddUserController;
 import de.schnorrenbergers.automat.controller.MainController;
 import de.schnorrenbergers.automat.database.Database;
 import de.schnorrenbergers.automat.database.types.*;
-import de.schnorrenbergers.automat.database.types.types.Day;
-import de.schnorrenbergers.automat.database.types.types.Gender;
-import de.schnorrenbergers.automat.database.types.types.Level;
-import de.schnorrenbergers.automat.database.types.types.Wohnort;
 import de.schnorrenbergers.automat.manager.*;
 import de.schnorrenbergers.automat.server.Server;
 import de.schnorrenbergers.automat.spring.SpringApi;
@@ -31,11 +27,9 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 
 import java.io.IOException;
-import java.sql.Date;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Für jeden der sich denkt, dass man das "nur mal kurz" fixt, NEIN lass ab. Selbst ich habe keine ahnung was hier wie geschieht.
@@ -80,34 +74,6 @@ public class Main extends Application {
         handler = new StatisticManager();
         logoutTime = Integer.parseInt(settingsManager.getSettingOrDefault("logout", String.valueOf(logoutTime)));
         checkAvailability = Boolean.parseBoolean(settingsManager.getSettingOrDefault("availability", String.valueOf(false)));
-        AtomicBoolean seeded = new AtomicBoolean(false);
-        database.getSessionFactory().inTransaction((x) -> {
-            if (!x.createSelectionQuery("from Student s", Student.class).getResultList().isEmpty()) {
-                System.out.println("Database already initialized");
-                return;
-            }
-            seeded.set(true);
-            Wohnort wohnortT = new Wohnort(1, "s", "s", 456, "dsa");
-            Wohnort wohnortS = new Wohnort(1, "s", "s", 4456, "dsa");
-            try {
-                Teacher teacher = new Teacher("Test", "TEzjk", new int[]{0, 0, 0, 0, 0}, Gender.AGENDER, new Date(System.currentTimeMillis()), wohnortT, "test@gmail.com", "123", Level.ADMIN);
-                Kurs kurs = new Kurs("Kurs", List.of(teacher), Day.DÖNNERSTAG);
-                Student student = new Student("David", "Junke", new int[]{99, 253, 101, 0, 251}, Gender.AGENDER, new Date(System.currentTimeMillis()), wohnortS, List.of(kurs));
-                x.persist(wohnortT);
-                x.persist(wohnortS);
-                x.persist(teacher);
-                x.persist(kurs);
-                x.persist(student);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        });
-        // Startguthaben nur für die frisch angelegten Testdaten - früher bekam
-        // die Testkarte bei jedem Start weitere 1000 Stunden.
-        if (seeded.get()) {
-            new KontenManager(new int[]{99, 253, 101, 0, 251}).deposit(1000);
-        }
-
         if (run == null) {
             run = SpringApplication.run(SpringApi.class);
         }
