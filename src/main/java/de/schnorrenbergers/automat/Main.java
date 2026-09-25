@@ -211,7 +211,15 @@ public class Main extends Application {
         stage.setScene(scene);
         stage.show();
         ping();
-        //TODO: add new CustomRequest("alarm_off", CustomRequest.REVIVER.SCANNER).execute();
+        // Nach einem Neustart hält die App den Alarm für aus - der Scanner soll
+        // dann nicht mehr piepen, falls er vorher an war.
+        new Thread(() -> {
+            try {
+                new CustomRequest("alarm_off", CustomRequest.REVIVER.SCANNER).execute();
+            } catch (Exception e) {
+                System.out.println("Alarm am Scanner konnte nicht ausgeschaltet werden: " + e.getMessage());
+            }
+        }, "alarm-off").start();
         System.out.println("Load done");
     }
 

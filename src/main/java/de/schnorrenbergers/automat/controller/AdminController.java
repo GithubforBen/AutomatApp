@@ -10,7 +10,6 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.Slider;
 import javafx.scene.layout.GridPane;
-import javafx.scene.paint.Color;
 
 import java.net.URL;
 import java.util.List;
@@ -56,11 +55,9 @@ public class AdminController implements Initializable {
      */
     private void setAlarmBTNColor() {
         boolean alarm = Main.getInstance().isAlarm();
-        if (alarm) {
-            alarmBTN.setTextFill(Color.GREEN);
-        } else {
-            alarmBTN.setTextFill(Color.RED);
-        }
+        alarmBTN.setText(alarm ? "Alarm: an" : "Alarm: aus");
+        // Rot, solange der Alarm läuft; sonst die normale Schriftfarbe des Themes.
+        alarmBTN.setStyle(alarm ? "-fx-text-fill: #da3633; -fx-font-weight: bold;" : "");
         Main.getInstance().getScreenSaver().setLastMove(System.currentTimeMillis());
     }
 
@@ -82,24 +79,27 @@ public class AdminController implements Initializable {
     }
 
     /**
-     * Toggles the alarm state in the application. If the alarm is currently active,
-     * it sends a request to turn it off, and vice versa. Updates the visual
+     * Toggles the alarm on the scanner: sends "alarm_on" while the alarm is off and
+     * "alarm_off" while it is on, and only switches the app's state once the scanner
+     * confirmed it. Updates the visual
      * representation of the alarm button and resets the screen saver timeout.
      *
      * @param actionEvent the event that triggered this method, typically a button press
      */
     public void alarm(ActionEvent actionEvent) {
-        boolean alarm = Main.getInstance().isAlarm();
+        // Früher war das vertauscht: bei ausgeschaltetem Alarm ging "alarm_off" raus.
+        boolean turnOn = !Main.getInstance().isAlarm();
+        String answer = null;
         try {
-            if (alarm) {
-                new CustomRequest("alarm_on", CustomRequest.REVIVER.SCANNER).execute();
-            } else {
-                new CustomRequest("alarm_off", CustomRequest.REVIVER.SCANNER).execute();
-            }
+            answer = new CustomRequest(turnOn ? "alarm_on" : "alarm_off", CustomRequest.REVIVER.SCANNER).execute();
         } catch (Exception e) {
             e.printStackTrace();
         }
-        Main.getInstance().setAlarm(!alarm);
+        // Nur umschalten, wenn der Scanner es bestätigt - sonst zeigt der Knopf
+        // etwas anderes an, als am Scanner tatsächlich passiert.
+        if ("success".equals(answer)) {
+            Main.getInstance().setAlarm(turnOn);
+        }
         setAlarmBTNColor();
         Main.getInstance().getScreenSaver().setLastMove(System.currentTimeMillis());
     }
