@@ -4,6 +4,7 @@ import atlantafx.base.theme.PrimerDark;
 import de.schnorrenbergers.automat.controller.AddUserController;
 import de.schnorrenbergers.automat.controller.MainController;
 import de.schnorrenbergers.automat.database.Database;
+import de.schnorrenbergers.automat.database.DatabaseSetup;
 import de.schnorrenbergers.automat.database.types.*;
 import de.schnorrenbergers.automat.manager.*;
 import de.schnorrenbergers.automat.server.Server;
@@ -59,6 +60,21 @@ public class Main extends Application {
 
     public static Main getInstance() {
         return instance;
+    }
+
+    /**
+     * Probelauf für das Startarchiv (Class Data Sharing, siehe {@link CdsTraining}):
+     * lädt einmal alles, was nach der PIN-Eingabe gebraucht wird - Datenbank,
+     * Hibernate, Spring -, mit einer Wegwerf-Datenbank im aktuellen Ordner.
+     */
+    static void warmUpForClassArchive() throws Exception {
+        Main main = new Main();
+        instance = main;
+        main.configurationManager = new ConfigurationManager();
+        main.database = new Database(DatabaseSetup.USER, "00000", "00000");
+        main.initialise();
+        main.run.close();
+        main.database.getSessionFactory().close();
     }
 
     public void initialise() throws Exception {

@@ -37,6 +37,13 @@ BIN_DIR="$INSTALL_DIR/bin"
 LOG_DIR="$INSTALL_DIR/logs"
 LOG="$LOG_DIR/install.log"
 LAUNCHER="$BIN_DIR/automat-start.sh"
+APP_JAR="$APP_DIR/target/automat.jar"
+APP_CLASSPATH="$APP_JAR:$APP_DIR/target/lib/*"
+# Startarchiv (Class Data Sharing): die nach der PIN-Eingabe gebrauchten Klassen
+# von Hibernate und Spring, vorab geladen - verkürzt den Start deutlich.
+CDS_ARCHIVE="$INSTALL_DIR/automat.jsa"
+# Nur der schnelle JIT-Compiler: startet schneller, die App braucht keine Spitzenleistung.
+JAVA_OPTS="-XX:TieredStopAtLevel=1"
 SERVICE="automat-website"
 SERVICE_FILE="/etc/systemd/system/$SERVICE.service"
 AUTOSTART_FILE="$HOME/.config/autostart/automat.desktop"
@@ -355,7 +362,29 @@ build_automat() {
     (cd "$APP_DIR" && run env JAVA_HOME="$JDK_HOME" ./mvnw -B -DskipTests clean compile \
         dependency:copy-dependencies -DincludeScope=runtime -DoutputDirectory=target/lib) ||
         fail "Der Automat konnte nicht gebaut werden."
+    # Das Startarchiv nimmt nur Klassen aus JAR-Dateien auf, nicht aus Ordnern.
+    run "$JDK_HOME/bin/jar" cf "$APP_JAR" -C "$APP_DIR/target/classes" . ||
+        fail "Der Automat konnte nicht gepackt werden."
     note "$(find "$APP_DIR/target/lib" -name '*.jar' | wc -l) Bibliotheken"
+    build_class_archive
+}
+
+# Probelauf mit Wegwerf-Datenbank; die JVM schreibt dabei das Startarchiv.
+# Klappt das nicht, startet der Automat eben ohne - nur langsamer.
+build_class_archive() {
+    step "Startarchiv anlegen (schnellerer Start nach der PIN)"
+    local tmp
+    tmp=$(mktemp -d)
+    rm -f "$CDS_ARCHIVE"
+    # shellcheck disable=SC2086
+    if (cd "$tmp" && run timeout 600 "$JDK_HOME/bin/java" $JAVA_OPTS -XX:ArchiveClassesAtExit="$CDS_ARCHIVE" \
+        -cp "$APP_CLASSPATH" de.schnorrenbergers.automat.CdsTraining) && [[ -s $CDS_ARCHIVE ]]; then
+        note "Startarchiv: $CDS_ARCHIVE ($(du -h "$CDS_ARCHIVE" | cut -f1))"
+    else
+        rm -f "$CDS_ARCHIVE"
+        note "Startarchiv nicht angelegt - der Automat startet ohne (langsamer), siehe $LOG"
+    fi
+    rm -rf "$tmp"
 }
 
 setup_website() {
@@ -391,7 +420,13 @@ fi
 while true; do
     [[ -f \$log && \$(stat -c %s "\$log") -gt 10485760 ]] && mv "\$log" "\$log.1"
     echo "\$(date '+%F %T') Automat startet" >>"\$log"
-    "$JDK_HOME/bin/java" -cp "target/classes:target/lib/*" $MAIN_CLASS >>"\$log" 2>&1 && break
+    # Startarchiv nur, wenn vorhanden; passt es nicht (z.B. nach einem
+    # Java-Update), ignoriert die JVM es und startet normal.
+    archive=()
+    [[ -f "$CDS_ARCHIVE" ]] && archive=(-XX:SharedArchiveFile="$CDS_ARCHIVE" -Xshare:auto)
+    classpath="$APP_CLASSPATH"
+    [[ -f "$APP_JAR" ]] || classpath="target/classes:target/lib/*"
+    "$JDK_HOME/bin/java" $JAVA_OPTS "\${archive[@]}" -cp "\$classpath" $MAIN_CLASS >>"\$log" 2>&1 && break
     code=\$?   # sofort sichern - \$(date) unten würde \$? überschreiben
     echo "\$(date '+%F %T') Automat beendet mit Code \$code - Neustart in 5 s" >>"\$log"
     sleep 5 9>&-   # ohne Sperre: wird das Skript hier beendet, blockiert sonst "sleep" den nächsten Start
