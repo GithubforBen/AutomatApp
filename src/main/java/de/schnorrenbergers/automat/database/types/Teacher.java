@@ -37,6 +37,10 @@ public class Teacher extends User {
     }
 
 
+    public Level getLevel() {
+        return level;
+    }
+
     public String getEmail() {
         return email;
     }
