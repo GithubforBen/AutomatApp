@@ -132,7 +132,7 @@ public class MainController implements Initializable {
             KontenManager kontenManager = new KontenManager(Main.getInstance().getLastScan());
             ConfigurationManager configurationManager = new ConfigurationManager();
             if (kontenManager.hasUnlimitedHours()
-                    || kontenManager.getKonto().getBalance() >= configurationManager.getInt("sweets._" + number + ".kost")
+                    || kontenManager.getKonto().getBalance() >= configurationManager.getCost(number)
                     || kontenManager.getKonto().getBalance() == Integer.MIN_VALUE
                     || !Boolean.parseBoolean(Main.getInstance().getSettings().getSettingOrDefault("checkTime", String.valueOf(true)))) {
                 // Vorrat und Stunden zieht dispense() erst ab, wenn die Ausgabe den

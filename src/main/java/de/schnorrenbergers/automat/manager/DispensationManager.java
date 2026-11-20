@@ -78,7 +78,7 @@ public class DispensationManager {
 
     public static void dispense(int number, KontenManager kontenManager, ConfigurationManager configurationManager) {
         if (!canDispense()) return;
-        int cost = configurationManager.getInt("sweets._" + number + ".kost");
+        double cost = configurationManager.getCost(number);
         int[] card = Main.getInstance().getLastScan();
         dispenser = new Thread(() -> {
             try {

@@ -50,14 +50,33 @@ public class ConfigurationManager {
     }
 
     public int getInt(String key) {
-        return (int) get(key);
+        return ((Number) get(key)).intValue();
     }
 
     public boolean getBoolean(String key) {
         return (boolean) get(key);
     }
 
+    /**
+     * Auch für ganze Zahlen in der YAML (die kommen dort als Integer an) - z.B.
+     * Preise wie {@code kost: 2} neben {@code kost: 1.5}.
+     */
     public double getDouble(String key) {
-        return (double) get(key);
+        return ((Number) get(key)).doubleValue();
+    }
+
+    /**
+     * Preis einer Süßigkeit in Stunden (auch halbe, z.B. 1.5).
+     */
+    public double getCost(int sweet) {
+        return getDouble("sweets._" + sweet + ".kost");
+    }
+
+    /**
+     * Preis zum Anzeigen: "2" statt "2.0", "1,5" statt "1.5".
+     */
+    public static String formatHours(double hours) {
+        if (hours == Math.rint(hours)) return String.valueOf((long) hours);
+        return String.valueOf(hours).replace('.', ',');
     }
 }

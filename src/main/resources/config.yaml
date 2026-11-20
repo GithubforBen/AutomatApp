@@ -1,23 +1,23 @@
-# sweet names and cost
+# sweet names and cost (kost = Preis in Stunden, halbe Stunden gehen auch: 1.5)
 sweets:
   _0:
     name: "Mentos"
-    kost: 2
+    kost: 4
   _1:
     name: "Duplo"
-    kost: 2
+    kost: 3
   _2:
     name: "Kinder"
     kost: 2
   _3:
     name: "Mauam"
-    kost: 2
+    kost: 1.5
   _4:
     name: "Smarties"
     kost: 2
   _5:
     name: "Haribo"
-    kost: 2
+    kost: 3
   _6:
     name: "Brause"
     kost: 2

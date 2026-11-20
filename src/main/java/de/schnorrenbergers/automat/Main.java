@@ -316,7 +316,7 @@ public class Main extends Application {
 
                 btn.setContentDisplay(ContentDisplay.RIGHT);
                 btn.setFont(new Font(40));
-                btn.setText(configurationManager.getInt("sweets._" + i + ".kost") + ":");
+                btn.setText(ConfigurationManager.formatHours(configurationManager.getCost(i)) + ":");
                 Image image = new Image(Objects.requireNonNull(getClass().getResourceAsStream(getImage(i))));
 
                 if (!isSellable(availabilityManager, i)) {
