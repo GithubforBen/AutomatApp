@@ -39,3 +39,7 @@ build/
 ### ESP ###
 # Echte Zugangsdaten (WLAN, HMAC) - nur .env.example wird eingecheckt
 .env
+
+### Datenbank (H2, enthält Schülerdaten) ###
+*.mv.db
+*.trace.db
