@@ -152,15 +152,15 @@ public class Main extends Application {
         dimension = new Dimension2D(
                 configurationManager.getInt("window-dimension.horizontal"),
                 configurationManager.getInt("window-dimension.vertical"));
-        FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("main-view.fxml"));
-        Scene scene = new Scene(fxmlLoader.load(), dimension.getWidth(), dimension.getHeight());
-        stage.setTitle("Hello!");
-        stage.setScene(scene);
-        stage.show();
         this.stage = stage;
+        stage.setTitle("Hello!");
         stage.setFullScreenExitHint("");
         Application.setUserAgentStylesheet(new PrimerDark().getUserAgentStylesheet());
         stage.setAlwaysOnTop(true);
+        // Über loadScene: das behält den Vollbildmodus (setScene allein beendet ihn,
+        // nach "Verbindung wiederherstellen" war er weg) und merkt sich den Namen der
+        // Ansicht, an dem Verbindungsbildschirm und Bildschirmschoner sie erkennen.
+        loadScene("main-view.fxml");
     }
 
     /**
@@ -236,11 +236,9 @@ public class Main extends Application {
 
     public void load() throws IOException {
         System.out.println("Load");
-        FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("main-view.fxml"));
-        Scene scene = new Scene(fxmlLoader.load(), dimension.getWidth(), dimension.getHeight());
         stage.setTitle("Hello!");
-        stage.setScene(scene);
-        stage.show();
+        // Wie jeder Wechsel der Ansicht über loadScene (Vollbild bleibt, Name gemerkt).
+        loadScene("main-view.fxml");
         ping();
         watchDispenser();
         // Nach einem Update des Automaten bekommen die ESPs dieselbe Version.
