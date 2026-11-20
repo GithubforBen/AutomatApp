@@ -25,6 +25,7 @@ import ntptime
 import hmac
 from machine import Pin, RTC
 import config
+import ota
 
 # Vom Automaten gelernt (Absender des ersten /ping). last_end: Ende der letzten
 # Ausgabe (ticks_ms) - kurz danach darf eine Lichtschranke noch nachzucken.
@@ -373,7 +374,7 @@ def handle(client, address):
         client.settimeout(3)
         method, path, headers, body = read_request(client)
 
-        if path in ("/ping", "/dispense", "/status"):
+        if path in ("/ping", "/dispense", "/status", "/version", "/update"):
             if state["server_ip"] != address[0]:
                 state["server_ip"] = address[0]
                 log("Automat unter", address[0])
@@ -384,7 +385,17 @@ def handle(client, address):
                     set_time_from_unix(int(headers["x-unix-time"]))
                 except Exception as e:
                     log("Uhrzeit aus /ping nicht übernommen:", e)
+            ota.confirm()
             respond(client, 200, "1")
+        elif path == "/version":
+            respond(client, 200, ota.version())
+        elif path == "/update":
+            # Nicht mitten in einer Ausgabe neu starten.
+            if state["busy"] or queue:
+                respond(client, 200, "busy")
+            else:
+                respond(client, 200, ota.start(config.SERVER_IP or address[0], config.SERVER_PORT, config.BOARD,
+                                               config.HMAC_KEY_ID, config.HMAC_KEY, headers.get("x-unix-time")))
         elif path == "/dispense" and method == "POST":
             try:
                 nr = int(ujson.loads(body)["nr"])
@@ -393,6 +404,10 @@ def handle(client, address):
                 return
             if not 0 <= nr <= 7:
                 respond(client, 400, "ungueltiges Fach")
+                return
+            if ota.running():
+                # Gleich startet der ESP neu - der Auftrag ginge verloren.
+                respond(client, 200, "update")
                 return
             # Sofort bestätigen: die Ausgabe selbst dauert Sekunden.
             waiting = enqueue(nr)

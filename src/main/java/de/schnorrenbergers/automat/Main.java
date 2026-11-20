@@ -232,6 +232,8 @@ public class Main extends Application {
         stage.show();
         ping();
         watchDispenser();
+        // Nach einem Update des Automaten bekommen die ESPs dieselbe Version.
+        EspUpdateManager.start();
         // Nach einem Neustart hält die App den Alarm für aus - der Scanner soll
         // dann nicht mehr piepen, falls er vorher an war.
         new Thread(() -> {

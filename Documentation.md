@@ -574,6 +574,25 @@ A light barrier was triggered while nothing was being dispensed (someone is reac
 the machine). Turns the alarm on the scanner on. The alarm goes off when the admin PIN is
 entered, or when a teacher or admin scans their card at the automat or at the station.
 
+## ESP updates
+
+Used by the ESP32s to update themselves over Wi-Fi (see `esp/README.md`). Both endpoints are
+HMAC-signed like all others; `board` is `ausgabe`, `scanner` or `station`.
+
+### GET /esp/manifest?board=ausgabe
+
+```json
+{"board": "ausgabe", "version": "feba32f5cefb", "files": [{"path": "main.py", "sha256": "…", "size": 12488}]}
+```
+
+`esp/common/` plus `esp/<board>/` of the running project, without `boot.py`, `.env*` and dot
+files. Header `X-Manifest-Signature`: Base64 HMAC-SHA256 of `<X-NONCE of the request>:<body>`
+with the requesting key.
+
+### GET /esp/file?board=ausgabe&path=main.py
+
+The raw file - only paths listed in the board's manifest (404 otherwise).
+
 ## Enum Reference Tables
 
 ### Gender

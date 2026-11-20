@@ -17,6 +17,7 @@ import ujson
 from machine import Pin, SoftSPI, SoftI2C
 import rfid
 import config
+import ota
 
 # Vom Automaten gelernt (Absender des ersten /ping) bzw. zuletzt gelesen.
 state = {"server_ip": None, "last_card": None}
@@ -133,14 +134,22 @@ def respond(client, status, body, content_type="text/plain; charset=utf-8"):
 def handle(client, address):
     try:
         client.settimeout(3)
-        parts = client.recv(1024).split(b"\r\n", 1)[0].decode().split()
+        request = client.recv(1024)
+        parts = request.split(b"\r\n", 1)[0].decode().split()
         path = parts[1].split("?")[0] if len(parts) > 1 else ""
-        if path in ("/ping", "/status") and state["server_ip"] != address[0]:
+        if path in ("/ping", "/status", "/version", "/update") and state["server_ip"] != address[0]:
             # Nur der Automat fragt hier an - so lernt die Station, wohin sie buchen muss.
             state["server_ip"] = address[0]
             log("Automat unter", address[0])
         if path == "/ping":
+            ota.confirm()
             respond(client, 200, "1")
+        elif path == "/version":
+            respond(client, 200, ota.version())
+        elif path == "/update":
+            respond(client, 200, ota.start(config.SERVER_IP or address[0], config.BACKEND_PORT, config.BOARD,
+                                           config.HMAC_KEY_ID, config.HMAC_KEY,
+                                           ota.header(request, "X-Unix-Time")))
         elif path == "/status":
             respond(client, 200, ujson.dumps({
                 "server": config.SERVER_IP or state["server_ip"],

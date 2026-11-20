@@ -26,6 +26,11 @@ def load(path=ENV_FILE):
     return values
 
 
+def get(values, key, default=None):
+    value = values.get(key)
+    return value if value else default
+
+
 def require(values, key):
     if key not in values or not values[key]:
         raise KeyError("{} fehlt in {}".format(key, ENV_FILE))

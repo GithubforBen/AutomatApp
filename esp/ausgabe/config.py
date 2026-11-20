@@ -16,6 +16,9 @@ STATIC_IP = "192.168.188.202"
 # Auf diesem Port fragt der Automat an (/ping, /dispense).
 HTTP_PORT = 80
 
+# Name im Ordner esp/ - darunter holt sich die Ausgabe ihre Updates (siehe ota.py).
+BOARD = "ausgabe"
+
 # Fehlgeschlagene Ausgaben meldet die Ausgabe direkt ans Backend des Automaten
 # (POST /dispense/failed), signiert mit einem HMAC-Schlüssel aus dessen
 # HMAC-Bildschirm. Die Adresse lernt sie aus dem ersten /ping des Automaten;

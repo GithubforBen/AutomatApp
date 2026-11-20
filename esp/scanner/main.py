@@ -17,6 +17,7 @@ import ujson
 from machine import Pin, SoftSPI
 import rfid
 import config
+import ota
 
 # Vom Automaten gelernt (Absender des ersten /ping) bzw. zuletzt gelesen.
 state = {"server_ip": None, "last_card": None}
@@ -125,7 +126,7 @@ class Server:
                 return
             path = parts[1].split("?")[0]
 
-            if path in ("/ping", "/alarm_on", "/alarm_off", "/status"):
+            if path in ("/ping", "/alarm_on", "/alarm_off", "/status", "/version", "/update"):
                 # Nur der Automat fragt hier an - so lernt der Scanner, wohin
                 # er die Karten schicken muss.
                 if state["server_ip"] != address[0]:
@@ -133,7 +134,14 @@ class Server:
                     log("Automat unter", address[0])
 
             if path == "/ping":
+                ota.confirm()
                 respond(client, 200, "1")
+            elif path == "/version":
+                respond(client, 200, ota.version())
+            elif path == "/update":
+                respond(client, 200, ota.start(config.SERVER_IP or address[0], config.BACKEND_PORT, config.BOARD,
+                                               config.HMAC_KEY_ID, config.HMAC_KEY,
+                                               ota.header(request, "X-Unix-Time")))
             elif path == "/alarm_on":
                 self._buzzer.set_alarm(True)
                 respond(client, 200, "success")
