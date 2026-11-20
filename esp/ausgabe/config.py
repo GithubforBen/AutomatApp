@@ -1,8 +1,13 @@
 # Einstellungen der Ausgabe (ESP32 mit Schrittmotor und Lichtschranken).
+# WLAN-Zugangsdaten und Schlüssel stehen in .env (nicht eingecheckt, siehe .env.example).
+
+import env
+
+_env = env.load()
 
 # WLAN
-WLAN_SSID = "DEIN_WLAN"
-WLAN_PASSWORD = "DEIN_PASSWORT"
+WLAN_SSID = env.require(_env, "WLAN_SSID")
+WLAN_PASSWORD = env.require(_env, "WLAN_PASSWORD")
 
 # Feste Adresse der Ausgabe - muss zu "dispenser-url" in der config.yaml des
 # Automaten passen. Netzmaske, Gateway und DNS kommen weiter per DHCP.
@@ -17,5 +22,5 @@ HTTP_PORT = 80
 # SERVER_IP setzt sie fest.
 SERVER_IP = None
 SERVER_PORT = 8000
-HMAC_KEY_ID = "KEY_ID_AUS_DER_APP"
-HMAC_KEY = b"BASE64_SCHLUESSEL_AUS_DER_APP"
+HMAC_KEY_ID = env.require(_env, "HMAC_KEY_ID")
+HMAC_KEY = env.require(_env, "HMAC_KEY").encode()

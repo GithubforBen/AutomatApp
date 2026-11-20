@@ -4,6 +4,10 @@ import socket
 import network
 import ujson
 
+# WLAN-Zugangsdaten und HMAC-Schlüssel stehen in .env (nicht eingecheckt, siehe .env.example).
+import env
+ENV = env.load()
+
 A = Pin(2 ,Pin.OUT)#2-13
 B = Pin(15, Pin.OUT)#15-4
 C = Pin(0, Pin.OUT)#0-2
@@ -128,7 +132,7 @@ def connect_wlan():
     wlan.active(False);
     time.sleep(0.1)
     wlan.active(True);
-    wlan.connect('DEIN_WLAN', 'DEIN_PASSWORT');
+    wlan.connect(ENV["WLAN_SSID"], ENV["WLAN_PASSWORD"]);
     print(network.STAT_IDLE)
     print(network.STAT_CONNECTING)
     print(network.STAT_WRONG_PASSWORD)

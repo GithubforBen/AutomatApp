@@ -1,8 +1,13 @@
 # Einstellungen des Kartenscanners (ESP32 mit RC522-Leser).
+# WLAN-Zugangsdaten und Schlüssel stehen in .env (nicht eingecheckt, siehe .env.example).
+
+import env
+
+_env = env.load()
 
 # WLAN
-WLAN_SSID = "DEIN_WLAN"
-WLAN_PASSWORD = "DEIN_PASSWORT"
+WLAN_SSID = env.require(_env, "WLAN_SSID")
+WLAN_PASSWORD = env.require(_env, "WLAN_PASSWORD")
 
 # Feste Adresse des Scanners - muss zu "scanner-url" in der config.yaml des
 # Automaten passen. Netzmaske, Gateway und DNS kommen weiter per DHCP.
