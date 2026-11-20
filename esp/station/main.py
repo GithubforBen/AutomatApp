@@ -3,7 +3,9 @@
 # * Liest Karten und bucht Kommen/Gehen über die Website (POST /station_scan,
 #   JSON-Liste der Kartenbytes). Die Antwort des Automaten ("Herzlich
 #   Willkommen, ...") steht danach einige Sekunden auf dem Display.
-# * Beantwortet die Anfragen des Automaten: /ping, /status.
+# * Beantwortet die Anfragen des Automaten: /ping, /status, /version, /update.
+# * Während eines Updates über WLAN zeigt das Display "Update im Gange" mit
+#   Prozentzahl.
 # * Summer: ein Ton sofort beim Lesen der Karte, drei, wenn die Buchung
 #   nicht geklappt hat.
 #
@@ -20,7 +22,7 @@ import config
 import ota
 
 # Vom Automaten gelernt (Absender des ersten /ping) bzw. zuletzt gelesen.
-state = {"server_ip": None, "last_card": None}
+state = {"server_ip": None, "last_card": None, "screen": None}
 
 IDLE_LINES = ["", "    MINT-Zentrum", "   Karte vorhalten", ""]
 
@@ -56,6 +58,7 @@ class Screen:
         self._lock = _thread.allocate_lock()
         self._lcd = None
         self._lines = [None, None, None, None]  # was gerade auf dem Display steht
+        self._wanted = ["", "", "", ""]  # was zuletzt angezeigt werden sollte
         self.shown_until = 0
         try:
             from pcf8574 import PCF8574
@@ -70,17 +73,22 @@ class Screen:
             # Ohne Display soll die Station trotzdem buchen.
             log("Display nicht ansprechbar:", e)
 
-    def show(self, lines, hold_ms=0):
+    def show(self, lines, hold_ms=0, quiet=False):
         """Zeigt bis zu vier Zeilen; mit hold_ms kehrt danach idle() zurück."""
         lines = (list(lines) + ["", "", "", ""])[:4]
-        log("Display:", " | ".join(str(line) for line in lines))
+        if not quiet:
+            log("Display:", " | ".join(str(line) for line in lines))
         self.shown_until = time.ticks_add(time.ticks_ms(), hold_ms) if hold_ms else 0
+        self._wanted = lines
+        self._render()
+
+    def _render(self):
         if not self._lcd:
             return
         self._lock.acquire()
         try:
             for i in range(4):
-                text = lcd_text(lines[i])[:20]
+                text = lcd_text(self._wanted[i])[:20]
                 # Nur geänderte Zeilen schreiben - jedes Zeichen kostet Zeit auf dem Bus.
                 if text != self._lines[i]:
                     self._lcd.write_line(text, i)
@@ -89,6 +97,20 @@ class Screen:
             log("Display-Fehler:", e)
         finally:
             self._lock.release()
+
+    def update_progress(self, percent, phase):
+        """Fortschritt eines Updates über WLAN (Rückruf aus ota.py)."""
+        if phase == "failed":
+            self.show(["    Update ist", "  fehlgeschlagen", "", "Alte Version bleibt"], 5000)
+            return
+        if phase == "download":
+            filled = percent * 18 // 100
+            self.show(["  Update im Gange", "", "[" + "#" * filled + " " * (18 - filled) + "]",
+                       "      {:3d} %".format(percent)], quiet=True)
+        elif phase == "install":
+            self.show(["  Update im Gange", "", "  Installiere ...", "      100 %"])
+        elif phase == "restart":
+            self.show(["  Update im Gange", "", "  Neustart ...", ""])
 
     def idle(self):
         self.show(IDLE_LINES)
@@ -149,7 +171,8 @@ def handle(client, address):
         elif path == "/update":
             respond(client, 200, ota.start(config.SERVER_IP or address[0], config.BACKEND_PORT, config.BOARD,
                                            config.HMAC_KEY_ID, config.HMAC_KEY,
-                                           ota.header(request, "X-Unix-Time")))
+                                           ota.header(request, "X-Unix-Time"),
+                                           state["screen"].update_progress if state["screen"] else None))
         elif path == "/status":
             respond(client, 200, ujson.dumps({
                 "server": config.SERVER_IP or state["server_ip"],
@@ -316,6 +339,7 @@ def connect_wlan(wlan):
 
 def main():
     screen = Screen()
+    state["screen"] = screen
     screen.show(["", "    MINT-Zentrum", "   Starte ...", ""])
     buzzer = Buzzer(config.BUZZER_PINS)
     wlan = network.WLAN(network.STA_IF)

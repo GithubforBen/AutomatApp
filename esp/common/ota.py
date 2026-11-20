@@ -92,8 +92,12 @@ def set_clock(unix_time):
     machine.RTC().datetime((tm[0], tm[1], tm[2], tm[6], tm[3], tm[4], tm[5], 0))
 
 
-def start(host, port, board, key_id, key, unix_time=None):
-    """Startet ein Update im Hintergrund. Gibt die Antwort für den Automaten zurück."""
+def start(host, port, board, key_id, key, unix_time=None, progress=None):
+    """Startet ein Update im Hintergrund. Gibt die Antwort für den Automaten zurück.
+
+    progress(prozent, phase) wird - falls angegeben - während des Updates
+    aufgerufen, z.B. für eine Anzeige. phase: "download", "install",
+    "restart" oder "failed" (dann ist prozent None)."""
     if not key_id or not key:
         return "kein HMAC-Schlüssel in .env"
     if _status["running"]:
@@ -104,24 +108,34 @@ def start(host, port, board, key_id, key, unix_time=None):
         except Exception as e:
             log("Uhrzeit nicht übernommen:", e)
     _status["running"] = True
-    _thread.start_new_thread(_run, (host, port, board, key_id, key))
+    _thread.start_new_thread(_run, (host, port, board, key_id, key, progress))
     return "ok"
 
 
-def _run(host, port, board, key_id, key):
+def _run(host, port, board, key_id, key, progress):
     try:
-        update(host, port, board, key_id, key)
+        update(host, port, board, key_id, key, progress)
     except Exception as e:
         log("Update abgebrochen:", e)
+        _report(progress, None, "failed")
     finally:
         _status["running"] = False
+
+
+def _report(progress, percent, phase):
+    if progress is None:
+        return
+    try:
+        progress(percent, phase)
+    except Exception as e:
+        log("Fortschrittsanzeige:", e)
 
 
 # ---------------------------------------------------------------------------
 # Update
 # ---------------------------------------------------------------------------
 
-def update(host, port, board, key_id, key):
+def update(host, port, board, key_id, key, progress=None):
     if isinstance(key, str):
         key = key.encode()
     client = _Client(host, port, key_id, key)
@@ -154,13 +168,24 @@ def update(host, port, board, key_id, key):
         raise OSError("Zu wenig Speicher: {} Bytes nötig, {} frei".format(needed * 2, free))
 
     log("Update", version(), "->", target, "-", len(changed), "Datei(en)")
+    _report(progress, 0, "download")
     _rmtree(NEW)
+    loaded = [0, -1]  # Bytes bisher, zuletzt gemeldete Prozent
+
+    def on_chunk(size):
+        loaded[0] += size
+        percent = min(99, loaded[0] * 100 // max(needed, 1))
+        if percent != loaded[1]:
+            loaded[1] = percent
+            _report(progress, percent, "download")
+
     for f in changed:
         dest = NEW + "/" + f["path"]
         _makedirs(dest)
-        digest = client.download("/esp/file?board={}&path={}".format(board, f["path"]), dest)
+        digest = client.download("/esp/file?board={}&path={}".format(board, f["path"]), dest, on_chunk)
         if digest != f["sha256"]:
             raise OSError("Prüfsumme von {} stimmt nicht".format(f["path"]))
+    _report(progress, 100, "install")
 
     # Austauschen. Bricht das ab (Strom weg), holt boot.py die alten Dateien zurück.
     paths = [f["path"] for f in changed]
@@ -179,6 +204,7 @@ def update(host, port, board, key_id, key):
     _write_json(STATE, state)
     _rmtree(NEW)
     log("Update auf", target, "installiert - Neustart")
+    _report(progress, 100, "restart")
     time.sleep(1)
     machine.reset()
 
@@ -245,7 +271,7 @@ class _Client:
             sock.close()
         return status, headers, body, nonce
 
-    def download(self, path, dest):
+    def download(self, path, dest, on_chunk=None):
         """Lädt in eine Datei und gibt deren SHA-256 (hex) zurück."""
         sock, status, headers, rest, nonce = self._request(path)
         try:
@@ -256,6 +282,8 @@ class _Client:
                 for chunk in self._body_chunks(sock, headers, rest):
                     h.update(chunk)
                     fh.write(chunk)
+                    if on_chunk:
+                        on_chunk(len(chunk))
             return binascii.hexlify(h.digest()).decode()
         finally:
             sock.close()
