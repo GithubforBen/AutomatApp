@@ -64,16 +64,26 @@ public class HMACController implements Initializable {
         dialog.setContentText("IP Address:");
 
         Optional<String> result = dialog.showAndWait();
-        result.ifPresent(ip -> {
-            ProcessBuilder pb = new ProcessBuilder("/bin/sh", "-c", "echo \"" + secret + "\" | nc " + ip + " 12345");
+        result.map(String::trim).ifPresent(ip -> {
+            // Nur eine IP-Adresse oder ein Hostname - früher landete die Eingabe in
+            // einem Shell-Befehl ("1.2.3.4; befehl" wäre ausgeführt worden), und ein
+            // führendes "-" wäre bei nc eine Option.
+            if (!ip.matches("[A-Za-z0-9][A-Za-z0-9.:-]*")) {
+                text.setText("Ungültige Adresse: " + ip);
+                return;
+            }
+            // nc direkt starten, ohne Shell; der Schlüssel geht über stdin.
+            ProcessBuilder pb = new ProcessBuilder("nc", ip, "12345");
             try {
                 Process start = pb.start();
+                try (var stdin = start.getOutputStream()) {
+                    stdin.write((secret + "\n").getBytes(java.nio.charset.StandardCharsets.UTF_8));
+                }
                 Thread.sleep(1000);
                 start.destroy();
             } catch (IOException | InterruptedException e) {
                 throw new RuntimeException(e);
             }
-
         });
         load();
     }
