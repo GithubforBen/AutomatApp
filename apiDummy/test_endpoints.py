@@ -106,6 +106,18 @@ def _send_raw(method, endpoint, raw_body):
 
 # ── Lookup helpers ─────────────────────────────────────────────────────────────
 
+
+def _add_teacher(body: dict):
+    """Lehrkräfte werden nur vorgemerkt (/teacher/add) und erst mit einer Karte
+    angelegt - am Automaten per Scan, hier per /seed/flush. Gibt die Antwort von
+    /teacher/add zurück; schlägt die fehl, wird nichts angelegt."""
+    resp = send_authenticated_request("POST", "/teacher/add", body)
+    if resp.status_code == 200:
+        rfid = body.get("rfid") or [random.randint(0, 255) for _ in range(4)]
+        flushed = send_authenticated_request("POST", "/seed/flush", {"rfid": rfid})
+        assert flushed.status_code == 200, f"seed/flush for teacher failed: {flushed.status_code} {flushed.text}"
+    return resp
+
 def _get_teachers():
     response = send_authenticated_request("GET", "/teacher/all")
     if response.status_code != 200:
@@ -272,7 +284,7 @@ def seed_test_data():
             "password": f"{GERMAN_FIRST_NAMES[i].lower()}123",
             "level": "ADMIN" if i < 2 else "NORMAL",
         }
-        send_authenticated_request("POST", "/teacher/add", teacher_body)
+        _add_teacher(teacher_body)
 
     seeded_teachers = [
         t for t in _get_teachers()
@@ -471,7 +483,7 @@ def setup_test_data():
         "password": "testpassword123",
         "level": "ADMIN",
     }
-    resp = send_authenticated_request("POST", "/teacher/add", teacher_body)
+    resp = _add_teacher(teacher_body)
     assert resp.status_code == 200, f"Setup: teacher/add failed ({resp.status_code}): {resp.text}"
 
     teacher_id = _find_teacher_id_by_email(email)
@@ -651,7 +663,7 @@ def test_teacher_add_and_delete():
         "password": "lifecycle123",
         "level": "NORMAL",
     }
-    resp = send_authenticated_request("POST", "/teacher/add", data)
+    resp = _add_teacher(data)
     assert resp.status_code == 200, f"teacher/add failed: {resp.status_code} {resp.text}"
 
     tid = _find_teacher_id_by_email(email)

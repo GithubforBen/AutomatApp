@@ -417,19 +417,8 @@ public class Main extends Application {
                 AddUserHandler.UserAdd peek = AddUserHandler.addQueue.poll();
                 if (peek == null) return;
 
-                Main.getInstance().getDatabase().getSessionFactory().inTransaction(session -> {
-                    session.persist(peek.getWohnort());
-                    session.persist(new Student(
-                            peek.getVorname(),
-                            peek.getNachname(),
-                            lastScan,
-                            peek.getGender(),
-                            peek.getDate(),
-                            peek.getWohnort(),
-                            peek.getKurse()
-                    ));
-                    session.flush();
-                });
+                Main.getInstance().getDatabase().getSessionFactory().inTransaction(session ->
+                        AddUserHandler.create(peek, lastScan, session));
                 AddUserController.confirmAdded(peek.getVorname() + " " + peek.getNachname());
             }
             return;

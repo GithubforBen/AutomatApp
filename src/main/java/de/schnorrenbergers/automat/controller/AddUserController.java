@@ -111,7 +111,8 @@ public class AddUserController implements Initializable {
             setState("state-empty", "Niemand vorgemerkt", null, "Neue Nutzer auf der Website vormerken.");
             return;
         }
-        setState("state-next", "Nächster Nutzer", peek.getVorname() + " " + peek.getNachname(),
+        setState("state-next", peek.isTeacher() ? "Nächste Lehrkraft" : "Nächster Nutzer",
+                peek.getVorname() + " " + peek.getNachname(),
                 "Jetzt Chipkarte scannen");
     }
 

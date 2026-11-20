@@ -181,7 +181,11 @@ Retrieves attendance records for a specific user ID.
 
 ### POST /teacher/add
 
-Creates a new teacher. Use `email` and `address` keys.
+Enqueues a teacher for registration. Use `email` and `address` keys.
+
+**Like students, teachers are not saved right away.** They wait in the addition queue until their card is scanned
+at the automat ("Nutzer hinzufügen") or `/seed/flush` is called with an RFID tag. A `rfid` in the body is ignored.
+The password is hashed when the teacher is enqueued.
 
 * **Request Body:**
   ```json
@@ -203,7 +207,8 @@ Creates a new teacher. Use `email` and `address` keys.
     "level": "ADMIN"
   }
   ```
-* **Response (200 OK):** `Successfully added teacher`
+* **Response (200 OK):** `Successfully queued teacher`
+* **Response (409):** the e-mail address is already used by a teacher or by a queued teacher
 
 ### GET /teacher/all
 
@@ -289,8 +294,9 @@ Updates an existing teacher. Requires full JSON object including `id`.
 
 Enqueues a student for registration. Use `address` key.
 
-**Warning:** This endpoint only enqueues the student. They are not saved to the database until `/seed/flush` is called
-with an RFID tag.
+**Warning:** This endpoint only enqueues the student. They are not saved to the database until their card is scanned
+at the automat ("Nutzer hinzufügen") or `/seed/flush` is called with an RFID tag. Every new student goes through the
+queue - `/student/addWithoutCard` is kept for older callers and does the same as this endpoint.
 
 * **Request Body:**
   ```json
@@ -309,7 +315,7 @@ with an RFID tag.
     "kurse": [1, 2]
   }
   ```
-* **Response (200 OK):** `Successfully added student`
+* **Response (200 OK):** `Successfully queued student`
 
 ### GET /student/all
 
@@ -509,13 +515,13 @@ These endpoints are for internal use and testing.
 
 ### POST /seed/flush ⚠️
 
-Assigns an RFID tag to the next student in the addition queue and persists them.
+Assigns an RFID tag to the next person (student or teacher) in the addition queue and persists them.
 
 * **Request Body:**
   ```json
   {"rfid": [10,11,12,13]}
   ```
-* **Response (200 OK):** `Successfully flushed student`
+* **Response (200 OK):** `Successfully flushed student` or `Successfully flushed teacher`
 
 ### POST /seed/attendance ⚠️
 

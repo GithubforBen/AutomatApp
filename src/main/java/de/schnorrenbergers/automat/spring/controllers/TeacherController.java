@@ -1,5 +1,6 @@
 package de.schnorrenbergers.automat.spring.controllers;
 
+import de.schnorrenbergers.automat.manager.AddUserHandler;
 import de.schnorrenbergers.automat.Main;
 import de.schnorrenbergers.automat.database.types.Kurs;
 import de.schnorrenbergers.automat.database.types.Teacher;
@@ -20,6 +21,12 @@ import java.util.List;
 @RequestMapping("/teacher")
 public class TeacherController {
 
+    /**
+     * Merkt eine Lehrkraft vor. Wie Schüler*innen wird sie erst angelegt, wenn am
+     * Automaten unter "Nutzer hinzufügen" ihre Karte gescannt wird (siehe
+     * {@link AddUserHandler}); eine mitgeschickte {@code rfid} wird ignoriert.
+     * 409, wenn die E-Mail-Adresse schon vergeben oder vorgemerkt ist.
+     */
     @PostMapping(value = "/add", produces = MediaType.TEXT_PLAIN_VALUE)
     public ResponseEntity<String> addTeacher(@RequestBody(required = false) String body) {
         JSONObject jsonObject = parseJson(body);
@@ -34,23 +41,27 @@ public class TeacherController {
                     address.getString("city"),
                     address.getInt("zip"),
                     address.getString("country"));
-            Teacher teacher = new Teacher(
-                    jsonObject.getString("firstName"),
-                    jsonObject.getString("lastName"),
-                    jsonObject.getJSONArray("rfid").toList().stream().mapToInt((x) -> Integer.parseInt(String.valueOf(x))).toArray(),
-                    Gender.valueOf(jsonObject.getString("gender")),
-                    new Date(jsonObject.getLong("birthday")),
-                    wohnort,
-                    jsonObject.getString("email"),
-                    jsonObject.getString("password"),
-                    Level.valueOf(jsonObject.getString("level"))
-            );
-            Main.getInstance().getDatabase().getSessionFactory().inTransaction(session -> {
-                session.persist(wohnort);
-                session.persist(teacher);
-                session.flush();
-            });
-            return okText("Successfully added teacher");
+            String email = jsonObject.getString("email").trim();
+            synchronized (AddUserHandler.class) {
+                if (AddUserHandler.isEmailTaken(email)) {
+                    return ResponseEntity.status(409).contentType(MediaType.TEXT_PLAIN)
+                            .body("Diese E-Mail-Adresse hat schon jemand anderes.");
+                }
+                // Das Passwort wird hier schon gehasht (Teacher-Konstruktor).
+                Teacher teacher = new Teacher(
+                        jsonObject.getString("firstName"),
+                        jsonObject.getString("lastName"),
+                        new int[0],
+                        Gender.valueOf(jsonObject.getString("gender")),
+                        new Date(jsonObject.getLong("birthday")),
+                        wohnort,
+                        email,
+                        jsonObject.getString("password"),
+                        Level.valueOf(jsonObject.getString("level"))
+                );
+                AddUserHandler.add(AddUserHandler.UserAdd.teacher(teacher));
+            }
+            return okText("Successfully queued teacher");
         } catch (Exception e) {
             e.printStackTrace();
             return jsonError();

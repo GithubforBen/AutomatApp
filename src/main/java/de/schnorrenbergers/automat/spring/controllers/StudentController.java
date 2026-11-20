@@ -23,6 +23,10 @@ import java.util.stream.Collectors;
 @RequestMapping("/student")
 public class StudentController {
 
+    /**
+     * Merkt eine Schüler*in vor. Angelegt wird sie erst, wenn am Automaten unter
+     * "Nutzer hinzufügen" ihre Karte gescannt wird (siehe {@link AddUserHandler}).
+     */
     @PostMapping(value = "/add", produces = MediaType.TEXT_PLAIN_VALUE)
     public ResponseEntity<String> addStudent(@RequestBody(required = false) String body) {
         JSONObject jsonObject = parseJson(body);
@@ -50,7 +54,7 @@ public class StudentController {
                         return k;
                     }).collect(Collectors.toList())
             ));
-            return okText("Successfully added student");
+            return okText("Successfully queued student");
         } catch (Exception e) {
             e.printStackTrace();
             return jsonError();
@@ -155,57 +159,14 @@ public class StudentController {
     }
 
     /**
-     * Legt einen Schüler sofort an, ohne den Umweg über die Warteschlange.
-     * <p>
-     * {@code /add} merkt den Schüler nur vor; angelegt wird er erst, wenn am
-     * Automaten seine Chipkarte gescannt wird. Für Schüler ohne Chipkarte gibt
-     * es diesen Weg nicht - und {@code /seed/flush} ist keine Alternative, weil
-     * es immer den ältesten Eintrag der Warteschlange nimmt und damit einem
-     * anderen, auf seine Karte wartenden Schüler die Anmeldung wegnehmen würde.
-     * <p>
-     * Die RFID ist hier leer; sie lässt sich später über die Weboberfläche
-     * nachtragen.
+     * Früher: Schüler*in sofort anlegen, ohne Karte. Jetzt geht jede neue
+     * Schüler*in über die Warteschlange (siehe {@link AddUserHandler}) und wird
+     * erst angelegt, wenn am Automaten ihre Karte gescannt wird. Der Endpunkt
+     * bleibt für ältere Aufrufer und macht dasselbe wie {@code /add}.
      */
     @PostMapping(value = "/addWithoutCard", produces = MediaType.TEXT_PLAIN_VALUE)
     public ResponseEntity<String> addStudentWithoutCard(@RequestBody(required = false) String body) {
-        JSONObject jsonObject = parseJson(body);
-        if (jsonObject == null) {
-            return jsonError();
-        }
-        try {
-            JSONObject address = jsonObject.getJSONObject("address");
-            Wohnort wohnort = new Wohnort(
-                    address.getInt("nr"),
-                    address.getString("street"),
-                    address.getString("city"),
-                    address.getInt("zip"),
-                    address.getString("country"));
-
-            List<Kurs> kurse = jsonObject.getJSONArray("kurse").toList().stream().map((x) -> {
-                Session session = Main.getInstance().getDatabase().getSessionFactory().openSession();
-                Kurs k = session.get(Kurs.class, Long.valueOf(String.valueOf(x)));
-                session.close();
-                return k;
-            }).collect(Collectors.toList());
-
-            Main.getInstance().getDatabase().getSessionFactory().inTransaction(session -> {
-                session.persist(wohnort);
-                session.persist(new Student(
-                        jsonObject.getString("firstName"),
-                        jsonObject.getString("lastName"),
-                        new int[0],
-                        Gender.valueOf(jsonObject.getString("gender")),
-                        new Date(jsonObject.getLong("birthday")),
-                        wohnort,
-                        kurse
-                ));
-                session.flush();
-            });
-            return okText("Successfully added student");
-        } catch (Exception e) {
-            e.printStackTrace();
-            return jsonError();
-        }
+        return addStudent(body);
     }
 
     // Backward compatibility with old endpoints

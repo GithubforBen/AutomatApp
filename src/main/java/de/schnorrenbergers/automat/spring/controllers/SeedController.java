@@ -2,7 +2,6 @@ package de.schnorrenbergers.automat.spring.controllers;
 
 import de.schnorrenbergers.automat.Main;
 import de.schnorrenbergers.automat.database.types.Konto;
-import de.schnorrenbergers.automat.database.types.Student;
 import de.schnorrenbergers.automat.database.types.types.Attandance;
 import de.schnorrenbergers.automat.manager.AddUserHandler;
 import de.schnorrenbergers.automat.manager.KontenManager;
@@ -31,20 +30,9 @@ public class SeedController {
                 return badRequest("Queue is empty");
             }
 
-            Main.getInstance().getDatabase().getSessionFactory().inTransaction(session -> {
-                session.persist(peek.getWohnort());
-                session.persist(new Student(
-                        peek.getVorname(),
-                        peek.getNachname(),
-                        lastScan,
-                        peek.getGender(),
-                        peek.getDate(),
-                        peek.getWohnort(),
-                        peek.getKurse()
-                ));
-                session.flush();
-            });
-            return okText("Successfully flushed student");
+            Main.getInstance().getDatabase().getSessionFactory().inTransaction(session ->
+                    AddUserHandler.create(peek, lastScan, session));
+            return okText(peek.isTeacher() ? "Successfully flushed teacher" : "Successfully flushed student");
         } catch (Exception e) {
             e.printStackTrace();
             return jsonError();
