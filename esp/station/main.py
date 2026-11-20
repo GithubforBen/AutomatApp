@@ -4,8 +4,8 @@
 #   JSON-Liste der Kartenbytes). Die Antwort des Automaten ("Herzlich
 #   Willkommen, ...") steht danach einige Sekunden auf dem Display.
 # * Beantwortet die Anfragen des Automaten: /ping, /status, /version, /update.
-# * Während eines Updates über WLAN zeigt das Display "Update im Gange" mit
-#   Prozentzahl.
+# * Unten rechts zeigt das Display die WLAN-Stärke (0-4 Balken); während eines
+#   Updates über WLAN steht dort "Update im Gange" mit Prozentzahl.
 # * Summer: ein Ton sofort beim Lesen der Karte, drei, wenn die Buchung
 #   nicht geklappt hat.
 #
@@ -25,6 +25,31 @@ import ota
 state = {"server_ip": None, "last_card": None, "screen": None}
 
 IDLE_LINES = ["", "    MINT-Zentrum", "   Karte vorhalten", ""]
+
+# WLAN-Stärke als eigenes Zeichen (5 Pixel breit, 8 hoch): 0 bis 4 Balken.
+# Belegt die Zeichen 0-4 im CGRAM des Displays.
+SIGNAL_GLYPHS = [
+    [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x15],  # keine Verbindung: nur Punkte
+    [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x10, 0x10],
+    [0x00, 0x00, 0x00, 0x00, 0x04, 0x04, 0x14, 0x14],
+    [0x00, 0x00, 0x01, 0x01, 0x05, 0x05, 0x15, 0x15],
+    [0x01, 0x01, 0x05, 0x05, 0x15, 0x15, 0x15, 0x15],
+]
+SIGNAL_EVERY_MS = 5000
+
+
+def signal_level(wlan):
+    """WLAN-Stärke als 0-4 Balken."""
+    if not wlan.isconnected():
+        return 0
+    try:
+        rssi = wlan.status("rssi")
+    except Exception:
+        return 0
+    for level, limit in ((4, -55), (3, -65), (2, -75), (1, -85)):
+        if rssi >= limit:
+            return level
+    return 0
 
 
 def log(*args):
@@ -59,6 +84,7 @@ class Screen:
         self._lcd = None
         self._lines = [None, None, None, None]  # was gerade auf dem Display steht
         self._wanted = ["", "", "", ""]  # was zuletzt angezeigt werden sollte
+        self._signal = 0
         self.shown_until = 0
         try:
             from pcf8574 import PCF8574
@@ -69,9 +95,17 @@ class Screen:
             self._lcd = LCD(HD44780(pcf8574, num_lines=4, num_columns=20), pcf8574)
             self._lcd.clear()
             self._lcd.backlight_on()
+            self._define_glyphs()
         except Exception as e:
             # Ohne Display soll die Station trotzdem buchen.
             log("Display nicht ansprechbar:", e)
+
+    def _define_glyphs(self):
+        hd = self._lcd.get_hd44780()
+        for slot, rows in enumerate(SIGNAL_GLYPHS):
+            hd._write_command(hd.LCD_SET_CGRAM_ADDR | (slot << 3))
+            for row in rows:
+                hd._write_data(row)
 
     def show(self, lines, hold_ms=0, quiet=False):
         """Zeigt bis zu vier Zeilen; mit hold_ms kehrt danach idle() zurück."""
@@ -89,6 +123,9 @@ class Screen:
         try:
             for i in range(4):
                 text = lcd_text(self._wanted[i])[:20]
+                if i == 3:
+                    # Letzte Spalte unten rechts: WLAN-Stärke.
+                    text = text[:19] + " " * (19 - len(text[:19])) + chr(self._signal)
                 # Nur geänderte Zeilen schreiben - jedes Zeichen kostet Zeit auf dem Bus.
                 if text != self._lines[i]:
                     self._lcd.write_line(text, i)
@@ -97,6 +134,11 @@ class Screen:
             log("Display-Fehler:", e)
         finally:
             self._lock.release()
+
+    def set_signal(self, level):
+        if level != self._signal:
+            self._signal = level
+            self._render()
 
     def update_progress(self, percent, phase):
         """Fortschritt eines Updates über WLAN (Rückruf aus ota.py)."""
@@ -274,12 +316,18 @@ def scan_loop(wlan, screen, buzzer):
     booked_uid = None
     booked_at = 0
     booked_lines = None
+    signal_checked = time.ticks_ms()
+    screen.set_signal(signal_level(wlan))
 
     while True:
         if not wlan.isconnected():
+            screen.set_signal(0)
             screen.show(["Keine Verbindung", "zum WLAN", "", ""])
             connect_wlan(wlan)
             screen.idle()
+        if time.ticks_diff(time.ticks_ms(), signal_checked) >= SIGNAL_EVERY_MS:
+            signal_checked = time.ticks_ms()
+            screen.set_signal(signal_level(wlan))
         if screen.expired():
             screen.idle()
         try:
