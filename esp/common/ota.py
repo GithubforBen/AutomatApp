@@ -205,7 +205,8 @@ def update(host, port, board, key_id, key, progress=None):
     _rmtree(NEW)
     log("Update auf", target, "installiert - Neustart")
     _report(progress, 100, "restart")
-    time.sleep(1)
+    # Kurz warten, damit eine Anzeige (Station) "Neustart" auch zeigen kann.
+    time.sleep(3)
     machine.reset()
 
 

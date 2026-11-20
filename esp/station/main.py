@@ -85,6 +85,9 @@ class Screen:
         self._lines = [None, None, None, None]  # was gerade auf dem Display steht
         self._wanted = ["", "", "", ""]  # was zuletzt angezeigt werden sollte
         self._signal = 0
+        # Fortschritt eines Updates: setzt der Update-Thread, zeichnet die Hauptschleife.
+        self._progress = None
+        self._progress_shown = None
         self.shown_until = 0
         try:
             from pcf8574 import PCF8574
@@ -141,8 +144,21 @@ class Screen:
             self._render()
 
     def update_progress(self, percent, phase):
-        """Fortschritt eines Updates über WLAN (Rückruf aus ota.py)."""
+        """Rückruf aus ota.py. Läuft im Update-Thread - der hat auf dem ESP32 nur
+        wenig Stack, für den Weg bis zum Display (I2C) reichte der nicht. Darum hier
+        nur merken; draw_progress() in der Hauptschleife zeichnet."""
+        self._progress = (percent, phase)
+
+    def draw_progress(self):
+        """Zeigt den zuletzt gemeldeten Update-Fortschritt, falls er sich geändert hat."""
+        progress = self._progress
+        if progress is None or progress == self._progress_shown:
+            return
+        self._progress_shown = progress
+        percent, phase = progress
         if phase == "failed":
+            self._progress = None
+            self._progress_shown = None
             self.show(["    Update ist", "  fehlgeschlagen", "", "Alte Version bleibt"], 5000)
             return
         if phase == "download":
@@ -329,6 +345,7 @@ def scan_loop(wlan, screen, buzzer):
         if time.ticks_diff(time.ticks_ms(), signal_checked) >= SIGNAL_EVERY_MS:
             signal_checked = time.ticks_ms()
             screen.set_signal(signal_level(wlan))
+        screen.draw_progress()
         if screen.expired():
             screen.idle()
         try:
