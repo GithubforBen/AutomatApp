@@ -168,6 +168,26 @@ public class AvailabilityManager {
     }
 
     /**
+     * Whether a sweet still has stock and is not deactivated - without creating or modifying any
+     * records (unlike {@link #checkAvailability(int)}). Used by "Fächer automatisch sperren": a sweet
+     * whose stored stock reached 0 or whose slot was deactivated after a failed dispense is locked.
+     *
+     * @param sweet the type of sweet to look up; 7 (the PIN button) is always available.
+     * @return {@code true} if the sweet has stock left and is not deactivated.
+     */
+    public boolean isInStockAndEnabled(int sweet) {
+        if (sweet == 7) return true;
+        Session session = Main.getInstance().getDatabase().getSessionFactory().openSession();
+        List<Sweet> select = session.createSelectionQuery("from Sweet s where s.type = :sweet", Sweet.class).setParameter("sweet", sweet).getResultList();
+        session.close();
+        if (select.size() != 1) {
+            return false;
+        }
+        Sweet first = select.getFirst();
+        return !first.isDisabled() && first.getAmount() > 0;
+    }
+
+    /**
      * Checks the availability of a specific type of sweet. If no record exists for the specified sweet,
      * a new record is created with a default amount of 0, provided the sweet type is valid (within the valid range).
      * If multiple records exist for the same sweet type, they are removed, and the availability check will return false.

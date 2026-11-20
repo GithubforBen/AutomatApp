@@ -68,7 +68,7 @@ lock = threading.Lock()
 events = collections.deque(maxlen=400)
 event_counter = 0
 device_state = {name: {"online": True, "lastPing": None} for name in DEVICES}
-dispense_mode = {"value": "ok"}  # "ok" | "jam"
+dispense_mode = {"value": "ok"}  # "ok" | "jam" | "silent"
 
 
 def log_event(source: str, text: str, level: str = "info", detail=None):
@@ -147,12 +147,16 @@ def make_device_app(name: str) -> Flask:
             log_event(name, "Ausgabe ohne Fachnummer angefordert", "bad", body)
             return "error: 235"
         text = f"Fach {nr} ausgeben, {body.get('cost', '?')} h, Karte {fmt_card(body.get('usr'))}"
+        # Wie die echte Ausgabe: sofort quittieren, das Ergebnis danach melden.
         if dispense_mode["value"] == "jam":
             log_event(name, text + " - klemmt", "warn", body)
-            # Wie boot.py: sofort quittieren, den Fehlschlag danach melden.
-            threading.Thread(target=report_dispense_failed, args=(nr,), daemon=True).start()
+            report_async("/dispense/failed", nr, f"Fehlschlag von Fach {nr} gemeldet - Fach wird gesperrt "
+                                                 f"(wenn \"Fächer automatisch sperren\" an ist)", "warn")
+        elif dispense_mode["value"] == "silent":
+            log_event(name, text + " - meldet nichts (das Backend sperrt nach 30 s)", "warn", body)
         else:
             log_event(name, text, "ok", body)
+            report_async("/dispense/success", nr, f"Erfolg von Fach {nr} gemeldet", "ok")
         return "success"
 
     @app.route("/alarm_on", methods=["GET", "POST"])
@@ -168,15 +172,20 @@ def make_device_app(name: str) -> Flask:
     return app
 
 
-def report_dispense_failed(nr: int):
+def report_async(path: str, nr: int, ok_text: str, level: str):
+    threading.Thread(target=report_to_backend, args=(path, nr, ok_text, level), daemon=True).start()
+
+
+def report_to_backend(path: str, nr: int, ok_text: str, level: str):
+    """Meldet wie die Ausgabe (ESP32) etwas signiert ans Backend."""
     time.sleep(1.0)
     if hmac_client is None:
-        log_event("ausgabe", "Fehlschlag nicht gemeldet: HMAC-Client fehlt", "bad")
+        log_event("ausgabe", f"{path} nicht gemeldet: HMAC-Client fehlt", "bad")
         return
     try:
-        r = hmac_client.post(BACKEND + "/dispense/failed", json_body={"nr": nr}, timeout=5)
+        r = hmac_client.post(BACKEND + path, json_body={"nr": nr}, timeout=5)
         if r.status_code == 200:
-            log_event("ausgabe", f"Fehlschlag von Fach {nr} ans Backend gemeldet, Fach ist jetzt gesperrt", "warn")
+            log_event("ausgabe", ok_text, level)
         else:
             log_event("ausgabe", f"Backend lehnt Fehlermeldung ab: HTTP {r.status_code}", "bad", r.text[:200])
     except requests.RequestException as e:
@@ -314,11 +323,21 @@ def set_device():
 @ui.route("/api/dispense_mode", methods=["POST"])
 def set_dispense_mode():
     mode = (request.get_json(silent=True) or {}).get("mode")
-    if mode not in ("ok", "jam"):
+    if mode not in ("ok", "jam", "silent"):
         return jsonify({"error": "Unbekannter Modus"}), 400
     dispense_mode["value"] = mode
-    log_event("ausgabe", "Ausgabe klemmt ab jetzt" if mode == "jam" else "Ausgabe funktioniert wieder",
-              "warn" if mode == "jam" else "info")
+    text = {"ok": "Ausgabe funktioniert wieder", "jam": "Ausgabe klemmt ab jetzt",
+            "silent": "Ausgabe meldet ab jetzt keinen Erfolg mehr"}[mode]
+    log_event("ausgabe", text, "info" if mode == "ok" else "warn")
+    return jsonify({"ok": True})
+
+
+@ui.route("/api/intrusion", methods=["POST"])
+def intrusion():
+    """Jemand greift in den Automaten: eine Lichtschranke spricht ohne Ausgabe an."""
+    nr = random.randint(0, 6)
+    log_event("ausgabe", f"Lichtschranke von Fach {nr} ohne Ausgabe ausgelöst", "warn")
+    report_async("/dispense/unexpected", nr, "Eingriff gemeldet - der Alarm am Scanner sollte jetzt laufen", "warn")
     return jsonify({"ok": True})
 
 

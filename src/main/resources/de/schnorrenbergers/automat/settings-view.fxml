@@ -90,6 +90,12 @@
                                 <Font size="16.0"/>
                             </font>
                         </CheckBox>
+                        <CheckBox fx:id="autoLock" mnemonicParsing="false" prefHeight="46.0" prefWidth="240.0"
+                                  text="Fächer automatisch sperren">
+                            <font>
+                                <Font size="16.0"/>
+                            </font>
+                        </CheckBox>
                         <CheckBox fx:id="checkTime" mnemonicParsing="false" prefHeight="46.0" prefWidth="240.0"
                                   text="Stundenanzahl überprüfen">
                             <font>
@@ -102,7 +108,7 @@
                                 <Font size="16.0"/>
                             </font>
                         </CheckBox>
-                        <Button mnemonicParsing="false" onAction="#hmac" prefHeight="132.0" prefWidth="254.0"
+                        <Button mnemonicParsing="false" onAction="#hmac" prefHeight="86.0" prefWidth="254.0"
                                 text="HMAC"/>
                     </children>
                 </VBox>

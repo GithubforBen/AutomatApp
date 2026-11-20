@@ -1,7 +1,6 @@
 package de.schnorrenbergers.automat.controller;
 
 import de.schnorrenbergers.automat.Main;
-import de.schnorrenbergers.automat.manager.AvailabilityManager;
 import de.schnorrenbergers.automat.manager.ConfigurationManager;
 import de.schnorrenbergers.automat.manager.DispensationManager;
 import de.schnorrenbergers.automat.manager.KontenManager;
@@ -123,15 +122,21 @@ public class MainController implements Initializable {
             setText("Bitte warten...", Color.RED, true);
             return;
         }
+        // Der Knopf ist dann schon ausgegraut - hier nur zur Sicherheit, falls das
+        // Fach gerade erst leer oder gesperrt wurde.
+        if (!Main.getInstance().isSellable(number)) {
+            setText("Fach leer oder gesperrt", Color.RED, true);
+            return;
+        }
         try {
             KontenManager kontenManager = new KontenManager(Main.getInstance().getLastScan());
             ConfigurationManager configurationManager = new ConfigurationManager();
-            AvailabilityManager availabilityManager = new AvailabilityManager();
-            availabilityManager.addSweet(number, -1);
             if (kontenManager.hasUnlimitedHours()
                     || kontenManager.getKonto().getBalance() >= configurationManager.getInt("sweets._" + number + ".kost")
                     || kontenManager.getKonto().getBalance() == Integer.MIN_VALUE
                     || !Boolean.parseBoolean(Main.getInstance().getSettings().getSettingOrDefault("checkTime", String.valueOf(true)))) {
+                // Vorrat und Stunden zieht dispense() erst ab, wenn die Ausgabe den
+                // Auftrag angenommen hat - früher sank der Vorrat auch bei "Nicht genug Stunden".
                 DispensationManager.dispense(number, kontenManager, configurationManager);
             } else {
                 setText("Nicht genug Stunden", Color.RED, true);

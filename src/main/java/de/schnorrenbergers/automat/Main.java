@@ -43,8 +43,9 @@ public class Main extends Application {
     private Server server;
     private int[] lastScan;
     private int logoutTime;
-    private boolean alarm = false;
+    private volatile boolean alarm = false;
     private boolean checkAvailability;
+    private volatile boolean autoLock;
     private boolean useLocalEndpoints = false;
     private ScreenSaver screenSaver;
     private Database database;
@@ -53,6 +54,8 @@ public class Main extends Application {
     private ConfigurationManager configurationManager;
     private ConfigurableApplicationContext run;
     private boolean initialized = false;
+    private static final long DISPENSER_CHECK_MS = 5000;
+    private Thread dispenserWatchdog;
 
     public static void main(String[] args) {
         launch();
@@ -90,6 +93,7 @@ public class Main extends Application {
         handler = new StatisticManager();
         logoutTime = Integer.parseInt(settingsManager.getSettingOrDefault("logout", String.valueOf(logoutTime)));
         checkAvailability = Boolean.parseBoolean(settingsManager.getSettingOrDefault("availability", String.valueOf(false)));
+        autoLock = Boolean.parseBoolean(settingsManager.getSettingOrDefault("autoLock", String.valueOf(false)));
         if (run == null) {
             run = SpringApplication.run(SpringApi.class);
         }
@@ -227,6 +231,7 @@ public class Main extends Application {
         stage.setScene(scene);
         stage.show();
         ping();
+        watchDispenser();
         // Nach einem Neustart hält die App den Alarm für aus - der Scanner soll
         // dann nicht mehr piepen, falls er vorher an war.
         new Thread(() -> {
@@ -248,9 +253,53 @@ public class Main extends Application {
                 new CustomRequest("ping", CustomRequest.REVIVER.DISPENSER).execute();
                 new CustomRequest("ping", CustomRequest.REVIVER.STATION).execute();
             } catch (Exception e) {
-                Platform.runLater(() -> loadScene("hello-view.fxml"));
+                showReconnect();
             }
         }).start();
+    }
+
+    /**
+     * Zeigt den Bildschirm "Verbindung wiederherstellen" - von jedem Thread aus.
+     * Bleibt auf dem HMAC-Bildschirm, den man von dort aus öffnet, um die
+     * Verbindung einzurichten.
+     */
+    public void showReconnect() {
+        Platform.runLater(() -> {
+            if (stage == null || stage.getScene() == null) return;
+            Object current = stage.getScene().getUserData();
+            if ("hello-view.fxml".equals(current) || "hmac-view.fxml".equals(current)) return;
+            loadScene("hello-view.fxml");
+        });
+    }
+
+    /**
+     * Ohne Ausgabe kann der Automat nichts ausgeben - ist sie nicht erreichbar,
+     * soll immer der Bildschirm "Verbindung wiederherstellen" zu sehen sein.
+     * Prüft dazu alle paar Sekunden; erst zwei Fehlschläge hintereinander zählen,
+     * damit ein einzelner verlorener Ping nicht gleich alles unterbricht.
+     */
+    private void watchDispenser() {
+        if (dispenserWatchdog != null) return;
+        dispenserWatchdog = new Thread(() -> {
+            int misses = 0;
+            while (true) {
+                try {
+                    Thread.sleep(DISPENSER_CHECK_MS);
+                    if (new CustomRequest("ping", CustomRequest.REVIVER.DISPENSER).ping()) {
+                        misses = 0;
+                    } else if (++misses >= 2) {
+                        System.out.println("Ausgabe nicht erreichbar - zeige Verbindungsbildschirm");
+                        showReconnect();
+                    }
+                } catch (InterruptedException e) {
+                    return;
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }, "dispenser-watchdog");
+        dispenserWatchdog.setDaemon(true);
+        dispenserWatchdog.start();
     }
 
     /**
@@ -270,9 +319,11 @@ public class Main extends Application {
                 btn.setText(configurationManager.getInt("sweets._" + i + ".kost") + ":");
                 Image image = new Image(Objects.requireNonNull(getClass().getResourceAsStream(getImage(i))));
 
-                if (checkAvailability && !availabilityManager.checkAvailability(i)) {
+                if (!isSellable(availabilityManager, i)) {
                     image = convertToGrayscale(image);
                     btn.setDisable(true);
+                } else {
+                    btn.setDisable(false);
                 }
 
                 ImageView imageView = new ImageView(image);
@@ -284,6 +335,21 @@ public class Main extends Application {
                 if (i == 7) btn.setText("");
             }
         });
+    }
+
+    /**
+     * Ob eine Süßigkeit gerade gewählt werden darf. Gesperrt ist sie, wenn
+     * "Verfügbarkeit überprüfen" an ist und sie nicht verfügbar ist, oder - davon
+     * unabhängig - wenn "Fächer automatisch sperren" an ist und ihr Vorrat
+     * aufgebraucht oder das Fach nach einer fehlgeschlagenen Ausgabe gesperrt ist.
+     */
+    public boolean isSellable(int sweet) {
+        return isSellable(new AvailabilityManager(), sweet);
+    }
+
+    private boolean isSellable(AvailabilityManager availabilityManager, int sweet) {
+        if (checkAvailability && !availabilityManager.checkAvailability(sweet)) return false;
+        return !autoLock || availabilityManager.isInStockAndEnabled(sweet);
     }
 
     private String getImage(int id) {
@@ -443,6 +509,15 @@ public class Main extends Application {
     public void setCheckAvailability(boolean checkAvailability) {
         this.checkAvailability = checkAvailability;
         settingsManager.setSetting("availability", String.valueOf(checkAvailability));
+    }
+
+    public boolean isAutoLock() {
+        return autoLock;
+    }
+
+    public void setAutoLock(boolean autoLock) {
+        this.autoLock = autoLock;
+        settingsManager.setSetting("autoLock", String.valueOf(autoLock));
     }
 
     public ScreenSaver getScreenSaver() {

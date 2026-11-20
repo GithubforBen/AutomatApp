@@ -537,24 +537,42 @@ Manually adds an attendance record.
 
 ## Dispenser
 
-Called by the dispenser hardware (ESP32) to report the outcome of a dispense attempt.
+Called by the dispenser hardware (ESP32), HMAC-signed, to report the outcome of a dispense
+attempt and unexpected light-barrier triggers. All three endpoints take the same body:
+
+```json
+{"nr": 2}
+```
+
+`nr` is the dispenser slot id as sent in the original `/dispense` request to the
+dispenser; it is mapped back to the corresponding Sweet.
+
+* **Response (200 OK):** `success`
+* **Response (400):** `BAD REQUEST: 400` if the body is missing or invalid, or `nr` does not map to a known Sweet
+
+**"Fächer automatisch sperren"** (setting `autoLock`, checkbox in the settings screen,
+independent of "Verfügbarkeit überprüfen"): when on, a sweet is greyed out and can't be
+chosen once its stored stock reaches 0, and its slot is deactivated when a dispense fails.
+A dispense counts as failed when the dispenser reports `/dispense/failed`, or when no
+`/dispense/success` arrives within 30 s (+15 s for every dispense queued before it).
+Deactivated slots stay locked until "Reaktivieren" in the admin screen. If the dispenser
+doesn't accept the `/dispense` request at all, nothing is charged, nothing is locked, and
+the "Verbindung wiederherstellen" screen is shown.
+
+### POST /dispense/success
+
+The light barrier saw the sweet fall - the dispense worked.
 
 ### POST /dispense/failed
 
-Called when a dispense did not produce a stop signal, i.e. the sweet was not actually
-dispensed. The corresponding Sweet is deactivated (stock set to 0) so it is greyed out
-in the UI (when availability checking is enabled) until it is refilled via the
-"Nachfüllung" admin screen.
+The dispense did not produce a stop signal, i.e. the sweet was not actually dispensed.
+Deactivates the slot if "Fächer automatisch sperren" is on.
 
-* **Request Body:**
-  ```json
-  {"nr": 2}
-  ```
-  `nr` is the dispenser slot id as sent in the original `/dispense` request to the
-  dispenser; it is mapped back to the corresponding Sweet.
-* **Response (200 OK):** `success`
-* **Response (400):** `BAD REQUEST: 400` if `nr` does not map to a known Sweet
-* **Response (410):** `Can't parse JSON` if the body is missing or invalid
+### POST /dispense/unexpected
+
+A light barrier was triggered while nothing was being dispensed (someone is reaching into
+the machine). Turns the alarm on the scanner on. The alarm goes off when the admin PIN is
+entered, or when a teacher or admin scans their card at the automat or at the station.
 
 ## Enum Reference Tables
 

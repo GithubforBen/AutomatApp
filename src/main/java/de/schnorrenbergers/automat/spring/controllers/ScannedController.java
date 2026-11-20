@@ -1,6 +1,7 @@
 package de.schnorrenbergers.automat.spring.controllers;
 
 import de.schnorrenbergers.automat.Main;
+import de.schnorrenbergers.automat.manager.AlarmManager;
 import org.json.JSONObject;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -20,8 +21,10 @@ public class ScannedController {
         }
         try {
             JSONObject json = new JSONObject(body);
-            Main.getInstance().setLastScan(
-                    json.getJSONArray("rfid").toList().stream().map(Object::toString).mapToInt(Integer::parseInt).toArray());
+            int[] rfid = json.getJSONArray("rfid").toList().stream().map(Object::toString).mapToInt(Integer::parseInt).toArray();
+            // Lehrkräfte und Admins beenden mit ihrer Karte den Alarm.
+            AlarmManager.disarmByCard(rfid);
+            Main.getInstance().setLastScan(rfid);
             return ResponseEntity.ok().contentType(MediaType.TEXT_PLAIN).body("success");
         } catch (Exception e) {
             return ResponseEntity.status(410).contentType(MediaType.TEXT_PLAIN).body("Can't parse JSON");

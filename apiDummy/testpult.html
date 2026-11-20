@@ -439,8 +439,12 @@
             <div class="segmented" role="group" aria-label="Verhalten der Ausgabe">
                 <button type="button" data-mode="ok" aria-pressed="true">klappt</button>
                 <button type="button" data-mode="jam" class="jam" aria-pressed="false">klemmt</button>
+                <button type="button" data-mode="silent" class="jam" aria-pressed="false">stumm</button>
             </div>
-            <p class="hint" style="margin-top:6px">Klemmt sie, meldet sie den Fehlschlag ans Backend und das Fach wird gesperrt.</p>
+            <p class="hint" style="margin-top:6px">Klappt sie, meldet sie den Erfolg. Klemmt sie, meldet sie den Fehlschlag;
+                stumm meldet sie gar nichts. In beiden Fällen sperrt das Backend das Fach, wenn
+                „Fächer automatisch sperren“ an ist.</p>
+            <button class="btn" id="intrusion" type="button" style="margin-top:6px">In den Automaten greifen (Alarm)</button>
         </div>
         <ul id="feed"></ul>
     </section>
@@ -791,6 +795,7 @@
     $("#scan-automat").addEventListener("click", () => scan("automat"));
     $("#scan-station").addEventListener("click", () => scan("station"));
     $("#clear-feed").addEventListener("click", () => { $("#feed").innerHTML = ""; });
+    $("#intrusion").addEventListener("click", () => postJson("/api/intrusion", {}).then(pollState));
     document.querySelectorAll(".segmented button").forEach((b) =>
         b.addEventListener("click", () => postJson("/api/dispense_mode", { mode: b.dataset.mode }).then(pollState)));
 

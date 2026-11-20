@@ -4,8 +4,12 @@
 # * Gibt Süßigkeiten nacheinander aus einer Warteschlange aus - der Server
 #   bleibt dabei erreichbar (früher lief der Motor im Server selbst, und der
 #   Automat hielt die Ausgabe währenddessen für ausgefallen).
-# * Meldet Ausgaben ohne Lichtschranken-Signal ans Backend (/dispense/failed),
-#   das Fach wird dann gesperrt.
+# * Meldet jede Ausgabe ans Backend: /dispense/success, wenn die Lichtschranke
+#   die Süßigkeit gesehen hat, sonst /dispense/failed. Bleibt die Erfolgsmeldung
+#   aus, sperrt das Backend das Fach ("Fächer automatisch sperren").
+# * Spricht eine Lichtschranke an, ohne dass etwas ausgegeben wird (jemand greift
+#   in den Automaten), meldet sie /dispense/unexpected - das Backend löst den
+#   Alarm am Scanner aus.
 #
 # Einstellungen stehen in config.py.
 
@@ -22,8 +26,9 @@ import hmac
 from machine import Pin, RTC
 import config
 
-# Vom Automaten gelernt (Absender des ersten /ping).
-state = {"server_ip": None, "busy": False}
+# Vom Automaten gelernt (Absender des ersten /ping). last_end: Ende der letzten
+# Ausgabe (ticks_ms) - kurz danach darf eine Lichtschranke noch nachzucken.
+state = {"server_ip": None, "busy": False, "last_end": time.ticks_ms()}
 
 # time.time() zählt auf dem ESP32 ab 2000, Unix-Zeit ab 1970.
 EPOCH_OFFSET = 946684800 if time.gmtime(0)[0] == 2000 else 0
@@ -156,10 +161,13 @@ def worker():
         except Exception as e:
             log("Motorfehler:", e)
             ok = False
+        state["last_end"] = time.ticks_ms()
         state["busy"] = False
-        if not ok:
+        if ok:
+            report("/dispense/success", nr)
+        else:
             log("Keine Süßigkeit erkannt, Fach", nr)
-            report_failed(nr)
+            report("/dispense/failed", nr)
 
 
 # ---------------------------------------------------------------------------
@@ -230,22 +238,92 @@ def http_post(host, port, path, body, headers, timeout=5):
         sock.close()
 
 
-def report_failed(nr):
+# Meldungen ans Backend laufen über einen eigenen Thread - so wartet weder die
+# Ausgabe noch die Überwachung der Lichtschranken auf das Netz.
+outbox = []
+outbox_lock = _thread.allocate_lock()
+
+
+def report(path, nr):
+    outbox_lock.acquire()
+    try:
+        outbox.append((path, nr))
+    finally:
+        outbox_lock.release()
+
+
+def send_report(path, nr):
     server = config.SERVER_IP or state["server_ip"]
     if not server:
-        log("Fehlschlag nicht gemeldet: noch kein /ping vom Automaten")
+        log(path, "nicht gemeldet: noch kein /ping vom Automaten")
         return
     body = ujson.dumps({"nr": nr})
     for attempt in range(3):
         try:
-            status = http_post(server, config.SERVER_PORT, "/dispense/failed", body, signed_headers(body))
+            status = http_post(server, config.SERVER_PORT, path, body, signed_headers(body))
             if status == 200:
-                log("Fehlschlag von Fach", nr, "gemeldet - Fach ist gesperrt")
+                log(path, "für Fach", nr, "gemeldet")
                 return
-            log("Backend lehnt die Meldung ab, Status", status)
+            log("Backend lehnt", path, "ab, Status", status)
         except Exception as e:
             log("Backend nicht erreichbar:", e)
         time.sleep(2)
+
+
+def reporter():
+    while True:
+        outbox_lock.acquire()
+        try:
+            item = outbox.pop(0) if outbox else None
+        finally:
+            outbox_lock.release()
+        if item is None:
+            time.sleep_ms(50)
+            continue
+        try:
+            send_report(item[0], item[1])
+        except Exception as e:
+            log("Meldung fehlgeschlagen:", e)
+
+
+# ---------------------------------------------------------------------------
+# Alarm: Lichtschranke ohne Ausgabe
+# ---------------------------------------------------------------------------
+
+# Wie viele Messungen (alle 10 ms) hintereinander unterbrochen, bis es zählt.
+blocked = {num: 0 for num in SENSES}
+# Wann je Fach zuletzt ein Eingriff gemeldet wurde (ticks_ms).
+last_alarm = {}
+
+
+def dispensing():
+    if state["busy"] or queue:
+        return True
+    return time.ticks_diff(time.ticks_ms(), state["last_end"]) < config.ALARM_GRACE_MS
+
+
+def check_sensors():
+    """Einmal alle Lichtschranken ansehen. Spricht eine an, ohne dass gerade
+    ausgegeben wird, greift jemand in den Automaten."""
+    if dispensing():
+        for num in blocked:
+            blocked[num] = 0
+        return
+    now = time.ticks_ms()
+    for num in SENSES:
+        if SENSES[num].value() != 1:
+            blocked[num] = 0
+            continue
+        blocked[num] += 1
+        if blocked[num] < config.ALARM_SAMPLES:
+            continue
+        last = last_alarm.get(num)
+        if last is not None and time.ticks_diff(now, last) < config.ALARM_REPEAT_MS:
+            continue
+        last_alarm[num] = now
+        nr = num - 1  # Lichtschranke num gehört zu Fach nr (siehe dispense())
+        log("Eingriff! Lichtschranke", num, "ohne Ausgabe ausgelöst")
+        report("/dispense/unexpected", nr)
 
 
 # ---------------------------------------------------------------------------
@@ -387,12 +465,21 @@ def main():
     connect_wlan(wlan)
     sync_time()
     _thread.start_new_thread(worker, ())
+    _thread.start_new_thread(reporter, ())
     _thread.start_new_thread(serve, (config.HTTP_PORT,))
-    # WLAN im Blick behalten; fällt es weg, neu verbinden.
+    # Lichtschranken überwachen und das WLAN im Blick behalten.
+    last_wlan_check = time.ticks_ms()
     while True:
-        time.sleep(5)
-        if not wlan.isconnected():
-            connect_wlan(wlan)
+        if config.ALARM_ENABLED:
+            try:
+                check_sensors()
+            except Exception as e:
+                log("Überwachung der Lichtschranken:", e)
+        if time.ticks_diff(time.ticks_ms(), last_wlan_check) > 5000:
+            last_wlan_check = time.ticks_ms()
+            if not wlan.isconnected():
+                connect_wlan(wlan)
+        time.sleep_ms(10)
 
 
 if __name__ == "__main__":

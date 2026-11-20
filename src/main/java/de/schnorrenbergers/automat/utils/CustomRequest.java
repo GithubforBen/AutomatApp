@@ -37,6 +37,17 @@ public class CustomRequest {
     }
 
     public boolean isOnline() {
+        if (ping()) return true;
+        Main.getInstance().showReconnect();
+        return false;
+    }
+
+    /**
+     * Pingt das Gerät, ohne dabei die Oberfläche zu verändern.
+     *
+     * @return ob es geantwortet hat
+     */
+    public boolean ping() {
         try {
             URL url = new URL(Main.getInstance().getUrl(reviver) + "/ping");
             URLConnection urlConnection = url.openConnection();
@@ -51,7 +62,6 @@ public class CustomRequest {
             br.lines().forEach(sb::append);
             br.close();
         } catch (Exception e) {
-            Main.getInstance().loadScene("hello-view.fxml");
             return false;
         }
         return true;

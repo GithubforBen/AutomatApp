@@ -21,6 +21,8 @@ public class SettingsController implements Initializable {
     @FXML
     public CheckBox availability;
     @FXML
+    public CheckBox autoLock;
+    @FXML
     public CheckBox checkTime;
     @FXML
     public CheckBox screensaver;
@@ -39,6 +41,12 @@ public class SettingsController implements Initializable {
         availability.setSelected(Main.getInstance().isCheckAvailability());
         availability.setOnAction((ActionEvent event) -> {
             Main.getInstance().setCheckAvailability(availability.isSelected());
+        });
+        // Eigene Einstellung, unabhängig von "Verfügbarkeit überprüfen": sperrt
+        // Fächer mit Vorrat 0 und nach Ausgaben ohne Erfolgsmeldung.
+        autoLock.setSelected(Main.getInstance().isAutoLock());
+        autoLock.setOnAction((ActionEvent event) -> {
+            Main.getInstance().setAutoLock(autoLock.isSelected());
         });
         checkTime.setSelected(Boolean.parseBoolean(Main.getInstance().getSettings().getSettingOrDefault("checkTime", "true")));
         checkTime.setOnAction((ActionEvent event) -> {

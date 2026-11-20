@@ -1,9 +1,9 @@
 package de.schnorrenbergers.automat.controller;
 
 import de.schnorrenbergers.automat.Main;
+import de.schnorrenbergers.automat.manager.AlarmManager;
 import de.schnorrenbergers.automat.manager.AvailabilityManager;
 import de.schnorrenbergers.automat.manager.ConfigurationManager;
-import de.schnorrenbergers.automat.utils.CustomRequest;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -89,15 +89,9 @@ public class AdminController implements Initializable {
     public void alarm(ActionEvent actionEvent) {
         // Früher war das vertauscht: bei ausgeschaltetem Alarm ging "alarm_off" raus.
         boolean turnOn = !Main.getInstance().isAlarm();
-        String answer = null;
-        try {
-            answer = new CustomRequest(turnOn ? "alarm_on" : "alarm_off", CustomRequest.REVIVER.SCANNER).execute();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
         // Nur umschalten, wenn der Scanner es bestätigt - sonst zeigt der Knopf
         // etwas anderes an, als am Scanner tatsächlich passiert.
-        if ("success".equals(answer)) {
+        if (AlarmManager.send(turnOn)) {
             Main.getInstance().setAlarm(turnOn);
         }
         setAlarmBTNColor();

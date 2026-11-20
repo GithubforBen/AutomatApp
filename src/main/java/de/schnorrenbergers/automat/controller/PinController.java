@@ -1,6 +1,7 @@
 package de.schnorrenbergers.automat.controller;
 
 import de.schnorrenbergers.automat.Main;
+import de.schnorrenbergers.automat.manager.AlarmManager;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -71,6 +72,8 @@ public class PinController implements Initializable {
         String sceneId = "";
         if (Objects.deepEquals(last, code)) {
             text.setText("Korrekt!");
+            // Wer die Admin-PIN kennt, darf den Alarm beenden.
+            AlarmManager.disarm("Admin-PIN");
             sceneId = "admin-view.fxml";
         } else if (Objects.deepEquals(last, settings)) {
             text.setText("Korrekt!");

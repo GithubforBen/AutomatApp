@@ -1,6 +1,7 @@
 package de.schnorrenbergers.automat.spring.controllers;
 
 import de.schnorrenbergers.automat.database.types.User;
+import de.schnorrenbergers.automat.manager.AlarmManager;
 import de.schnorrenbergers.automat.manager.KontenManager;
 import de.schnorrenbergers.automat.manager.LoginManager;
 import org.json.JSONArray;
@@ -24,6 +25,8 @@ public class LoginController {
         }
         try {
             int[] rfids = json.getJSONArray("rfid").toList().stream().map(Object::toString).mapToInt(Integer::parseInt).toArray();
+            // Auch an der Station beendet die Karte einer Lehrkraft oder eines Admins den Alarm.
+            AlarmManager.disarmByCard(rfids);
             boolean rfid = new LoginManager().login(rfids);
             KontenManager kontenManager = new KontenManager(rfids);
             JSONObject jsonResponse = new JSONObject();

@@ -24,3 +24,14 @@ SERVER_IP = None
 SERVER_PORT = 8000
 HMAC_KEY_ID = env.require(_env, "HMAC_KEY_ID")
 HMAC_KEY = env.require(_env, "HMAC_KEY").encode()
+
+# Alarm: Spricht eine Lichtschranke an, ohne dass gerade ausgegeben wird, meldet
+# die Ausgabe einen Eingriff und das Backend schaltet den Alarm am Scanner ein.
+ALARM_ENABLED = True
+# Nach einer Ausgabe so lange nicht überwachen (fallende Süßigkeit, Nachlauf).
+ALARM_GRACE_MS = 3000
+# So viele Messungen im Abstand von 10 ms muss die Lichtschranke unterbrochen
+# sein, bevor es als Eingriff zählt (gegen Störungen).
+ALARM_SAMPLES = 3
+# Bleibt eine Lichtschranke unterbrochen, frühestens nach dieser Zeit erneut melden.
+ALARM_REPEAT_MS = 10000
