@@ -36,3 +36,6 @@ build/
 
 ### Mac OS ###
 .DS_Store
+### ESP ###
+# Echte Zugangsdaten (WLAN, HMAC) - nur config.example.py wird eingecheckt
+esp/*/config.py
