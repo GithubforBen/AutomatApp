@@ -56,6 +56,13 @@ public class Main extends Application {
     private boolean initialized = false;
     private static final long DISPENSER_CHECK_MS = 5000;
     private Thread dispenserWatchdog;
+    /**
+     * Die Verbindung ist weg, während der Bildschirmschoner läuft - der soll
+     * weiterlaufen; "Verbindung wiederherstellen" kommt erst, wenn ihn jemand beendet.
+     */
+    private volatile boolean reconnectPending = false;
+    /** Welche Ansicht zu sehen war, als der Bildschirmschoner anging. */
+    private volatile String sceneBeforeSaver;
 
     public static void main(String[] args) {
         launch();
@@ -185,7 +192,11 @@ public class Main extends Application {
                     Thread.sleep(400);
                     boolean saver = Main.getInstance().getScreenSaver().isSaver();
                     if (saver && !Main.getInstance().getScreenSaver().isSaverr()) {
-                        Runnable runnable = () -> loadScene("screenSaver.fxml");
+                        Runnable runnable = () -> {
+                            Object current = stage.getScene() == null ? null : stage.getScene().getUserData();
+                            sceneBeforeSaver = current == null ? null : current.toString();
+                            loadScene("screenSaver.fxml");
+                        };
                         Platform.runLater(runnable);
                         Main.getInstance().getScreenSaver().setSaver(true);
                     }
@@ -263,15 +274,33 @@ public class Main extends Application {
     /**
      * Zeigt den Bildschirm "Verbindung wiederherstellen" - von jedem Thread aus.
      * Bleibt auf dem HMAC-Bildschirm, den man von dort aus öffnet, um die
-     * Verbindung einzurichten.
+     * Verbindung einzurichten. Läuft gerade der Bildschirmschoner, läuft er weiter;
+     * der Verbindungsbildschirm kommt, sobald ihn jemand beendet
+     * (siehe {@link #sceneAfterSaver()}).
      */
     public void showReconnect() {
         Platform.runLater(() -> {
             if (stage == null || stage.getScene() == null) return;
             Object current = stage.getScene().getUserData();
+            if ("screenSaver.fxml".equals(current) || getScreenSaver() != null && getScreenSaver().isSaverr()) {
+                reconnectPending = true;
+                return;
+            }
             if ("hello-view.fxml".equals(current) || "hmac-view.fxml".equals(current)) return;
             loadScene("hello-view.fxml");
         });
+    }
+
+    /**
+     * Wohin es nach dem Bildschirmschoner geht: zurück zu "Verbindung
+     * wiederherstellen", wenn die Verbindung inzwischen weg ist oder dieser
+     * Bildschirm vorher zu sehen war - sonst wie bisher zur Startansicht.
+     */
+    public String sceneAfterSaver() {
+        boolean reconnect = reconnectPending || "hello-view.fxml".equals(sceneBeforeSaver);
+        reconnectPending = false;
+        sceneBeforeSaver = null;
+        return reconnect ? "hello-view.fxml" : "main-view.fxml";
     }
 
     /**
@@ -289,6 +318,8 @@ public class Main extends Application {
                     Thread.sleep(DISPENSER_CHECK_MS);
                     if (new CustomRequest("ping", CustomRequest.REVIVER.DISPENSER).ping()) {
                         misses = 0;
+                        // Wieder da, bevor jemand den Bildschirmschoner beendet hat.
+                        reconnectPending = false;
                     } else if (++misses >= 2) {
                         System.out.println("Ausgabe nicht erreichbar - zeige Verbindungsbildschirm");
                         showReconnect();

@@ -16,20 +16,22 @@ public class ScreenSaverController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        new Thread(() -> {
+        // Ein Thread je Bildschirmschoner, der danach endet. Früher lief er ewig
+        // weiter: Bei jedem weiteren Bildschirmschoner wachten alle alten Threads
+        // mit auf und luden jeder für sich die Startansicht.
+        Thread animation = new Thread(() -> {
             try {
-                while (true) {
-                    while (Main.getInstance().getScreenSaver().isSaver()) {
-                        display();
-                    }
-                    Thread.sleep(40);
+                while (Main.getInstance().getScreenSaver().isSaver()) {
+                    display();
                 }
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
             Main.getInstance().getScreenSaver().setSaver(false);
             loadDefault();
-        }).start();//.start();
+        }, "screensaver");
+        animation.setDaemon(true);
+        animation.start();
     }
 
     public void display() throws InterruptedException {
@@ -63,21 +65,15 @@ public class ScreenSaverController implements Initializable {
             arc.setRotate(j);
             Thread.sleep(40);
             if (!Main.getInstance().getScreenSaver().isSaver()) {
-                Main.getInstance().getScreenSaver().setSaver(false);
-                loadDefault();
-                return;
+                return; // Beenden übernimmt initialize()
             }
         }
     }
 
     public void loadDefault() {
-        Runnable runnable = new Runnable() {
-            @Override
-            public void run() {
-                Main.getInstance().loadScene("main-view.fxml");
-            }
-        };
-        Platform.runLater(runnable);
+        // Nicht immer zur Startansicht: fehlt die Verbindung, zurück zu
+        // "Verbindung wiederherstellen" (siehe Main#sceneAfterSaver).
+        Platform.runLater(() -> Main.getInstance().loadScene(Main.getInstance().sceneAfterSaver()));
     }
 
     @FXML
