@@ -20,6 +20,10 @@ import java.nio.file.Path;
 /**
  * Liefert den ESP32 ihre Dateien für Updates über WLAN (siehe {@link EspUpdateManager}).
  * Die Anfragen sind wie alle anderen per HMAC signiert.
+ * <p>
+ * Die Namen in {@code @RequestParam("...")} müssen ausgeschrieben sein: Das Projekt wird
+ * ohne {@code -parameters} übersetzt, Spring kennt die Parameternamen sonst nicht und
+ * antwortet mit einem Fehler (nach außen ein leeres 403).
  */
 @RestController
 @RequestMapping("/esp")
@@ -34,7 +38,7 @@ public class EspController {
      * die Liste wirklich vom Automaten kommt und frisch ist.
      */
     @GetMapping("/manifest")
-    public ResponseEntity<byte[]> manifest(@RequestParam String board,
+    public ResponseEntity<byte[]> manifest(@RequestParam("board") String board,
                                            @RequestHeader("X-API-KEY-ID") String keyId,
                                            @RequestHeader("X-NONCE") String nonce) throws IOException {
         EspUpdateManager.Board target = EspUpdateManager.Board.byFolder(board);
@@ -53,7 +57,7 @@ public class EspController {
      * Eine Datei aus der Dateiliste des Geräts - nur die, keine anderen Pfade.
      */
     @GetMapping("/file")
-    public ResponseEntity<byte[]> file(@RequestParam String board, @RequestParam String path) throws IOException {
+    public ResponseEntity<byte[]> file(@RequestParam("board") String board, @RequestParam("path") String path) throws IOException {
         EspUpdateManager.Board target = EspUpdateManager.Board.byFolder(board);
         if (target == null) return notFound();
         Path file = EspUpdateManager.manifest(target).files().get(path);
