@@ -107,14 +107,14 @@ public class MainController implements Initializable {
     public void click(int number) {
         Main.getInstance().getScreenSaver().setLastMove(System.currentTimeMillis());
         if (Main.getInstance().getLastScan() == null) {
-            setText("Bitte Karte Scannen", Color.RED, true);
+            setText("Bitte Karte scannen", Color.RED, true);
             new Thread(() -> {
                 try {
                     Thread.sleep(1000 * 2);
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
-                setText("Bitte Karte Scannen", Color.WHITE, true);
+                setText("Bitte Karte scannen", Color.WHITE, true);
             }).start();
             return;
         }
@@ -142,7 +142,7 @@ public class MainController implements Initializable {
                 setText("Nicht genug Stunden", Color.RED, true);
             }
         } catch (Exception e) {
-            setText("Unbekannte karte[login]", Color.RED, true);
+            setText("Unbekannte Karte", Color.RED, true);
         }
     }
 

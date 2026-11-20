@@ -46,7 +46,7 @@ public class LoginController {
 
     private JSONArray getText(User user, boolean cameIn) {
         JSONArray array = new JSONArray();
-        array.put(cameIn ? "Herzlich Willkommen," : "Auf Wiedersehen,");
+        array.put(cameIn ? "Herzlich willkommen," : "Auf Wiedersehen,");
         array.put(user.getFullName().substring(0, Math.min(user.getFullName().length(), 20)));
         array.put("im MINT-Zentrum!");
         array.put("Stunden: " + new KontenManager(user.getId()).getKonto().getBalanceRounded());

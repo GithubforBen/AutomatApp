@@ -7,7 +7,7 @@
             xmlns="http://javafx.com/javafx/17.0.12" fx:controller="de.schnorrenbergers.automat.controller.LoginController">
     <VBox prefHeight="800.0" prefWidth="480.0" alignment="TOP_CENTER">
         <children>
-            <Label fx:id="text" prefHeight="53.0" prefWidth="480" text="Password eingeben" textAlignment="CENTER"
+            <Label fx:id="text" prefHeight="53.0" prefWidth="480" text="Passwort eingeben" textAlignment="CENTER"
                    wrapText="true">
                 <font>
                     <Font name="Segoe UI" size="48.0"/>

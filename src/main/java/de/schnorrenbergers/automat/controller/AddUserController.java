@@ -108,10 +108,10 @@ public class AddUserController implements Initializable {
 
         AddUserHandler.UserAdd peek = AddUserHandler.addQueue.peek();
         if (peek == null) {
-            setState("state-empty", "Niemand vorgemerkt", null, "Neue Nutzer auf der Website vormerken.");
+            setState("state-empty", "Niemand vorgemerkt", null, "Neue Personen auf der Website vormerken.");
             return;
         }
-        setState("state-next", peek.isTeacher() ? "Nächste Lehrkraft" : "Nächster Nutzer",
+        setState("state-next", peek.isTeacher() ? "Nächste Lehrkraft" : "Nächste Person",
                 peek.getVorname() + " " + peek.getNachname(),
                 "Jetzt Chipkarte scannen");
     }

@@ -25,7 +25,7 @@
                               AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                             <children>
                                 <Button fx:id="button" mnemonicParsing="false" onAction="#reconnect" prefHeight="250.0"
-                                        prefWidth="478.0" text="Neu Verbinden">
+                                        prefWidth="478.0" text="Neu verbinden">
                                     <font>
                                         <Font size="33.0"/>
                                     </font>

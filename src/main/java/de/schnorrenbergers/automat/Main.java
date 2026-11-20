@@ -385,7 +385,7 @@ public class Main extends Application {
 
     private void updateDisplay() {
         if (lastScan == null) {
-            MainController.getMainController().setText("Bitte Karte Scannen", Color.WHITE, true);
+            MainController.getMainController().setText("Bitte Karte scannen", Color.WHITE, true);
             return;
         }
         getDatabase().getSessionFactory().inTransaction(session -> {

@@ -34,7 +34,7 @@
                 </Button>
                 <AnchorPane GridPane.rowIndex="1">
                     <children>
-                        <Text layoutY="31.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Auto Logout Zeit"
+                        <Text layoutY="31.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Auto-Logout-Zeit"
                               wrappingWidth="240.0">
                             <font>
                                 <Font size="24.0"/>
@@ -77,7 +77,7 @@
                     </children>
                 </AnchorPane>
                 <Button mnemonicParsing="false" onAction="#resetStats" prefHeight="278.0" prefWidth="275.0"
-                        text="Statistik Zurücksetzen" GridPane.columnIndex="1">
+                        text="Statistik zurücksetzen" GridPane.columnIndex="1">
                     <font>
                         <Font size="19.0"/>
                     </font>
@@ -135,7 +135,7 @@
                     </children>
                 </VBox>
                 <Button mnemonicParsing="false" onAction="#addUser" prefHeight="475.0" prefWidth="460.0"
-                        text="Nutzer Hinzufügen" textAlignment="CENTER" wrapText="true" GridPane.columnIndex="1"
+                        text="Person hinzufügen" textAlignment="CENTER" wrapText="true" GridPane.columnIndex="1"
                         GridPane.rowIndex="2">
                     <font>
                         <Font size="35.0"/>

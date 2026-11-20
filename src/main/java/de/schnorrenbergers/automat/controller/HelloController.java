@@ -67,7 +67,7 @@ public class HelloController implements Initializable {
             String finalStation = station;
             Platform.runLater(() -> {
                 button.setDisable(false);
-                button.setText("Erneuter versuch?\n" +
+                button.setText("Erneuter Versuch?\n" +
                         "Website: " + (finalWebsite != null ? "✓" : "❌") + "\n" +
                         "Ausgabe: " + (finalDispenser != null ? "✓" : "❌") + "\n" +
                         "Scanner: " + (finalScanner != null ? "✓" : "❌") + "\n" +

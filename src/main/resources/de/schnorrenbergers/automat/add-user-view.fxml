@@ -12,7 +12,7 @@
         <Insets top="24.0" right="24.0" bottom="24.0" left="24.0"/>
     </padding>
     <top>
-        <Label styleClass="title" text="Nutzer hinzufügen" maxWidth="Infinity" BorderPane.alignment="CENTER"/>
+        <Label styleClass="title" text="Person hinzufügen" maxWidth="Infinity" BorderPane.alignment="CENTER"/>
     </top>
     <center>
         <!-- Zustand (nächster Nutzer, leer, angelegt, Karte bekannt) setzt der
