@@ -1,9 +1,10 @@
 # Kartenscanner des B.A.M.B.I.-Automaten (MicroPython, ESP32 mit RC522-Leser)
 #
-# * Liest Karten und schickt sie an die Website (POST /scan, JSON-Liste der
-#   Kartenbytes). Die Website reicht sie an den Automaten weiter oder nimmt sie
-#   für "Karte scannen" entgegen.
-# * Beantwortet die Anfragen des Automaten: /ping, /alarm_on, /alarm_off, /status.
+# * Liest Karten und schickt sie signiert ans Backend (POST /scanned). Das
+#   meldet die Karte am Automaten an oder nimmt sie für "Karte scannen" auf der
+#   Website entgegen.
+# * Beantwortet die Anfragen des Automaten: /ping, /alarm_on, /alarm_off, /status,
+#   /version, /update. Alarm und Update nur mit Signatur des Automaten (signing.py).
 # * Summer: ein kurzer Ton pro gelesener Karte, drei kurze, wenn sie nicht
 #   ankam, Intervallton solange der Alarm an ist.
 #
@@ -18,6 +19,7 @@ from machine import Pin, SoftSPI
 import rfid
 import config
 import ota
+import signing
 
 # Vom Automaten gelernt (Absender des ersten /ping) bzw. zuletzt gelesen.
 state = {"server_ip": None, "last_card": None}
@@ -126,23 +128,30 @@ class Server:
                 return
             path = parts[1].split("?")[0]
 
-            # /status und /version nicht: die fragt auch mal ein anderer Rechner ab.
-            if path in ("/ping", "/alarm_on", "/alarm_off", "/update"):
-                # Nur der Automat fragt hier an - so lernt der Scanner, wohin
-                # er die Karten schicken muss.
-                if state["server_ip"] != address[0]:
-                    state["server_ip"] = address[0]
-                    log("Automat unter", address[0])
+            # Vom Automaten signiert? Nur dann zählt die Anfrage als seine
+            # (alle Anfragen des Automaten sind GET, also ohne Körper).
+            headers = signing.parse_headers(request)
+            signed = "x-signature" in headers and \
+                signing.verify(headers, "", config.HMAC_KEY_ID, config.HMAC_KEY)
 
-            if path == "/ping":
-                ota.confirm()
+            # So lernt der Scanner, wohin er die Karten schicken muss.
+            if signed and state["server_ip"] != address[0]:
+                state["server_ip"] = address[0]
+                log("Automat unter", address[0])
+
+            if path in ("/alarm_on", "/alarm_off", "/update") and not signed:
+                # Sonst könnte jeder im WLAN den Alarm abschalten.
+                log("Unsignierte Anfrage", path, "von", address[0], "abgelehnt")
+                respond(client, 403, "signature required")
+            elif path == "/ping":
+                if signed:
+                    ota.confirm()
                 respond(client, 200, "1")
             elif path == "/version":
                 respond(client, 200, ota.version())
             elif path == "/update":
                 respond(client, 200, ota.start(config.SERVER_IP or address[0], config.BACKEND_PORT, config.BOARD,
-                                               config.HMAC_KEY_ID, config.HMAC_KEY,
-                                               ota.header(request, "X-Unix-Time")))
+                                               config.HMAC_KEY_ID, config.HMAC_KEY))
             elif path == "/alarm_on":
                 self._buzzer.set_alarm(True)
                 respond(client, 200, "success")
@@ -164,14 +173,17 @@ class Server:
 
 
 def http_post(host, port, path, body, timeout=5):
-    """Schickt einen POST und gibt den HTTP-Status zurück."""
+    """Schickt einen signierten POST und gibt den HTTP-Status zurück."""
     sock = socket.socket()
     sock.settimeout(timeout)
     try:
         sock.connect(socket.getaddrinfo(host, port)[0][-1])
         data = body.encode()
-        head = "POST {} HTTP/1.1\r\nHost: {}:{}\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n".format(
+        head = "POST {} HTTP/1.1\r\nHost: {}:{}\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n".format(
             path, host, port, len(data))
+        for key, value in signing.headers(config.HMAC_KEY_ID, config.HMAC_KEY, body).items():
+            head += "{}: {}\r\n".format(key, value)
+        head += "\r\n"
         sock.sendall(head.encode() + data)
         return int(sock.recv(64).split()[1])
     finally:
@@ -214,9 +226,11 @@ def send_card(card, buzzer):
         buzzer.beep(3, 60, 80)
         return
     try:
-        status = http_post(server, config.WEBSITE_PORT, "/scan", ujson.dumps(card))
+        # Signiert direkt ans Backend (früher unsigniert über die Website -
+        # da konnte jeder im WLAN eine fremde Karte vortäuschen).
+        status = http_post(server, config.BACKEND_PORT, "/scanned", ujson.dumps({"rfid": card}))
     except Exception as e:
-        log("Website", server, "nicht erreichbar:", e)
+        log("Automat", server, "nicht erreichbar:", e)
         status = None
     if status != 200:
         log("Karte nicht angekommen, Status", status)
@@ -267,6 +281,8 @@ def main():
     time.sleep_ms(100)
     wlan.active(True)
     connect_wlan(wlan)
+    # Karten gehen signiert ans Backend - dafür muss die Uhr stimmen.
+    signing.sync_ntp(wlan)
     Server(config.HTTP_PORT, buzzer).start()
     buzzer.beep(2, 60, 80)  # bereit
     scan_loop(wlan, buzzer)

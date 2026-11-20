@@ -1,9 +1,10 @@
 # Station des B.A.M.B.I.-Automaten (MicroPython, ESP32 mit RC522-Leser und 20x4-LCD)
 #
-# * Liest Karten und bucht Kommen/Gehen über die Website (POST /station_scan,
-#   JSON-Liste der Kartenbytes). Die Antwort des Automaten ("Herzlich
-#   Willkommen, ...") steht danach einige Sekunden auf dem Display.
-# * Beantwortet die Anfragen des Automaten: /ping, /status, /version, /update.
+# * Liest Karten und bucht Kommen/Gehen signiert beim Backend (POST /login).
+#   Die Antwort des Automaten ("Herzlich willkommen, ...") steht danach einige
+#   Sekunden auf dem Display.
+# * Beantwortet die Anfragen des Automaten: /ping, /status, /version, /update -
+#   Updates nur mit Signatur des Automaten (signing.py).
 # * Unten rechts zeigt das Display die WLAN-Stärke (0-4 Balken); während eines
 #   Updates über WLAN steht dort "Update im Gange" mit Prozentzahl.
 # * Summer: ein Ton sofort beim Lesen der Karte, drei, wenn die Buchung
@@ -20,6 +21,7 @@ from machine import Pin, SoftSPI, SoftI2C
 import rfid
 import config
 import ota
+import signing
 
 # Vom Automaten gelernt (Absender des ersten /ping) bzw. zuletzt gelesen.
 state = {"server_ip": None, "last_card": None, "screen": None}
@@ -217,20 +219,27 @@ def handle(client, address):
         request = client.recv(1024)
         parts = request.split(b"\r\n", 1)[0].decode().split()
         path = parts[1].split("?")[0] if len(parts) > 1 else ""
-        # /status und /version nicht: die fragt auch mal ein anderer Rechner ab.
-        if path in ("/ping", "/update") and state["server_ip"] != address[0]:
-            # Nur der Automat fragt hier an - so lernt die Station, wohin sie buchen muss.
+        # Vom Automaten signiert? Nur dann zählt die Anfrage als seine
+        # (alle Anfragen des Automaten sind GET, also ohne Körper).
+        headers = signing.parse_headers(request)
+        signed = "x-signature" in headers and \
+            signing.verify(headers, "", config.HMAC_KEY_ID, config.HMAC_KEY)
+        # So lernt die Station, wohin sie buchen muss.
+        if signed and state["server_ip"] != address[0]:
             state["server_ip"] = address[0]
             log("Automat unter", address[0])
-        if path == "/ping":
-            ota.confirm()
+        if path == "/update" and not signed:
+            log("Unsignierte Anfrage", path, "von", address[0], "abgelehnt")
+            respond(client, 403, "signature required")
+        elif path == "/ping":
+            if signed:
+                ota.confirm()
             respond(client, 200, "1")
         elif path == "/version":
             respond(client, 200, ota.version())
         elif path == "/update":
             respond(client, 200, ota.start(config.SERVER_IP or address[0], config.BACKEND_PORT, config.BOARD,
-                                           config.HMAC_KEY_ID, config.HMAC_KEY,
-                                           ota.header(request, "X-Unix-Time"),
+                                           config.HMAC_KEY_ID, config.HMAC_KEY, None,
                                            state["screen"].update_progress if state["screen"] else None))
         elif path == "/status":
             respond(client, 200, ujson.dumps({
@@ -266,14 +275,17 @@ def serve(port):
 
 
 def http_post(host, port, path, body, timeout=8):
-    """Schickt einen POST und gibt (Status, Antworttext) zurück."""
+    """Schickt einen signierten POST und gibt (Status, Antworttext) zurück."""
     sock = socket.socket()
     sock.settimeout(timeout)
     try:
         sock.connect(socket.getaddrinfo(host, port)[0][-1])
         data = body.encode()
-        head = "POST {} HTTP/1.1\r\nHost: {}:{}\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n".format(
+        head = "POST {} HTTP/1.1\r\nHost: {}:{}\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n".format(
             path, host, port, len(data))
+        for key, value in signing.headers(config.HMAC_KEY_ID, config.HMAC_KEY, body).items():
+            head += "{}: {}\r\n".format(key, value)
+        head += "\r\n"
         sock.sendall(head.encode() + data)
         response = b""
         while True:
@@ -298,23 +310,27 @@ def book(card, screen, buzzer):
     if not server:
         log("Noch kein /ping vom Automaten - weiß nicht, wohin buchen")
         buzzer.beep(3, 60, 80)
-        return ["Keine Verbindung", "zum Automaten", "", "Bitte spaeter"]
+        return ["Keine Verbindung", "zum Automaten", "", "Bitte später"]
     screen.show(["", "   Einen Moment ...", "", ""])
     try:
-        status, text = http_post(server, config.WEBSITE_PORT, "/station_scan", ujson.dumps(card))
+        # Signiert direkt ans Backend (früher unsigniert über die Website -
+        # da konnte jeder im WLAN für andere ein- und ausbuchen).
+        status, text = http_post(server, config.BACKEND_PORT, "/login", ujson.dumps({"rfid": card}))
     except Exception as e:
-        log("Website", server, "nicht erreichbar:", e)
+        log("Automat", server, "nicht erreichbar:", e)
         buzzer.beep(3, 60, 80)
-        return ["Keine Verbindung", "zum Automaten", "", "Bitte spaeter"]
-    try:
-        return ujson.loads(text)["text"]
-    except Exception:
-        # Die Website antwortet "login failed", wenn die Karte niemandem gehört.
-        log("Keine Buchung, Antwort:", status, text[:60])
-        buzzer.beep(3, 60, 80)
-        if "login failed" in text:
-            return ["Karte unbekannt", "", "Bitte bei einer", "Lehrkraft melden"]
-        return ["Buchung fehlgeschlagen", "", "Bitte nochmal", "versuchen"]
+        return ["Keine Verbindung", "zum Automaten", "", "Bitte später"]
+    if status == 200:
+        try:
+            return ujson.loads(text)["text"]
+        except Exception:
+            pass
+    log("Keine Buchung, Antwort:", status, text[:60])
+    buzzer.beep(3, 60, 80)
+    if status == 501:
+        # Das Backend kennt die Karte nicht.
+        return ["Karte unbekannt", "", "Bitte bei einer", "Lehrkraft melden"]
+    return ["Buchen ging nicht", "", "Bitte nochmal", "versuchen"]
 
 
 def valid_uid(uid):
@@ -413,6 +429,8 @@ def main():
     time.sleep_ms(100)
     wlan.active(True)
     connect_wlan(wlan)
+    # Buchungen gehen signiert ans Backend - dafür muss die Uhr stimmen.
+    signing.sync_ntp(wlan)
     _thread.start_new_thread(serve, (config.HTTP_PORT,))
     screen.idle()
     buzzer.beep(2, 60, 80)  # bereit

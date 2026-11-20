@@ -40,3 +40,6 @@ shutdown-delay: 30
 # Standardwerte stehen öffentlich im Quelltext.
 admin-pin: "12345"
 settings-pin: "33333"
+# HMAC-Schlüssel der ESP32 (HMAC_KEY_ID in deren .env). Damit signiert der
+# Automat Ausgabe, Alarm und Updates; die Geräte nehmen nur signierte an.
+esp-key-id: "ausgabe"

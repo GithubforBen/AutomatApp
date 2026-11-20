@@ -316,6 +316,11 @@ public class Main extends Application {
             while (true) {
                 try {
                     Thread.sleep(DISPENSER_CHECK_MS);
+                    // Scanner und Station nur anpingen: Die signierten Pings stellen ihre
+                    // Uhr und sagen ihnen, wo der Automat ist - sie brauchen beides, um
+                    // Karten signiert zu schicken (auch nach einem Neustart ohne NTP).
+                    new CustomRequest("ping", CustomRequest.REVIVER.SCANNER).ping();
+                    new CustomRequest("ping", CustomRequest.REVIVER.STATION).ping();
                     if (new CustomRequest("ping", CustomRequest.REVIVER.DISPENSER).ping()) {
                         misses = 0;
                         // Wieder da, bevor jemand den Bildschirmschoner beendet hat.

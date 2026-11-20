@@ -49,8 +49,9 @@ DEVICES = {
     "station": {"label": "Station", "port": 8083},
 }
 
-# Der HMAC-Client liest das Secret aus der .env der Website. Fehlt er, laufen
-# Scans trotzdem - nur Kartenliste und "Ausgabe klemmt" fallen weg.
+# Der HMAC-Client liest das Secret aus der .env der Website. Ohne ihn gehen weder
+# Scans (die echten Geräte schicken sie signiert ans Backend) noch Kartenliste
+# und "Ausgabe klemmt".
 try:
     sys.path.insert(0, WEBSITE_SRC)
     import hmac_client  # noqa: E402
@@ -280,14 +281,17 @@ def scan():
             or not rfid or not all(isinstance(b, int) and 0 <= b <= 255 for b in rfid):
         return jsonify({"error": "Ungültige Anfrage"}), 400
 
-    path = "/scan" if where == "automat" else "/station_scan"
+    # Wie die echten Geräte: signiert direkt ans Backend (/scanned bzw. /login).
+    path = "/scanned" if where == "automat" else "/login"
     source = "automat" if where == "automat" else "station"
+    if hmac_client is None:
+        log_event(source, f"Karte {fmt_card(rfid)}: HMAC-Client fehlt", "bad")
+        return jsonify({"ok": False, "error": "HMAC-Client nicht geladen: " + HMAC_ERROR})
     try:
-        r = requests.post(WEBSITE + path, data=json.dumps(rfid),
-                          headers={"Content-Type": "application/json"}, timeout=15)
+        r = hmac_client.post(BACKEND + path, json_body={"rfid": rfid}, timeout=15)
     except requests.RequestException as e:
-        log_event(source, f"Karte {fmt_card(rfid)}: Website nicht erreichbar", "bad")
-        return jsonify({"ok": False, "error": f"Website nicht erreichbar ({type(e).__name__})"})
+        log_event(source, f"Karte {fmt_card(rfid)}: Backend nicht erreichbar", "bad")
+        return jsonify({"ok": False, "error": f"Backend nicht erreichbar ({type(e).__name__})"})
 
     text = r.text.strip()
     try:

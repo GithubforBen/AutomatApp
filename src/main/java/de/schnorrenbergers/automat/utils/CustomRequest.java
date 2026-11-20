@@ -29,6 +29,8 @@ public class CustomRequest {
         URLConnection urlConnection = url.openConnection();
         urlConnection.setConnectTimeout(1000);
         urlConnection.setReadTimeout(1000);
+        // Die ESPs führen Alarm und Updates nur mit Signatur des Automaten aus.
+        DeviceSigner.sign(urlConnection, "");
         BufferedReader br = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
         StringBuilder sb = new StringBuilder();
         br.lines().forEach(sb::append);
@@ -57,6 +59,8 @@ public class CustomRequest {
             // NTP sync failed, since that's the same clock HMACFilter's timestamp check
             // (Instant.now()) is compared against anyway.
             urlConnection.setRequestProperty("X-Unix-Time", String.valueOf(Instant.now().getEpochSecond()));
+            // Signiert: die ESPs lernen daraus die Adresse des Automaten und stellen ihre Uhr.
+            DeviceSigner.sign(urlConnection, "");
             BufferedReader br = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
             StringBuilder sb = new StringBuilder();
             br.lines().forEach(sb::append);
@@ -76,6 +80,8 @@ public class CustomRequest {
         urlConnection.setDoInput(true);
         urlConnection.setRequestProperty("Content-Type", "application/json");
         urlConnection.setRequestProperty("Accept", "application/json");
+        // Die Ausgabe gibt nur mit Signatur des Automaten etwas aus.
+        DeviceSigner.sign(urlConnection, data);
         urlConnection.setConnectTimeout(1000);
         urlConnection.setReadTimeout(1000 * 60);
         OutputStream outputStream = urlConnection.getOutputStream();

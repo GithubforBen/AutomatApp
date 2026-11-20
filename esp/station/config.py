@@ -16,20 +16,20 @@ STATIC_IP = "192.168.188.203"
 # Auf diesem Port fragt der Automat an (/ping, /status).
 HTTP_PORT = 80
 
-# Updates über WLAN (siehe ota.py): Name im Ordner esp/, Port des Backends und
-# der HMAC-Schlüssel aus dem HMAC-Bildschirm des Automaten (in .env). Ohne
-# Schlüssel läuft die Station normal, nur ohne Updates über WLAN.
+# Name im Ordner esp/ (Updates über WLAN, siehe ota.py), Port des Backends und
+# der HMAC-Schlüssel aus dem HMAC-Bildschirm des Automaten (in .env). Mit dem
+# Schlüssel signiert die Station ihre Karten und erkennt Anfragen des Automaten -
+# ohne ihn nimmt das Backend keine Karten an.
 BOARD = "station"
 BACKEND_PORT = 8000
 HMAC_KEY_ID = env.get(_env, "HMAC_KEY_ID")
 HMAC_KEY = env.get(_env, "HMAC_KEY")
 
-# Wohin gescannte Karten gehen: an die Website (Route /station_scan), die das
-# Kommen/Gehen beim Automaten bucht und dessen Antwort zurückgibt. Die Adresse
-# des Rechners lernt die Station aus dem ersten /ping des Automaten;
-# SERVER_IP setzt sie fest (z.B. "192.168.188.20").
+# Wohin gescannte Karten gehen: ans Backend des Automaten (Route /login), das
+# Kommen/Gehen bucht und die Anzeige zurückgibt. Die Adresse lernt die Station
+# aus der ersten signierten Anfrage des Automaten; SERVER_IP setzt sie fest
+# (z.B. "192.168.188.20").
 SERVER_IP = None
-WEBSITE_PORT = 8080
 
 # Pins
 LCD_SDA = 19

@@ -11,6 +11,21 @@ Jedes Gerät bekommt `common/` **und** seinen eigenen Ordner, dazu eine `.env` m
 HMAC-Schlüssel (Vorlage: `.env.example` im Ordner des Geräts, Schlüssel aus dem
 HMAC-Bildschirm des Automaten).
 
+## Signierte Anfragen
+
+Automat und Geräte signieren ihre Anfragen gegenseitig mit dem HMAC-Schlüssel aus der `.env`
+(`common/signing.py`, auf dem Automaten `esp-key-id` in der `config.yaml`):
+
+* Die Ausgabe gibt nur auf signierte `/dispense` etwas aus, der Scanner schaltet den Alarm nur
+  auf signierte `/alarm_on`/`/alarm_off`, alle drei aktualisieren sich nur auf signierte `/update`.
+* Scanner und Station schicken Karten signiert direkt ans Backend (`/scanned` bzw. `/login`).
+* Die Adresse des Automaten lernen die Geräte nur aus signierten Anfragen.
+* Die Uhr stellen sie per NTP; klappt das nicht (z.B. im Schul-WLAN gesperrt), stellt sie die
+  erste signierte Anfrage des Automaten - er pingt alle drei alle fünf Sekunden.
+
+**Ohne Schlüssel in der `.env` geht nichts mehr:** Die Ausgabe gibt nichts aus, Scanner und
+Station werden ihre Karten nicht los.
+
 ## Updates über WLAN
 
 Die ESPs holen sich ihre Dateien selbst vom Automaten - aus dessen Projektordner, also immer

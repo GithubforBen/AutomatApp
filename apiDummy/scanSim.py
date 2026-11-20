@@ -1,25 +1,29 @@
 #!/usr/bin/env python3
 """Interaktiver Karten-Scan-Simulator.
 
-Ersetzt die echte Scanner-Hardware. Alle Requests gehen an die Website
-(Port 8080), genau wie beim echten ESP - die Website übernimmt das
-HMAC-Signieren Richtung Java-Backend. Es wird also weder ein Login-Cookie
-noch ein HMAC-Secret in diesem Skript gebraucht.
+Ersetzt die echte Scanner-Hardware. Wie die echten Geräte gehen alle Scans
+signiert direkt ans Java-Backend (Port 8000). Signiert wird mit dem
+hmac_client der Website (liest deren .env), siehe SCANSIM_WEBSITE_SRC.
 
 Drei Scan-Arten:
-  * scanned  -> /scan          Automat: Karte am Ausgabeautomaten
-  * login    -> /station_scan  Station: Kommen/Gehen (bucht Zeit)
-  * assign   -> /scan          füllt "Karte scannen" im Website-Popup
-                               (identisch zu 'scanned', nur ist dann in der
-                                Website gerade der Scan-Modus aktiv)
+  * scanned  -> /scanned  Automat: Karte am Ausgabeautomaten
+  * login    -> /login    Station: Kommen/Gehen (bucht Zeit)
+  * assign   -> /scanned  füllt "Karte scannen" im Website-Popup
+                          (identisch zu 'scanned', nur wartet die Website
+                           dann gerade auf eine Karte)
 """
 
 import json
+import os
 import sys
 
 import requests
 
-WEBSITE = "http://127.0.0.1:8080"
+BACKEND = os.environ.get("SCANSIM_BACKEND", "http://127.0.0.1:8000")
+WEBSITE_SRC = os.environ.get(
+    "SCANSIM_WEBSITE_SRC", os.path.expanduser("~/WebstormProjects/automatWebsiteTwo/src"))
+sys.path.insert(0, WEBSITE_SRC)
+import hmac_client  # noqa: E402  (signiert wie die echten Geräte)
 
 # Bekannte Karten aus der Testdatenbank. "-" trennt nur optisch.
 PRESETS = {
@@ -34,12 +38,11 @@ PRESETS = {
 
 
 def post(path: str, rfid: list):
-    url = WEBSITE + path
+    url = BACKEND + path
     try:
-        r = requests.post(url, data=json.dumps(rfid),
-                          headers={"Content-Type": "application/json"}, timeout=15)
+        r = hmac_client.post(url, json_body={"rfid": rfid}, timeout=15)
     except requests.RequestException as e:
-        print(f"  !! Website nicht erreichbar ({e.__class__.__name__}): {url}")
+        print(f"  !! Backend nicht erreichbar ({e.__class__.__name__}): {url}")
         return
     print(f"  -> {path}  HTTP {r.status_code}")
     body = r.text.strip()
@@ -94,12 +97,12 @@ def menu():
 
 def main():
     print("=" * 62)
-    print("  Karten-Scan-Simulator   ->  " + WEBSITE)
+    print("  Karten-Scan-Simulator   ->  " + BACKEND)
     print("=" * 62)
     try:
-        requests.get(WEBSITE + "/ping", timeout=5)
+        requests.get(BACKEND + "/teacher/exists", timeout=5)
     except requests.RequestException:
-        print("  !! Website (Port 8080) läuft nicht - bitte zuerst starten.")
+        print("  !! Backend (Port 8000) läuft nicht - bitte zuerst starten.")
     menu()
 
     while True:
@@ -131,9 +134,9 @@ def main():
             continue
 
         if cmd == "s":
-            post("/station_scan", rfid)
+            post("/login", rfid)
         else:
-            post("/scan", rfid)
+            post("/scanned", rfid)
 
 
 if __name__ == "__main__":

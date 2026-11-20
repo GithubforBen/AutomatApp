@@ -2,6 +2,7 @@ package de.schnorrenbergers.automat.manager;
 
 import de.schnorrenbergers.automat.Main;
 import de.schnorrenbergers.automat.utils.CustomRequest;
+import de.schnorrenbergers.automat.utils.DeviceSigner;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -229,6 +230,8 @@ public final class EspUpdateManager {
         // Die ESPs stellen damit ihre Uhr - ihre Anfragen hier sind signiert und
         // nur mit passender Uhrzeit gültig.
         connection.setRequestProperty("X-Unix-Time", String.valueOf(Instant.now().getEpochSecond()));
+        // Updates nimmt ein ESP nur mit Signatur des Automaten an.
+        DeviceSigner.sign(connection, "");
         try {
             int status = connection.getResponseCode();
             InputStream stream = status < 400 ? connection.getInputStream() : connection.getErrorStream();

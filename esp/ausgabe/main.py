@@ -10,6 +10,9 @@
 # * Spricht eine Lichtschranke an, ohne dass etwas ausgegeben wird (jemand greift
 #   in den Automaten), meldet sie /dispense/unexpected - das Backend löst den
 #   Alarm am Scanner aus.
+# * /dispense und /update nimmt sie nur vom Automaten an: Die Anfragen sind mit
+#   dem HMAC-Schlüssel signiert (signing.py) - sonst könnte jeder im WLAN
+#   Süßigkeiten ausgeben lassen.
 #
 # Einstellungen stehen in config.py.
 
@@ -18,21 +21,15 @@ import socket
 import network
 import _thread
 import ujson
-import hashlib
-import binascii
-import os
-import ntptime
-import hmac
-from machine import Pin, RTC
+from machine import Pin
 import config
 import ota
+import signing
 
 # Vom Automaten gelernt (Absender des ersten /ping). last_end: Ende der letzten
 # Ausgabe (ticks_ms) - kurz danach darf eine Lichtschranke noch nachzucken.
 state = {"server_ip": None, "busy": False, "last_end": time.ticks_ms()}
 
-# time.time() zählt auf dem ESP32 ab 2000, Unix-Zeit ab 1970.
-EPOCH_OFFSET = 946684800 if time.gmtime(0)[0] == 2000 else 0
 
 
 def log(*args):
@@ -175,53 +172,6 @@ def worker():
 # Zeit und Signatur (für die Meldung ans Backend)
 # ---------------------------------------------------------------------------
 
-def sync_time():
-    """NTP über mehrere Server (auch das Gateway). Klappt das nicht, stellt der
-    Automat die Uhr über den Kopf X-Unix-Time seiner Pings."""
-    hosts = ["pool.ntp.org", "de.pool.ntp.org", "time.google.com"]
-    try:
-        hosts.append(network.WLAN(network.STA_IF).ifconfig()[2])
-    except Exception:
-        pass
-    for host in hosts:
-        for attempt in range(2):
-            try:
-                ntptime.host = host
-                ntptime.settime()
-                log("Uhrzeit per NTP von", host)
-                return True
-            except Exception as e:
-                log("NTP über", host, "fehlgeschlagen:", e)
-                time.sleep(1)
-    log("NTP nicht erreichbar - warte auf die Uhrzeit vom Automaten")
-    return False
-
-
-def set_time_from_unix(unix_ts):
-    tm = time.gmtime(unix_ts - EPOCH_OFFSET)
-    RTC().datetime((tm[0], tm[1], tm[2], tm[6], tm[3], tm[4], tm[5], 0))
-
-
-def random_string(length):
-    chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
-    return "".join(chars[b % len(chars)] for b in os.urandom(length))
-
-
-def signed_headers(body):
-    # Muss zur Prüfung im Backend passen (HMACFilter: Abweichung höchstens 30 s).
-    timestamp = int(time.time()) + EPOCH_OFFSET
-    nonce = random_string(16)
-    data = "{}:{}:{}:{}".format(config.HMAC_KEY_ID, timestamp, nonce, body).encode()
-    signature = binascii.b2a_base64(hmac.new(config.HMAC_KEY, data, hashlib.sha256).digest()).decode().strip()
-    return {
-        "X-API-KEY-ID": config.HMAC_KEY_ID,
-        "X-TIMESTAMP": str(timestamp),
-        "X-NONCE": nonce,
-        "X-SIGNATURE": signature,
-        "Content-Type": "application/json",
-    }
-
-
 def http_post(host, port, path, body, headers, timeout=5):
     """Schickt einen POST und gibt den HTTP-Status zurück."""
     sock = socket.socket()
@@ -261,7 +211,9 @@ def send_report(path, nr):
     body = ujson.dumps({"nr": nr})
     for attempt in range(3):
         try:
-            status = http_post(server, config.SERVER_PORT, path, body, signed_headers(body))
+            headers = signing.headers(config.HMAC_KEY_ID, config.HMAC_KEY, body)
+            headers["Content-Type"] = "application/json"
+            status = http_post(server, config.SERVER_PORT, path, body, headers)
             if status == 200:
                 log(path, "für Fach", nr, "gemeldet")
                 return
@@ -373,21 +325,25 @@ def handle(client, address):
     try:
         client.settimeout(3)
         method, path, headers, body = read_request(client)
+        try:
+            body_text = body.decode()
+        except Exception:
+            body_text = ""
+        # Vom Automaten signiert? Nur dann zählt die Anfrage als seine.
+        signed = "x-signature" in headers and \
+            signing.verify(headers, body_text, config.HMAC_KEY_ID, config.HMAC_KEY)
 
-        # Nur Anfragen, die bloß der Automat schickt - eine Abfrage von /status
-        # oder /version von einem anderen Rechner soll die Adresse nicht verstellen.
-        if path in ("/ping", "/dispense", "/update"):
-            if state["server_ip"] != address[0]:
-                state["server_ip"] = address[0]
-                log("Automat unter", address[0])
+        # Die Adresse des Automaten lernt die Ausgabe nur aus signierten Anfragen.
+        if signed and state["server_ip"] != address[0]:
+            state["server_ip"] = address[0]
+            log("Automat unter", address[0])
 
-        if path == "/ping":
-            if "x-unix-time" in headers:
-                try:
-                    set_time_from_unix(int(headers["x-unix-time"]))
-                except Exception as e:
-                    log("Uhrzeit aus /ping nicht übernommen:", e)
-            ota.confirm()
+        if path in ("/dispense", "/update") and not signed:
+            log("Unsignierte Anfrage", path, "von", address[0], "abgelehnt")
+            respond(client, 403, "signature required")
+        elif path == "/ping":
+            if signed:
+                ota.confirm()
             respond(client, 200, "1")
         elif path == "/version":
             respond(client, 200, ota.version())
@@ -397,10 +353,10 @@ def handle(client, address):
                 respond(client, 200, "busy")
             else:
                 respond(client, 200, ota.start(config.SERVER_IP or address[0], config.SERVER_PORT, config.BOARD,
-                                               config.HMAC_KEY_ID, config.HMAC_KEY, headers.get("x-unix-time")))
+                                               config.HMAC_KEY_ID, config.HMAC_KEY))
         elif path == "/dispense" and method == "POST":
             try:
-                nr = int(ujson.loads(body)["nr"])
+                nr = int(ujson.loads(body_text)["nr"])
             except Exception:
                 respond(client, 400, "nr fehlt")
                 return
@@ -420,7 +376,7 @@ def handle(client, address):
                 "busy": state["busy"],
                 "queue": len(queue),
                 "server": config.SERVER_IP or state["server_ip"],
-                "time": int(time.time()) + EPOCH_OFFSET,
+                "time": signing.now(),
             }), "application/json")
         else:
             respond(client, 404, "not found")
@@ -480,7 +436,7 @@ def main():
     time.sleep_ms(100)
     wlan.active(True)
     connect_wlan(wlan)
-    sync_time()
+    signing.sync_ntp(wlan)
     _thread.start_new_thread(worker, ())
     _thread.start_new_thread(reporter, ())
     _thread.start_new_thread(serve, (config.HTTP_PORT,))

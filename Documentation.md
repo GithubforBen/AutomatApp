@@ -580,6 +580,26 @@ A light barrier was triggered while nothing was being dispensed (someone is reac
 the machine). Turns the alarm on the scanner on. The alarm goes off when the admin PIN is
 entered, or when a teacher or admin scans their card at the automat or at the station.
 
+## Card scans from the devices
+
+The scanner and the station send cards HMAC-signed straight to the backend (they used to go
+unsigned through the website's `/scan` and `/station_scan`, which are gone):
+
+* Scanner: `POST /scanned` with `{"rfid": [..]}` - logs the card in at the automat, or hands it to
+  the website while it waits for one ("Karte scannen").
+* Station: `POST /login` with `{"rfid": [..]}` (see above).
+
+### POST /scanned/capture/start
+
+The next card scanned at the automat is for the website (for up to 60 s). Response: `started`.
+
+### POST /scanned/capture/check
+
+`{"status": "waiting"}` or, once a card was scanned, `{"status": "done", "rfid": [..]}`.
+
+The automat signs its requests to the devices the same way (key from `esp-key-id` in
+`config.yaml`); see `esp/README.md`.
+
 ## ESP updates
 
 Used by the ESP32s to update themselves over Wi-Fi (see `esp/README.md`). Both endpoints are
