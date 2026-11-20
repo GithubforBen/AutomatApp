@@ -374,7 +374,9 @@ def handle(client, address):
         client.settimeout(3)
         method, path, headers, body = read_request(client)
 
-        if path in ("/ping", "/dispense", "/status", "/version", "/update"):
+        # Nur Anfragen, die bloß der Automat schickt - eine Abfrage von /status
+        # oder /version von einem anderen Rechner soll die Adresse nicht verstellen.
+        if path in ("/ping", "/dispense", "/update"):
             if state["server_ip"] != address[0]:
                 state["server_ip"] = address[0]
                 log("Automat unter", address[0])

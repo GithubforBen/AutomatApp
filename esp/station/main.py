@@ -201,7 +201,8 @@ def handle(client, address):
         request = client.recv(1024)
         parts = request.split(b"\r\n", 1)[0].decode().split()
         path = parts[1].split("?")[0] if len(parts) > 1 else ""
-        if path in ("/ping", "/status", "/version", "/update") and state["server_ip"] != address[0]:
+        # /status und /version nicht: die fragt auch mal ein anderer Rechner ab.
+        if path in ("/ping", "/update") and state["server_ip"] != address[0]:
             # Nur der Automat fragt hier an - so lernt die Station, wohin sie buchen muss.
             state["server_ip"] = address[0]
             log("Automat unter", address[0])

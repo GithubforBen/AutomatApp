@@ -126,7 +126,8 @@ class Server:
                 return
             path = parts[1].split("?")[0]
 
-            if path in ("/ping", "/alarm_on", "/alarm_off", "/status", "/version", "/update"):
+            # /status und /version nicht: die fragt auch mal ein anderer Rechner ab.
+            if path in ("/ping", "/alarm_on", "/alarm_off", "/update"):
                 # Nur der Automat fragt hier an - so lernt der Scanner, wohin
                 # er die Karten schicken muss.
                 if state["server_ip"] != address[0]:
