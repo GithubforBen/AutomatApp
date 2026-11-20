@@ -35,3 +35,8 @@ window-dimension:
   horizontal: 480
   vertical: 800
 shutdown-delay: 30
+# PINs am Automaten (Bambi unten rechts): Admin-Bildschirm und Einstellungen.
+# 4 bis 12 Ziffern, in Anführungszeichen. Unbedingt eigene setzen - diese
+# Standardwerte stehen öffentlich im Quelltext.
+admin-pin: "12345"
+settings-pin: "33333"

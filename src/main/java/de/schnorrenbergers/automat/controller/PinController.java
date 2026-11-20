@@ -6,18 +6,24 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.text.Text;
-import org.apache.commons.lang3.ArrayUtils;
-
 import java.net.URL;
 import java.util.Arrays;
-import java.util.Objects;
 import java.util.ResourceBundle;
+import java.util.logging.Logger;
 
 public class PinController implements Initializable {
 
+    private static final Logger LOG = Logger.getLogger(PinController.class.getName());
+
+    /** Die zuletzt getippten Ziffern, neueste vorne; -1 = noch nichts. */
     private int[] last;
-    private final int[] code = new int[]{1, 2, 3, 4, 5};
-    private final int[] settings = new int[]{3, 3, 3, 3, 3};
+    /**
+     * Admin- und Einstellungs-PIN kommen aus der config.yaml ("admin-pin",
+     * "settings-pin"). Fehlen sie dort, gelten die bisherigen Codes - die stehen
+     * aber öffentlich im Quelltext und sollten in der config.yaml ersetzt werden.
+     */
+    private int[] code;
+    private int[] settings;
 
     @FXML
     private Text text;
@@ -68,18 +74,17 @@ public class PinController implements Initializable {
     }
 
     public void btn_next(ActionEvent actionEvent) {
-        ArrayUtils.reverse(last);
         String sceneId = "";
-        if (Objects.deepEquals(last, code)) {
+        if (endsWith(code)) {
             text.setText("Korrekt!");
             // Wer die Admin-PIN kennt, darf den Alarm beenden.
             AlarmManager.disarm("Admin-PIN");
             sceneId = "admin-view.fxml";
-        } else if (Objects.deepEquals(last, settings)) {
+        } else if (endsWith(settings)) {
             text.setText("Korrekt!");
             sceneId = "settings-view.fxml";
         } else {
-            text.setText("_ ".repeat(code.length));
+            text.setText("_ ".repeat(last.length));
             Arrays.fill(last, -1);
             sceneId = "stats-view.fxml";
         }
@@ -89,12 +94,41 @@ public class PinController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        if (code.length != settings.length) {
-            throw new RuntimeException("Code and last have different lengths");
+        code = readPin("admin-pin", "12345");
+        settings = readPin("settings-pin", "33333");
+        if (Arrays.equals(code, settings)) {
+            LOG.warning("admin-pin und settings-pin sind gleich - die Einstellungen sind so nicht erreichbar");
         }
-        last = new int[code.length];
-        text.setText("_ ".repeat(code.length));
+        last = new int[Math.max(code.length, settings.length)];
+        text.setText("_ ".repeat(last.length));
         Arrays.fill(last, -1);
+    }
+
+    /**
+     * Liest eine PIN (nur Ziffern) aus der config.yaml. Ohne gültigen Eintrag gilt
+     * der bisherige Code.
+     */
+    private static int[] readPin(String key, String fallback) {
+        Object value = Main.getInstance().getConfigurationManager().get(key);
+        String pin = value == null ? "" : String.valueOf(value).trim();
+        if (!pin.matches("[0-9]{4,12}")) {
+            if (!pin.isEmpty()) LOG.warning(key + " in der config.yaml ist ungültig (4 bis 12 Ziffern) - es gilt der alte Code");
+            pin = fallback;
+        }
+        return pin.chars().map(c -> c - '0').toArray();
+    }
+
+    /**
+     * Sind die zuletzt getippten Ziffern genau diese PIN? Wie bisher zählen nur
+     * die letzten Ziffern - ein vertippter Anfang stört nicht.
+     */
+    private boolean endsWith(int[] pin) {
+        if (pin.length > last.length) return false;
+        for (int i = 0; i < pin.length; i++) {
+            // last[0] ist die neueste Ziffer, pin[pin.length - 1] die letzte der PIN.
+            if (last[i] != pin[pin.length - 1 - i]) return false;
+        }
+        return true;
     }
 
     public void press(int press) {
