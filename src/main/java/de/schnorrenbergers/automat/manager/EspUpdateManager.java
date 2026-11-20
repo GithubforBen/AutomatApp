@@ -41,6 +41,13 @@ public final class EspUpdateManager {
     private static final Logger LOG = Logger.getLogger(EspUpdateManager.class.getName());
     private static final long FIRST_CHECK_SECONDS = 30;
     private static final long CHECK_EVERY_MINUTES = 15;
+    /**
+     * Nach einem Update läuft die neue Version auf Probe und muss innerhalb von
+     * 3 Minuten einen /ping bekommen (siehe esp/common/boot.py). Scanner und Station
+     * pingt der Automat sonst nur beim Start - also hier eine Weile nachhelfen.
+     */
+    private static final long CONFIRM_PING_SECONDS = 20;
+    private static final long CONFIRM_PING_FOR_SECONDS = 6 * 60;
     private static ScheduledExecutorService scheduler;
 
     /**
@@ -193,6 +200,23 @@ public final class EspUpdateManager {
         Response answer = get(base + "/update");
         LOG.info("ESP-Update " + board.folder + ": " + installed.body().trim() + " -> " + target
                 + ", Antwort: " + answer.body().trim());
+        if ("ok".equals(answer.body().trim())) pingWhileOnTrial(board);
+    }
+
+    /**
+     * Pingt das Gerät eine Weile regelmäßig, damit es seine neue Version nach dem
+     * Neustart bestätigt, statt sie wieder zurückzurollen.
+     */
+    private static void pingWhileOnTrial(Board board) {
+        for (long delay = CONFIRM_PING_SECONDS; delay <= CONFIRM_PING_FOR_SECONDS; delay += CONFIRM_PING_SECONDS) {
+            scheduler.schedule(() -> {
+                try {
+                    get(Main.getInstance().getUrl(board.reviver) + "/ping");
+                } catch (Exception e) {
+                    // Startet gerade neu - beim nächsten Mal.
+                }
+            }, delay, TimeUnit.SECONDS);
+        }
     }
 
     private record Response(int status, String body) {
