@@ -1,6 +1,7 @@
 package de.schnorrenbergers.automat.controller;
 
 import de.schnorrenbergers.automat.Main;
+import de.schnorrenbergers.automat.manager.AlarmLog;
 import de.schnorrenbergers.automat.manager.AlarmManager;
 import de.schnorrenbergers.automat.manager.AvailabilityManager;
 import de.schnorrenbergers.automat.manager.ConfigurationManager;
@@ -93,6 +94,7 @@ public class AdminController implements Initializable {
         // etwas anderes an, als am Scanner tatsächlich passiert.
         if (AlarmManager.send(turnOn)) {
             Main.getInstance().setAlarm(turnOn);
+            AlarmLog.event("Alarm im Admin-Bildschirm " + (turnOn ? "eingeschaltet" : "ausgeschaltet"));
         }
         setAlarmBTNColor();
         Main.getInstance().getScreenSaver().setLastMove(System.currentTimeMillis());

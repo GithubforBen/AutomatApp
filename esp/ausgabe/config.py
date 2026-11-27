@@ -33,8 +33,10 @@ HMAC_KEY = env.require(_env, "HMAC_KEY").encode()
 ALARM_ENABLED = True
 # Nach einer Ausgabe so lange nicht überwachen (fallende Süßigkeit, Nachlauf).
 ALARM_GRACE_MS = 3000
-# So viele Messungen im Abstand von 10 ms muss die Lichtschranke unterbrochen
-# sein, bevor es als Eingriff zählt (gegen Störungen).
-ALARM_SAMPLES = 3
+# So lange muss eine Lichtschranke ohne Unterbrechung unterbrochen sein, bevor
+# es als Eingriff zählt. Eine Hand braucht deutlich länger; kürzere Impulse
+# (Störungen, eine nachrutschende Süßigkeit) zählen nur als "Zucker" und
+# stehen in der nächsten Meldung bzw. in /status.
+ALARM_MIN_BLOCKED_MS = 150
 # Bleibt eine Lichtschranke unterbrochen, frühestens nach dieser Zeit erneut melden.
 ALARM_REPEAT_MS = 10000

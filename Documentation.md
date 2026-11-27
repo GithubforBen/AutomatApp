@@ -580,6 +580,23 @@ A light barrier was triggered while nothing was being dispensed (someone is reac
 the machine). Turns the alarm on the scanner on. The alarm goes off when the admin PIN is
 entered, or when a teacher or admin scans their card at the automat or at the station.
 
+The dispenser reports only when a light barrier stays blocked for `ALARM_MIN_BLOCKED_MS`
+(150 ms, `esp/ausgabe/config.py`) without a break; shorter pulses are counted as glitches.
+It adds what it measured to the body (all optional):
+
+```json
+{"nr": 3, "sensor": 4, "blocked_ms": 230, "sensors": "0001000", "glitches": {"4": [2, 40]},
+ "since_dispense_ms": 812345, "uptime_s": 3605, "rssi": -61}
+```
+
+`sensors`: all light barriers 1-7 at that moment (1 = blocked). `glitches`: per light barrier
+the number of short pulses since the last report and the longest one in ms.
+
+Every report goes to `alarm.log` (next to `automat.log`, i.e. `~/automat/logs`; override with
+`-Dautomat.log-dir`), marked `AUSGELÖST`, `ERNEUT` (alarm already running) or `IGNORIERT`
+(alarm switched off in the settings, checkbox "Alarm bei Eingriff"), plus every time the alarm
+is switched off (`AUS`).
+
 ## Card scans from the devices
 
 The scanner and the station send cards HMAC-signed straight to the backend (they used to go

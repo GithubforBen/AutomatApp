@@ -5,6 +5,7 @@ import de.schnorrenbergers.automat.database.types.Teacher;
 import de.schnorrenbergers.automat.database.types.User;
 import de.schnorrenbergers.automat.utils.CustomRequest;
 import org.hibernate.Session;
+import org.json.JSONObject;
 
 import java.util.List;
 import java.util.logging.Logger;
@@ -42,6 +43,21 @@ public final class AlarmManager {
     }
 
     /**
+     * Meldung der Ausgabe: eine Lichtschranke hat ohne Ausgabe angesprochen.
+     * Löst den Alarm aus (falls eingeschaltet) und schreibt die Meldung samt
+     * Messwerten der Ausgabe ins Alarm-Protokoll.
+     *
+     * @param type    Süßigkeiten-Typ (Fach)
+     * @param details Messwerte der Ausgabe, darf {@code null} sein
+     */
+    public static void unexpected(int type, JSONObject details) {
+        boolean enabled = Main.getInstance().isAlarmEnabled();
+        boolean running = Main.getInstance().isAlarm();
+        AlarmLog.unexpected(type, details, !enabled ? "IGNORIERT" : running ? "ERNEUT" : "AUSGELÖST");
+        trigger("Lichtschranke von Fach " + type + " ohne Ausgabe ausgelöst");
+    }
+
+    /**
      * Schaltet den Alarm aus, falls er läuft. Die Anfrage an den Scanner läuft im
      * Hintergrund, damit die Oberfläche nicht wartet.
      *
@@ -51,6 +67,7 @@ public final class AlarmManager {
     public static boolean disarm(String reason) {
         if (!Main.getInstance().isAlarm()) return false;
         LOG.info("Alarm aus: " + reason);
+        AlarmLog.disarmed(reason);
         Main.getInstance().setAlarm(false);
         sendAsync(false);
         return true;

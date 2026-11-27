@@ -241,20 +241,23 @@ outbox = []
 outbox_lock = _thread.allocate_lock()
 
 
-def report(path, nr):
+def report(path, nr, details=None):
     outbox_lock.acquire()
     try:
-        outbox.append((path, nr))
+        outbox.append((path, nr, details))
     finally:
         outbox_lock.release()
 
 
-def send_report(path, nr):
+def send_report(path, nr, details=None):
     server = config.SERVER_IP or state["server_ip"]
     if not server:
         log(path, "nicht gemeldet: noch kein /ping vom Automaten")
         return
-    body = ujson.dumps({"nr": nr})
+    data = {"nr": nr}
+    if details:
+        data.update(details)
+    body = ujson.dumps(data)
     for attempt in range(3):
         # Nicht senden, während der Motor dreht (z.B. nächstes Fach in der Warteschlange).
         wait_motor_idle()
@@ -286,7 +289,7 @@ def reporter():
             time.sleep_ms(200)
             continue
         try:
-            send_report(item[0], item[1])
+            send_report(item[0], item[1], item[2])
         except Exception as e:
             log("Meldung fehlgeschlagen:", e)
 
@@ -295,10 +298,28 @@ def reporter():
 # Alarm: Lichtschranke ohne Ausgabe
 # ---------------------------------------------------------------------------
 
-# Wie viele Messungen (alle 10 ms) hintereinander unterbrochen, bis es zählt.
-blocked = {num: 0 for num in SENSES}
+# Entprellung über die Zeit, nicht über die Zahl der Messungen: Stockt die
+# Schleife (WLAN, andere Threads), lägen "aufeinanderfolgende" Messungen
+# sonst weit auseinander, und drei einzelne Störimpulse sähen aus wie eine
+# lange Unterbrechung.
+#
+# blocked_since[num]: seit wann (ticks_ms) ununterbrochen unterbrochen, sonst None.
+blocked_since = {num: None for num in SENSES}
+# Kurze Impulse je Lichtschranke seit der letzten Meldung: [Anzahl, längster in ms].
+glitches = {num: [0, 0] for num in SENSES}
 # Wann je Fach zuletzt ein Eingriff gemeldet wurde (ticks_ms).
 last_alarm = {}
+# Letzte Messung (ticks_ms) - liegt sie zu lange zurück, gilt eine laufende
+# Unterbrechung als unbekannt und beginnt neu.
+last_sample = [None]
+# Letzte Meldung, für /status.
+last_trigger = [None]
+MAX_SAMPLE_GAP_MS = 50
+BOOT_TICKS = time.ticks_ms()
+
+
+def min_blocked_ms():
+    return getattr(config, "ALARM_MIN_BLOCKED_MS", 150)
 
 
 def dispensing():
@@ -307,28 +328,72 @@ def dispensing():
     return time.ticks_diff(time.ticks_ms(), state["last_end"]) < config.ALARM_GRACE_MS
 
 
-def check_sensors():
-    """Einmal alle Lichtschranken ansehen. Spricht eine an, ohne dass gerade
-    ausgegeben wird, greift jemand in den Automaten."""
-    if dispensing():
-        for num in blocked:
-            blocked[num] = 0
+def sensor_values():
+    return "".join(str(SENSES[num].value()) for num in sorted(SENSES))
+
+
+def end_blocked(num, now):
+    since = blocked_since[num]
+    if since is None:
         return
+    blocked_since[num] = None
+    duration = time.ticks_diff(now, since)
+    if duration < min_blocked_ms():
+        g = glitches[num]
+        g[0] += 1
+        if duration > g[1]:
+            g[1] = duration
+
+
+def check_sensors():
+    """Einmal alle Lichtschranken ansehen. Ist eine länger als
+    ALARM_MIN_BLOCKED_MS unterbrochen, ohne dass gerade ausgegeben wird, greift
+    jemand in den Automaten."""
     now = time.ticks_ms()
+    gap = None if last_sample[0] is None else time.ticks_diff(now, last_sample[0])
+    last_sample[0] = now
+    if dispensing():
+        for num in blocked_since:
+            blocked_since[num] = None
+        return
+    if gap is not None and gap > MAX_SAMPLE_GAP_MS:
+        # Schleife hat gestockt: was dazwischen war, ist unbekannt.
+        for num in blocked_since:
+            if blocked_since[num] is not None:
+                blocked_since[num] = now
     for num in SENSES:
         if SENSES[num].value() != 1:
-            blocked[num] = 0
+            end_blocked(num, now)
             continue
-        blocked[num] += 1
-        if blocked[num] < config.ALARM_SAMPLES:
+        if blocked_since[num] is None:
+            blocked_since[num] = now
+            continue
+        duration = time.ticks_diff(now, blocked_since[num])
+        if duration < min_blocked_ms():
             continue
         last = last_alarm.get(num)
         if last is not None and time.ticks_diff(now, last) < config.ALARM_REPEAT_MS:
             continue
         last_alarm[num] = now
         nr = num - 1  # Lichtschranke num gehört zu Fach nr (siehe dispense())
-        log("Eingriff! Lichtschranke", num, "ohne Ausgabe ausgelöst")
-        report("/dispense/unexpected", nr)
+        details = {
+            "sensor": num,
+            "blocked_ms": duration,
+            "sensors": sensor_values(),
+            "glitches": {str(k): v[:] for k, v in glitches.items() if v[0]},
+            "since_dispense_ms": time.ticks_diff(now, state["last_end"]),
+            "uptime_s": time.ticks_diff(now, BOOT_TICKS) // 1000,
+        }
+        try:
+            details["rssi"] = network.WLAN(network.STA_IF).status("rssi")
+        except Exception:
+            pass
+        for v in glitches.values():
+            v[0] = 0
+            v[1] = 0
+        last_trigger[0] = details
+        log("Eingriff! Lichtschranke", num, "seit", duration, "ms unterbrochen, alle:", details["sensors"])
+        report("/dispense/unexpected", nr, details)
 
 
 # ---------------------------------------------------------------------------
@@ -429,7 +494,12 @@ def handle(client, address):
                 "queue": len(queue),
                 "server": config.SERVER_IP or state["server_ip"],
                 "time": signing.now(),
-                # Zur Fehlersuche: im Leerlauf A/B/C = 0 (Kanal 0), ALWAYS_ON = 1.
+                # Zur Fehlersuche: Lichtschranken (1 = unterbrochen), kurze
+                # Impulse seit der letzten Meldung, letzter gemeldeter Eingriff.
+                "sensors": sensor_values(),
+                "glitches": {str(k): v for k, v in glitches.items() if v[0]},
+                "last_alarm": last_trigger[0],
+                # Im Leerlauf A/B/C = 0 (Kanal 0), ALWAYS_ON = 1.
                 "pins": {"A": A.value(), "B": B.value(), "C": C.value(), "ALWAYS_ON": ALWAYS_ON.value(),
                          "STEP": STEP.value(), "DIR": DIR.value()},
             }), "application/json")

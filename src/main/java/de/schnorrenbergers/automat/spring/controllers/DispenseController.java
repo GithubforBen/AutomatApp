@@ -51,7 +51,13 @@ public class DispenseController {
     public ResponseEntity<String> unexpected(@RequestBody(required = false) String body) {
         Integer type = readType(body);
         if (type == null) return badRequest();
-        AlarmManager.trigger("Lichtschranke von Fach " + type + " ohne Ausgabe ausgelöst");
+        JSONObject details = null;
+        try {
+            details = new JSONObject(body);
+        } catch (Exception ignored) {
+            // readType hat den Körper schon geprüft
+        }
+        AlarmManager.unexpected(type, details);
         return ok();
     }
 
