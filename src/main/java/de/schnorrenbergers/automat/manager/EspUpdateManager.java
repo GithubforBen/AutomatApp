@@ -245,7 +245,7 @@ public final class EspUpdateManager {
         if ("ok".equals(reply)) {
             lastTarget.put(board, target);
             attempts.put(board, tries + 1);
-            pingWhileOnTrial(board);
+            pingWhileOnTrial(board, target);
         } else if ("busy".equals(reply) || "läuft schon".equals(reply)) {
             // Ausgabe läuft gerade bzw. Update läuft schon - gleich nochmal.
             retrySoon(board);
@@ -256,11 +256,28 @@ public final class EspUpdateManager {
      * Pingt das Gerät eine Weile regelmäßig, damit es seine neue Version nach dem
      * Neustart bestätigt, statt sie wieder zurückzurollen.
      */
-    private static void pingWhileOnTrial(Board board) {
+    private static void pingWhileOnTrial(Board board, String target) {
+        // Je Update-Versuch nur einmal melden.
+        java.util.concurrent.atomic.AtomicBoolean answered = new java.util.concurrent.atomic.AtomicBoolean();
+        java.util.concurrent.atomic.AtomicBoolean crashLogged = new java.util.concurrent.atomic.AtomicBoolean();
         for (long delay = CONFIRM_PING_SECONDS; delay <= CONFIRM_PING_FOR_SECONDS; delay += CONFIRM_PING_SECONDS) {
             scheduler.schedule(() -> {
                 try {
-                    get(Main.getInstance().getUrl(board.reviver) + "/ping");
+                    String base = Main.getInstance().getUrl(board.reviver);
+                    Response ping = get(base + "/ping");
+                    if (ping.status() == 503) {
+                        // Neue Version ist beim Start abgestürzt (esp/<board>/crash.py).
+                        if (!crashLogged.getAndSet(true)) {
+                            Response crash = get(base + "/crash");
+                            LOG.warning("ESP-Update " + board.folder + ": neue Version startet nicht:\n"
+                                    + crash.body().trim());
+                        }
+                    } else if (ping.status() == 200 && !answered.get()
+                            && target.equals(get(base + "/version").body().trim())) {
+                        // Vorher antwortet noch die alte Version (lädt gerade herunter).
+                        answered.set(true);
+                        LOG.info("ESP-Update " + board.folder + ": neue Version " + target + " läuft und antwortet");
+                    }
                 } catch (Exception e) {
                     // Startet gerade neu - beim nächsten Mal.
                 }
