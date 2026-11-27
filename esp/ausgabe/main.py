@@ -16,12 +16,47 @@
 #
 # Einstellungen stehen in config.py.
 
+# Zuerst die Motor-Pins: Beim Start ziehen die Boot-Pins GPIO 0 und 15 (C, B)
+# hoch, damit ist ein Fach ausgewählt und hat Haltestrom. Das soll nur so kurz
+# wie möglich dauern - also vor allen anderen Imports (config/.env, ota,
+# signing), die Zeit brauchen und auch fehlschlagen können.
+from machine import Pin
+
+A = Pin(2, Pin.OUT)  # 2-13
+B = Pin(15, Pin.OUT)  # 15-4
+C = Pin(0, Pin.OUT)  # 0-2
+STEP = Pin(13, Pin.OUT)
+DIR = Pin(4, Pin.OUT)
+ALWAYS_ON = Pin(12, Pin.OUT)
+
+direction = 0
+ALWAYS_ON.value(1)
+
+
+def idle_pins():
+    """Kein Fach ausgewählt (A/B/C = 0) - die Inverter ziehen alle Enable-Pins
+    hoch, kein Motor hat Haltestrom. Mehrfach aufrufen schadet nicht."""
+    STEP.value(0)
+    DIR.value(0)
+    A.value(0)
+    B.value(0)
+    C.value(0)
+    ALWAYS_ON.value(1)
+
+
+def release_motors():
+    """Haltestrom zurücksetzen (wie bisher nach jeder Ausgabe)."""
+    ALWAYS_ON.value(0)
+    idle_pins()
+
+
+release_motors()
+
 import time
 import socket
 import network
 import _thread
 import ujson
-from machine import Pin
 import config
 import ota
 import signing
@@ -39,16 +74,6 @@ def log(*args):
 # ---------------------------------------------------------------------------
 # Motor und Lichtschranken (unverändert aus dem bisherigen boot.py)
 # ---------------------------------------------------------------------------
-
-A = Pin(2, Pin.OUT)  # 2-13
-B = Pin(15, Pin.OUT)  # 15-4
-C = Pin(0, Pin.OUT)  # 0-2
-STEP = Pin(13, Pin.OUT)
-DIR = Pin(4, Pin.OUT)
-ALWAYS_ON = Pin(12, Pin.OUT)
-
-direction = 0
-ALWAYS_ON.value(1)
 
 SENSES = {
     1: Pin(14, Pin.IN),
@@ -70,10 +95,6 @@ mapping = [
     [0, 1, 1],
     [1, 1, 1]
 ]
-
-A.value(0)
-B.value(0)
-C.value(0)
 
 
 def step(num):
@@ -106,11 +127,7 @@ def step(num):
     STEP.value(0)
     DIR.value(0)
     time.sleep(1)
-    ALWAYS_ON.value(0)
-    A.value(0)
-    B.value(0)
-    C.value(0)
-    ALWAYS_ON.value(1)
+    release_motors()
     return success
 
 
@@ -172,6 +189,7 @@ def worker():
         except Exception as e:
             log("Motorfehler:", e)
             ok = False
+            release_motors()
         finally:
             state["last_end"] = time.ticks_ms()
             state["busy"] = False
@@ -208,10 +226,6 @@ def http_post(host, port, path, body, headers, timeout=5):
 # Ausgabe noch die Überwachung der Lichtschranken auf das Netz.
 outbox = []
 outbox_lock = _thread.allocate_lock()
-# Frei = es liegt etwas in outbox. Der Thread wartet darauf, statt alle 50 ms
-# nachzusehen (siehe motor_lock).
-outbox_ready = _thread.allocate_lock()
-outbox_ready.acquire()
 
 
 def report(path, nr):
@@ -220,10 +234,6 @@ def report(path, nr):
         outbox.append((path, nr))
     finally:
         outbox_lock.release()
-    try:
-        outbox_ready.release()
-    except RuntimeError:
-        pass  # schon frei - der Thread holt alles auf einmal ab
 
 
 def send_report(path, nr):
@@ -249,20 +259,23 @@ def send_report(path, nr):
 
 
 def reporter():
+    # Jede Sperre wird im selben Thread freigegeben, der sie geholt hat - ältere
+    # MicroPython-Versionen stürzen sonst ab (FreeRTOS-Mutex).
     while True:
-        outbox_ready.acquire()
-        while True:
-            outbox_lock.acquire()
-            try:
-                item = outbox.pop(0) if outbox else None
-            finally:
-                outbox_lock.release()
-            if item is None:
-                break
-            try:
-                send_report(item[0], item[1])
-            except Exception as e:
-                log("Meldung fehlgeschlagen:", e)
+        # Während der Motor dreht, hier warten statt nachzusehen.
+        wait_motor_idle()
+        outbox_lock.acquire()
+        try:
+            item = outbox.pop(0) if outbox else None
+        finally:
+            outbox_lock.release()
+        if item is None:
+            time.sleep_ms(200)
+            continue
+        try:
+            send_report(item[0], item[1])
+        except Exception as e:
+            log("Meldung fehlgeschlagen:", e)
 
 
 # ---------------------------------------------------------------------------
@@ -479,6 +492,14 @@ def main():
                 log("Überwachung der Lichtschranken:", e)
         if time.ticks_diff(time.ticks_ms(), last_wlan_check) > 5000:
             last_wlan_check = time.ticks_ms()
+            # Sicherheitsnetz: im Leerlauf ist nie ein Fach ausgewählt. Nur mit
+            # motor_lock, damit keine beginnende Ausgabe abgewählt wird.
+            if motor_lock.acquire(0):
+                try:
+                    if not state["busy"]:
+                        idle_pins()
+                finally:
+                    motor_lock.release()
             if not wlan.isconnected():
                 connect_wlan(wlan)
         time.sleep_ms(10)
