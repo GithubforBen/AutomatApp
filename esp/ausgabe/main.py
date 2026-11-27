@@ -16,54 +16,11 @@
 #
 # Einstellungen stehen in config.py.
 
-# Zuerst die Motor-Pins: Beim Start ziehen die Boot-Pins GPIO 0 und 15 (C, B)
-# hoch, damit ist ein Fach ausgewählt und hat Haltestrom. Das soll nur so kurz
-# wie möglich dauern - also vor allen anderen Imports (config/.env, ota,
-# signing), die Zeit brauchen und auch fehlschlagen können.
-from machine import Pin
-from time import sleep_us
-
-A = Pin(2, Pin.OUT)  # 2-13
-B = Pin(15, Pin.OUT)  # 15-4
-C = Pin(0, Pin.OUT)  # 0-2
-STEP = Pin(13, Pin.OUT)
-DIR = Pin(4, Pin.OUT)
-ALWAYS_ON = Pin(12, Pin.OUT)
-
-direction = 0
-ALWAYS_ON.value(1)
-
-
-def idle_pins():
-    """Kein Fach ausgewählt (A/B/C = 0) - die Inverter ziehen alle Enable-Pins
-    hoch, kein Motor hat Haltestrom. Mehrfach aufrufen schadet nicht."""
-    STEP.value(0)
-    DIR.value(0)
-    A.value(0)
-    B.value(0)
-    C.value(0)
-    ALWAYS_ON.value(1)
-
-
-def release_motors():
-    """Haltestrom aus für alle Motoren.
-
-    Der Multiplexer verbindet nur den gewählten Kanal; die Eingänge der
-    Inverter an den anderen Kanälen hängen dann offen und behalten ihre
-    Ladung. Ein Eingang, der einmal hoch war (z.B. beim Booten, wenn die
-    Boot-Pins einen Kanal wählen), hält seinen Motor sonst weiter aktiv.
-    Deshalb jeden Kanal 1-7 einmal mit ALWAYS_ON = 0 wählen (Eingang entladen,
-    Enable bleibt hoch) und erst dann Kanal 0 - der hat keinen Motor."""
-    ALWAYS_ON.value(0)
-    for bits in ((1, 1, 1), (0, 1, 1), (1, 0, 1), (0, 0, 1), (1, 1, 0), (0, 1, 0), (1, 0, 0)):
-        A.value(bits[0])
-        B.value(bits[1])
-        C.value(bits[2])
-        sleep_us(50)
-    idle_pins()
-
-
-release_motors()
+# Zuerst die Motor-Pins (motor.py setzt sie beim Import): Beim Start ziehen die
+# Boot-Pins GPIO 0 und 15 hoch, damit ist ein Fach ausgewählt und hat
+# Haltestrom - das soll so kurz wie möglich dauern.
+from motor import A, B, C, STEP, DIR, ALWAYS_ON, SENSES, dispense, release_motors, idle_pins, log
+import gc
 
 import time
 import socket
@@ -73,86 +30,13 @@ import ujson
 import config
 import ota
 import signing
+from httpio import http_post, respond, read_request
+gc.collect()
 
 # Vom Automaten gelernt (Absender des ersten /ping). last_end: Ende der letzten
 # Ausgabe (ticks_ms) - kurz danach darf eine Lichtschranke noch nachzucken.
 state = {"server_ip": None, "busy": False, "last_end": time.ticks_ms()}
 
-
-
-def log(*args):
-    print("[ausgabe]", *args)
-
-
-# ---------------------------------------------------------------------------
-# Motor und Lichtschranken (unverändert aus dem bisherigen boot.py)
-# ---------------------------------------------------------------------------
-
-SENSES = {
-    1: Pin(14, Pin.IN),
-    2: Pin(27, Pin.IN),
-    3: Pin(26, Pin.IN),
-    4: Pin(25, Pin.IN),
-    5: Pin(32, Pin.IN),
-    6: Pin(33, Pin.IN),
-    7: Pin(34, Pin.IN),
-}
-
-mapping = [
-    [0, 0, 0],  # A;B;C
-    [1, 0, 0],
-    [0, 1, 0],
-    [1, 1, 0],
-    [0, 0, 1],
-    [1, 0, 1],
-    [0, 1, 1],
-    [1, 1, 1]
-]
-
-
-def step(num):
-    """Dreht Fach num, bis die Lichtschranke eine Süßigkeit gesehen hat.
-    Gibt zurück, ob das geklappt hat."""
-    sense = SENSES[num]
-    DIR.value(direction)
-    time.sleep(2)
-    was_one = 0
-    success = False
-    # Fach 6 dreht nur halb so weit und danach ein Stück weiter (Eigenheit dieses Geräts).
-    for x in range(750 // 2 if num == 6 else 750):
-        STEP.on()
-        time.sleep(1 / 200)
-        STEP.off()
-        time.sleep(1 / 200)
-        if sense.value() == 1:
-            was_one = was_one + 1
-        elif was_one >= 3:
-            log("Lichtschranke ausgelöst (Motor", num, ")")
-            success = True
-            break
-        else:
-            was_one = 0
-    for x in range(750 // 2 if num == 6 else 4):
-        STEP.on()
-        time.sleep(1 / 200)
-        STEP.off()
-        time.sleep(1 / 200)
-    STEP.value(0)
-    DIR.value(0)
-    time.sleep(1)
-    release_motors()
-    return success
-
-
-def dispense(x):
-    x += 1
-    if x >= 8:
-        x = 1
-    y = mapping[x]
-    A.value(y[0])
-    B.value(y[1])
-    C.value(y[2])
-    return step(x)
 
 
 # ---------------------------------------------------------------------------
@@ -217,23 +101,6 @@ def worker():
 # ---------------------------------------------------------------------------
 # Zeit und Signatur (für die Meldung ans Backend)
 # ---------------------------------------------------------------------------
-
-def http_post(host, port, path, body, headers, timeout=5):
-    """Schickt einen POST und gibt den HTTP-Status zurück."""
-    sock = socket.socket()
-    sock.settimeout(timeout)
-    try:
-        sock.connect(socket.getaddrinfo(host, port)[0][-1])
-        data = body.encode()
-        head = "POST {} HTTP/1.1\r\nHost: {}:{}\r\n".format(path, host, port)
-        for key in headers:
-            head += "{}: {}\r\n".format(key, headers[key])
-        head += "Content-Length: {}\r\nConnection: close\r\n\r\n".format(len(data))
-        sock.sendall(head.encode() + data)
-        return int(sock.recv(64).split()[1])
-    finally:
-        sock.close()
-
 
 # Meldungen ans Backend laufen über einen eigenen Thread - so wartet weder die
 # Ausgabe noch die Überwachung der Lichtschranken auf das Netz.
@@ -399,44 +266,6 @@ def check_sensors():
 # ---------------------------------------------------------------------------
 # HTTP-Server für den Automaten
 # ---------------------------------------------------------------------------
-
-def respond(client, status, body, content_type="text/plain; charset=utf-8"):
-    reason = {200: "OK", 400: "Bad Request", 404: "Not Found"}.get(status, "OK")
-    data = body.encode()
-    head = "HTTP/1.1 {} {}\r\nContent-Type: {}\r\nContent-Length: {}\r\nConnection: close\r\n\r\n".format(
-        status, reason, content_type, len(data))
-    client.sendall(head.encode() + data)
-
-
-def read_request(client):
-    """Liest Kopf und (per Content-Length) den ganzen Körper - der kann in
-    einem zweiten Netzwerkpaket kommen."""
-    data = b""
-    while data.find(b"\r\n\r\n") < 0 and len(data) < 8192:
-        chunk = client.recv(512)
-        if not chunk:
-            break
-        data += chunk
-    end = data.find(b"\r\n\r\n")
-    head = data[:end] if end >= 0 else data
-    body = data[end + 4:] if end >= 0 else b""
-    lines = head.decode().split("\r\n")
-    parts = lines[0].split()
-    headers = {}
-    for line in lines[1:]:
-        if ":" in line:
-            key, value = line.split(":", 1)
-            headers[key.strip().lower()] = value.strip()
-    length = int(headers.get("content-length", "0"))
-    while len(body) < length:
-        chunk = client.recv(512)
-        if not chunk:
-            break
-        body += chunk
-    method = parts[0] if parts else ""
-    path = parts[1].split("?")[0] if len(parts) > 1 else ""
-    return method, path, headers, body
-
 
 def handle(client, address):
     try:
