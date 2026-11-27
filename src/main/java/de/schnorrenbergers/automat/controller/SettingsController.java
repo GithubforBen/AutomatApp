@@ -2,13 +2,18 @@ package de.schnorrenbergers.automat.controller;
 
 import de.schnorrenbergers.automat.Main;
 import de.schnorrenbergers.automat.database.types.Statistic;
+import javafx.animation.Animation;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Slider;
 import javafx.scene.text.Text;
+import javafx.util.Duration;
 
 import java.io.IOException;
 import java.net.URL;
@@ -56,6 +61,12 @@ public class SettingsController implements Initializable {
         screensaver.setOnAction((ActionEvent event) -> {
             Main.getInstance().getScreenSaver().setDoSaver(screensaver.isSelected());
         });
+        // Kein Thread, der auf die aktuelle Szene prüft: initialize() läuft, bevor
+        // loadScene() die neue Szene setzt (siehe AddUserController).
+        shutTicker = new Timeline(new KeyFrame(Duration.millis(250), e -> updateShutButton()));
+        shutTicker.setCycleCount(Animation.INDEFINITE);
+        shutTicker.play();
+        updateShutButton();
     }
 
     public void fullscreen(ActionEvent actionEvent) {
@@ -98,29 +109,71 @@ public class SettingsController implements Initializable {
         });
     }
 
+    /**
+     * Wann sich der Automat beim geplanten Herunterfahren beendet (0 = keins
+     * geplant). Statisch, denn die Einstellungen werden bei jedem Öffnen neu
+     * geladen (auch nach dem Bildschirmschoner) - sonst zeigte der Knopf
+     * wieder "Herunterfahren" statt "Abbrechen", obwohl es noch läuft.
+     */
+    private static volatile long shutdownAt;
+
+    private Timeline shutTicker;
+
     public void shutdown(ActionEvent actionEvent) {
-        ProcessBuilder processBuilder = new ProcessBuilder();
-        if (shut.getText().equals("Herunterfahren")) {
-            processBuilder.command("shutdown");
-            new Thread(() -> {
-                try {
-                    Thread.sleep(1000L * Main.getInstance().getConfigurationManager().getInt("shutdown-delay"));
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-                if (!shut.getText().equals("Herunterfahren")) System.exit(0);
-            }).start();
-            shut.setText("Herunterfahren\n Abbrechen");
-        } else {
-            processBuilder.command("shutdown", "-c");
-            shut.setText("Herunterfahren");
-        }
-        try {
-            processBuilder.start();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
         Main.getInstance().getScreenSaver().setLastMove(System.currentTimeMillis());
+        if (shutdownAt == 0) {
+            if (!runCommand("shutdown")) return;
+            long at = System.currentTimeMillis()
+                    + 1000L * Main.getInstance().getConfigurationManager().getInt("shutdown-delay");
+            shutdownAt = at;
+            Thread timer = new Thread(() -> {
+                try {
+                    Thread.sleep(Math.max(0, at - System.currentTimeMillis()));
+                } catch (InterruptedException e) {
+                    return;
+                }
+                // Abgebrochen (0) oder inzwischen neu geplant: nicht beenden.
+                if (shutdownAt == at) System.exit(0);
+            }, "shutdown-timer");
+            timer.setDaemon(true);
+            timer.start();
+        } else {
+            runCommand("shutdown", "-c");
+            shutdownAt = 0;
+        }
+        updateShutButton();
+    }
+
+    private static boolean runCommand(String... command) {
+        try {
+            new ProcessBuilder(command).inheritIO().start();
+            return true;
+        } catch (IOException e) {
+            System.err.println("Befehl " + String.join(" ", command) + " fehlgeschlagen: " + e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Zeigt "Herunterfahren" oder, solange es läuft, "Abbrechen" mit den
+     * verbleibenden Sekunden bis der Automat sich beendet.
+     */
+    private void updateShutButton() {
+        Scene scene = shut.getScene();
+        if (scene != null && scene != Main.getInstance().getStage().getScene()) {
+            // Ansicht wurde verlassen.
+            shutTicker.stop();
+            return;
+        }
+        long at = shutdownAt;
+        if (at == 0) {
+            shut.setText("Herunterfahren");
+            shut.setStyle("");
+        } else {
+            long seconds = Math.max(0, (at - System.currentTimeMillis() + 999) / 1000);
+            shut.setText("Abbrechen\n(noch " + seconds + " s)");
+            shut.setStyle("-fx-base: #d9534f; -fx-text-fill: white;");
+        }
     }
 
     public void refresh(ActionEvent event) {
