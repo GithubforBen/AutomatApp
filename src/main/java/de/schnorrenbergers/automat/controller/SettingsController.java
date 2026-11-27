@@ -2,6 +2,7 @@ package de.schnorrenbergers.automat.controller;
 
 import de.schnorrenbergers.automat.Main;
 import de.schnorrenbergers.automat.database.types.Statistic;
+import de.schnorrenbergers.automat.manager.AlarmManager;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -28,6 +29,8 @@ public class SettingsController implements Initializable {
     @FXML
     public CheckBox autoLock;
     @FXML
+    public CheckBox alarm;
+    @FXML
     public CheckBox checkTime;
     @FXML
     public CheckBox screensaver;
@@ -52,6 +55,14 @@ public class SettingsController implements Initializable {
         autoLock.setSelected(Main.getInstance().isAutoLock());
         autoLock.setOnAction((ActionEvent event) -> {
             Main.getInstance().setAutoLock(autoLock.isSelected());
+        });
+        // Aus: Lichtschranken ohne Ausgabe lösen keinen Alarm mehr aus, ein
+        // laufender Alarm geht aus.
+        alarm.setSelected(Main.getInstance().isAlarmEnabled());
+        alarm.setOnAction((ActionEvent event) -> {
+            Main.getInstance().setAlarmEnabled(alarm.isSelected());
+            if (!alarm.isSelected()) AlarmManager.disarm("Alarm in den Einstellungen abgeschaltet");
+            Main.getInstance().getScreenSaver().setLastMove(System.currentTimeMillis());
         });
         checkTime.setSelected(Boolean.parseBoolean(Main.getInstance().getSettings().getSettingOrDefault("checkTime", "true")));
         checkTime.setOnAction((ActionEvent event) -> {

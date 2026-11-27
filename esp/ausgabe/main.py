@@ -21,6 +21,7 @@
 # wie möglich dauern - also vor allen anderen Imports (config/.env, ota,
 # signing), die Zeit brauchen und auch fehlschlagen können.
 from machine import Pin
+from time import sleep_us
 
 A = Pin(2, Pin.OUT)  # 2-13
 B = Pin(15, Pin.OUT)  # 15-4
@@ -45,8 +46,20 @@ def idle_pins():
 
 
 def release_motors():
-    """Haltestrom zurücksetzen (wie bisher nach jeder Ausgabe)."""
+    """Haltestrom aus für alle Motoren.
+
+    Der Multiplexer verbindet nur den gewählten Kanal; die Eingänge der
+    Inverter an den anderen Kanälen hängen dann offen und behalten ihre
+    Ladung. Ein Eingang, der einmal hoch war (z.B. beim Booten, wenn die
+    Boot-Pins einen Kanal wählen), hält seinen Motor sonst weiter aktiv.
+    Deshalb jeden Kanal 1-7 einmal mit ALWAYS_ON = 0 wählen (Eingang entladen,
+    Enable bleibt hoch) und erst dann Kanal 0 - der hat keinen Motor."""
     ALWAYS_ON.value(0)
+    for bits in ((1, 1, 1), (0, 1, 1), (1, 0, 1), (0, 0, 1), (1, 1, 0), (0, 1, 0), (1, 0, 0)):
+        A.value(bits[0])
+        B.value(bits[1])
+        C.value(bits[2])
+        sleep_us(50)
     idle_pins()
 
 
@@ -416,6 +429,9 @@ def handle(client, address):
                 "queue": len(queue),
                 "server": config.SERVER_IP or state["server_ip"],
                 "time": signing.now(),
+                # Zur Fehlersuche: im Leerlauf A/B/C = 0 (Kanal 0), ALWAYS_ON = 1.
+                "pins": {"A": A.value(), "B": B.value(), "C": C.value(), "ALWAYS_ON": ALWAYS_ON.value(),
+                         "STEP": STEP.value(), "DIR": DIR.value()},
             }), "application/json")
         else:
             respond(client, 404, "not found")
@@ -492,12 +508,12 @@ def main():
                 log("Überwachung der Lichtschranken:", e)
         if time.ticks_diff(time.ticks_ms(), last_wlan_check) > 5000:
             last_wlan_check = time.ticks_ms()
-            # Sicherheitsnetz: im Leerlauf ist nie ein Fach ausgewählt. Nur mit
+            # Sicherheitsnetz: im Leerlauf hat kein Motor Haltestrom. Nur mit
             # motor_lock, damit keine beginnende Ausgabe abgewählt wird.
             if motor_lock.acquire(0):
                 try:
                     if not state["busy"]:
-                        idle_pins()
+                        release_motors()
                 finally:
                     motor_lock.release()
             if not wlan.isconnected():

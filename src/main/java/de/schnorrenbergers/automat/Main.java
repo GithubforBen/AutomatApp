@@ -46,6 +46,8 @@ public class Main extends Application {
     private volatile boolean alarm = false;
     private boolean checkAvailability;
     private volatile boolean autoLock;
+    /** Alarm bei Eingriff (Lichtschranke ohne Ausgabe) - in den Einstellungen abschaltbar. */
+    private volatile boolean alarmEnabled = true;
     private boolean useLocalEndpoints = false;
     private ScreenSaver screenSaver;
     private Database database;
@@ -101,6 +103,7 @@ public class Main extends Application {
         logoutTime = Integer.parseInt(settingsManager.getSettingOrDefault("logout", String.valueOf(logoutTime)));
         checkAvailability = Boolean.parseBoolean(settingsManager.getSettingOrDefault("availability", String.valueOf(false)));
         autoLock = Boolean.parseBoolean(settingsManager.getSettingOrDefault("autoLock", String.valueOf(false)));
+        alarmEnabled = Boolean.parseBoolean(settingsManager.getSettingOrDefault("alarmEnabled", String.valueOf(true)));
         if (run == null) {
             run = SpringApplication.run(SpringApi.class);
         }
@@ -534,6 +537,15 @@ public class Main extends Application {
     public void setCheckAvailability(boolean checkAvailability) {
         this.checkAvailability = checkAvailability;
         settingsManager.setSetting("availability", String.valueOf(checkAvailability));
+    }
+
+    public boolean isAlarmEnabled() {
+        return alarmEnabled;
+    }
+
+    public void setAlarmEnabled(boolean alarmEnabled) {
+        this.alarmEnabled = alarmEnabled;
+        settingsManager.setSetting("alarmEnabled", String.valueOf(alarmEnabled));
     }
 
     public boolean isAutoLock() {

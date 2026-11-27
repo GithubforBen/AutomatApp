@@ -32,6 +32,10 @@ public final class AlarmManager {
      * @param reason wofür der Alarm ausgelöst wurde (nur fürs Protokoll)
      */
     public static void trigger(String reason) {
+        if (!Main.getInstance().isAlarmEnabled()) {
+            LOG.info("Alarm ist abgeschaltet, ignoriert: " + reason);
+            return;
+        }
         LOG.warning("Alarm ausgelöst: " + reason);
         Main.getInstance().setAlarm(true);
         sendAsync(true);
