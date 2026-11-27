@@ -318,7 +318,8 @@ sync_repo() {  # URL Zweig Ordner
             note "$(basename "$dir"): lokale Änderungen vorhanden - nicht aktualisiert"
             return
         fi
-        run git -C "$dir" fetch origin "$branch" || fail "$(basename "$dir") konnte nicht aktualisiert werden."
+        # --tags: die Versionsnummern (v0.1, v0.2, ...; siehe app_version)
+        run git -C "$dir" fetch --tags origin "$branch" || fail "$(basename "$dir") konnte nicht aktualisiert werden."
         run git -C "$dir" checkout -q "$branch"
         run git -C "$dir" merge --ff-only "origin/$branch" ||
             fail "$(basename "$dir") lässt sich nicht automatisch aktualisieren (abweichende Commits)."
@@ -362,6 +363,13 @@ sync_website() {
         note "automatWebsite: abweichender Stand gesichert als Zweig automat-sicherung-$stamp"
     fi
     note "automatWebsite: $(git -C "$dir" log --oneline -1)"
+}
+
+# Versionsnummer des Automaten (jeder Push auf master bekommt automatisch eine,
+# siehe .github/workflows/version-tag.yml), sonst der Commit.
+app_version() {
+    git -C "$APP_DIR" describe --tags --match 'v0.*' 2>/dev/null ||
+        git -C "$APP_DIR" log -1 --format=%h 2>/dev/null || echo "?"
 }
 
 download_sources() {
@@ -1058,8 +1066,11 @@ cmd_update() {
         fail "Keine Installation in $INSTALL_DIR gefunden - zuerst: bash install.sh"
     if [[ ${AUTOMAT_UPDATE_STAGE:-} != 2 ]]; then
         step "Installer aktualisieren"
+        # Version vor dem Update merken - Stufe 2 sieht schon den neuen Stand.
+        local before
+        before=$(app_version)
         sync_repo "$APP_REPO" "$APP_BRANCH" "$APP_DIR"
-        exec env AUTOMAT_UPDATE_STAGE=2 bash "$APP_DIR/install.sh" update
+        exec env AUTOMAT_UPDATE_STAGE=2 AUTOMAT_VERSION_BEFORE="$before" bash "$APP_DIR/install.sh" update
     fi
 
     local question="Automat und Website aktualisieren?"
@@ -1085,8 +1096,17 @@ cmd_update() {
     start_automat || true
 
     local text
+    local before after
+    before=${AUTOMAT_VERSION_BEFORE:-}
+    after=$(app_version)
     text="Aktualisiert."$'\n\n'
-    text+="Automat: $(git -C "$APP_DIR" log -1 --format='%h %s' | cut -c1-70)"$'\n'
+    if [[ -z $before ]]; then
+        text+="Automat: $after"$'\n'
+    elif [[ $before == "$after" ]]; then
+        text+="Automat: $after (unverändert)"$'\n'
+    else
+        text+="Automat: $before → $after"$'\n'
+    fi
     text+="Website: $(git -C "$WEB_DIR" log -1 --format='%h %s' | cut -c1-70)"
     ((website_ok)) || text+=$'\n\n'"Achtung: Die Website antwortet nach dem Neustart nicht. Fehler anzeigen: journalctl -u $SERVICE -n 50"
     automat_running && text+=$'\n\n'"Jetzt am Automaten das Datenbank-Passwort eingeben."

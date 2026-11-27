@@ -617,6 +617,23 @@ The next card scanned at the automat is for the website (for up to 60 s). Respon
 The automat signs its requests to the devices the same way (key from `esp-key-id` in
 `config.yaml`); see `esp/README.md`.
 
+## System
+
+### GET /system/version
+
+Version of the automat and whether a newer one exists. Every push to `master` gets the next
+version tag automatically (`v0.1`, `v0.2`, ...; `.github/workflows/version-tag.yml`). The
+installed version comes from `git describe --tags` of the running checkout, the newest from
+`git ls-remote --tags origin` (asked at most every 30 minutes; offline: the last answer).
+
+```json
+{"installed": "v0.5", "latest": "v0.7", "updateAvailable": true, "checkedAt": "2026-11-27T15:00:00Z"}
+```
+
+`installed` can also be `v0.5-2-gabc1234` (2 commits after v0.5) or just a commit hash.
+`latest` is missing when GitHub was never reachable. The website shows the version in its
+title and footer, and admins see "Update verfügbar: v0.5 → v0.7".
+
 ## ESP updates
 
 Used by the ESP32s to update themselves over Wi-Fi (see `esp/README.md`). Both endpoints are

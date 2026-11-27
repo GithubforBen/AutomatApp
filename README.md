@@ -21,6 +21,10 @@ Auf dem Desktop liegt der Knopf **„Automat aktualisieren“**. Er holt die neu
 Automat und Website, baut neu und startet beide neu (danach am Automaten die PIN eingeben).
 Datenbank, `config.yaml` und der Website-Schlüssel bleiben unverändert.
 
+Jeder Push auf `master` bekommt automatisch eine Versionsnummer (`v0.1`, `v0.2`, …, GitHub Action
+`.github/workflows/version-tag.yml`). Das Update zeigt am Ende „Automat: v0.5 → v0.7“, die Website
+zeigt die Version unten rechts und Admins oben „Update verfügbar“, sobald es eine neuere gibt.
+
 Die Website kommt dabei immer auf den neuesten Stand von `main`: lokale Änderungen in
 `~/automat/automatWebsite` werden vorher mit `git stash` gesichert, abweichende Commits als Zweig
 `automat-sicherung-<Datum>`. Fehlt der Ordner, wird die Website neu geladen. Antwortet sie nach dem

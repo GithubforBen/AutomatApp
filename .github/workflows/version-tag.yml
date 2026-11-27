@@ -1,0 +1,36 @@
+# Gibt jedem Push auf master automatisch die nächste Versionsnummer (v0.1,
+# v0.2, ...). Der Automat zeigt sie beim Aktualisieren und meldet sie der
+# Website ("Update verfügbar: v0.5 -> v0.7").
+name: Versionsnummer
+
+on:
+  push:
+    branches: [master]
+
+permissions:
+  contents: write
+
+# Zwei Pushes kurz nacheinander dürfen nicht dieselbe Nummer bekommen.
+concurrency:
+  group: version-tag
+  cancel-in-progress: false
+
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Nächste Version vergeben
+        run: |
+          if git tag --points-at HEAD | grep -qE '^v0\.[0-9]+$'; then
+            echo "HEAD hat schon eine Version: $(git tag --points-at HEAD)"
+            exit 0
+          fi
+          last=$(git tag -l 'v0.*' | sed -n 's/^v0\.\([0-9][0-9]*\)$/\1/p' | sort -n | tail -n 1)
+          next="v0.$(( ${last:-0} + 1 ))"
+          git tag "$next" HEAD
+          git push origin "refs/tags/$next"
+          echo "Neue Version: $next ($(git log -1 --format='%h %s'))" >> "$GITHUB_STEP_SUMMARY"
