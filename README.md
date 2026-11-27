@@ -21,6 +21,11 @@ Auf dem Desktop liegt der Knopf **„Automat aktualisieren“**. Er holt die neu
 Automat und Website, baut neu und startet beide neu (danach am Automaten die PIN eingeben).
 Datenbank, `config.yaml` und der Website-Schlüssel bleiben unverändert.
 
+Die Website kommt dabei immer auf den neuesten Stand von `main`: lokale Änderungen in
+`~/automat/automatWebsite` werden vorher mit `git stash` gesichert, abweichende Commits als Zweig
+`automat-sicherung-<Datum>`. Fehlt der Ordner, wird die Website neu geladen. Antwortet sie nach dem
+Neustart nicht, sagt das die Abschlussmeldung (`journalctl -u automat-website`).
+
 Wer noch mit der ersten Version des Skripts installiert hat, holt Knopf und Update-Funktion einmalig so:
 
 ```bash

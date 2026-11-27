@@ -314,9 +314,6 @@ ensure_java() {
 sync_repo() {  # URL Zweig Ordner
     local url=$1 branch=$2 dir=$3
     if [[ -d $dir/.git ]]; then
-        # Der CSV-Export der Website überschreibt diese (versionierte) Datei bei
-        # jedem Export - das ist keine echte Änderung und darf das Update nicht blockieren.
-        [[ $dir == "$WEB_DIR" ]] && git -C "$dir" checkout -q -- src/students.csv 2>/dev/null || true
         if [[ -n $(git -C "$dir" status --porcelain --untracked-files=no) ]]; then
             note "$(basename "$dir"): lokale Änderungen vorhanden - nicht aktualisiert"
             return
@@ -332,10 +329,45 @@ sync_repo() {  # URL Zweig Ordner
     fi
 }
 
+# Die Website auf dem Gerät ist nur eine Kopie zum Ausführen: sie kommt bei
+# jedem Update auf den neuesten Stand. Lokale Änderungen oder abweichende
+# Commits blockieren das nicht mehr, sondern werden vorher gesichert
+# (git stash bzw. Zweig "automat-sicherung-..."), nie einfach verworfen.
+sync_website() {
+    local dir=$WEB_DIR branch=$WEB_BRANCH stamp
+    if [[ ! -d $dir/.git ]]; then
+        sync_repo "$WEB_REPO" "$branch" "$dir"
+        return
+    fi
+    stamp=$(date '+%Y%m%d-%H%M%S')
+    # Ältere Stände der Website schrieben den CSV-Export in diese versionierte
+    # Datei - das ist keine echte Änderung.
+    git -C "$dir" checkout -q -- src/students.csv 2>/dev/null || true
+    if [[ -n $(git -C "$dir" status --porcelain --untracked-files=no) ]]; then
+        # Eigene Identität: auf dem Gerät ist für git meist keine eingerichtet.
+        run git -C "$dir" -c user.name=automat -c user.email=automat@localhost \
+            stash push -m "automat-update $stamp" ||
+            fail "Lokale Änderungen der Website konnten nicht gesichert werden."
+        note "automatWebsite: lokale Änderungen gesichert (git -C $dir stash list)"
+    fi
+    run git -C "$dir" fetch origin "$branch" || fail "automatWebsite konnte nicht geladen werden (Internet?)."
+    run git -C "$dir" checkout -q -f "$branch" ||
+        run git -C "$dir" checkout -q -f -B "$branch" "origin/$branch" ||
+        fail "automatWebsite: Zweig $branch lässt sich nicht auswählen."
+    if ! run git -C "$dir" merge --ff-only "origin/$branch"; then
+        # Abweichende Commits (z.B. nach einem Force-Push der Website).
+        run git -C "$dir" branch -f "automat-sicherung-$stamp" HEAD
+        run git -C "$dir" reset -q --hard "origin/$branch" ||
+            fail "automatWebsite lässt sich nicht auf den neuesten Stand bringen."
+        note "automatWebsite: abweichender Stand gesichert als Zweig automat-sicherung-$stamp"
+    fi
+    note "automatWebsite: $(git -C "$dir" log --oneline -1)"
+}
+
 download_sources() {
     step "Quellcode laden"
     sync_repo "$APP_REPO" "$APP_BRANCH" "$APP_DIR"
-    sync_repo "$WEB_REPO" "$WEB_BRANCH" "$WEB_DIR"
+    sync_website
 }
 
 automat_running() { pgrep -f "$MAIN_CLASS" >/dev/null; }
@@ -564,6 +596,17 @@ restart_website() {
     need_root
     run as_root systemctl restart "$SERVICE" || fail "Der Website-Dienst startet nicht (journalctl -u $SERVICE)."
     note "Website neu gestartet"
+}
+
+# Wartet, bis die Website nach dem Neustart wieder antwortet (höchstens 30 s).
+website_responds() {
+    local i
+    for i in $(seq 30); do
+        # Ohne -f: jede HTTP-Antwort (auch Weiterleitung zur Anmeldung) zählt.
+        curl -s -o /dev/null --max-time 2 "http://127.0.0.1:$WEBSITE_PORT/" && return 0
+        sleep 1
+    done
+    return 1
 }
 
 kiosk_settings() {
@@ -1010,7 +1053,8 @@ cmd_install() {
 # dieses Skripts): holt erst das eigene Repository und startet dann die neue
 # Version von install.sh, damit Verbesserungen am Update selbst sofort gelten.
 cmd_update() {
-    [[ -d $APP_DIR/.git && -d $WEB_DIR/.git ]] ||
+    # Fehlt nur die Website, lädt sync_website sie neu.
+    [[ -d $APP_DIR/.git ]] ||
         fail "Keine Installation in $INSTALL_DIR gefunden - zuerst: bash install.sh"
     if [[ ${AUTOMAT_UPDATE_STAGE:-} != 2 ]]; then
         step "Installer aktualisieren"
@@ -1026,19 +1070,25 @@ cmd_update() {
     ensure_java
     step "Quellcode laden"
     sync_repo "$APP_REPO" "$APP_BRANCH" "$APP_DIR"
-    sync_repo "$WEB_REPO" "$WEB_BRANCH" "$WEB_DIR"
+    sync_website
     build_automat
     setup_website
     write_launcher
     write_service
     step "Neu starten"
     restart_website
+    local website_ok=1
+    if [[ $SKIP_SYSTEM != 1 ]] && ! website_responds; then
+        website_ok=0
+        note "Website antwortet nicht auf Port $WEBSITE_PORT (journalctl -u $SERVICE)"
+    fi
     start_automat || true
 
     local text
     text="Aktualisiert."$'\n\n'
     text+="Automat: $(git -C "$APP_DIR" log -1 --format='%h %s' | cut -c1-70)"$'\n'
     text+="Website: $(git -C "$WEB_DIR" log -1 --format='%h %s' | cut -c1-70)"
+    ((website_ok)) || text+=$'\n\n'"Achtung: Die Website antwortet nach dem Neustart nicht. Fehler anzeigen: journalctl -u $SERVICE -n 50"
     automat_running && text+=$'\n\n'"Jetzt am Automaten das Datenbank-Passwort eingeben."
     ui_info "$TITLE" "$text"
     printf '\n%s\n' "$text"
