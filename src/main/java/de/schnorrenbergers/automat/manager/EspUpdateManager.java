@@ -19,7 +19,9 @@ import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.util.HexFormat;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -49,7 +51,14 @@ public final class EspUpdateManager {
      */
     private static final long CONFIRM_PING_SECONDS = 20;
     private static final long CONFIRM_PING_FOR_SECONDS = 6 * 60;
+    /** Aufgeschobenes Update (Alarm, Gerät beschäftigt/nicht erreichbar): bald erneut versuchen. */
+    private static final long RETRY_SECONDS = 60;
     private static ScheduledExecutorService scheduler;
+    /** Geräte mit schon geplantem Neuversuch - damit sich keine stapeln. */
+    private static final Set<Board> retryPlanned = ConcurrentHashMap.newKeySet();
+    /** Zuletzt angestoßene Zielversion je Gerät und wie oft schon. */
+    private static final Map<Board, String> lastTarget = new ConcurrentHashMap<>();
+    private static final Map<Board, Integer> attempts = new ConcurrentHashMap<>();
 
     /**
      * Die ESPs, ihr Ordner unter {@code esp/} und wie der Automat sie erreicht.
@@ -169,21 +178,38 @@ public final class EspUpdateManager {
 
     public static void checkAll() {
         for (Board board : Board.values()) {
-            try {
-                check(board);
-            } catch (Exception e) {
-                LOG.warning("ESP-Update " + board.folder + ": " + e.getMessage());
-            }
+            checkLogged(board);
         }
+    }
+
+    private static void checkLogged(Board board) {
+        try {
+            check(board);
+        } catch (Exception e) {
+            LOG.warning("ESP-Update " + board.folder + ": " + e.getMessage());
+            retrySoon(board);
+        }
+    }
+
+    /** Nach RETRY_SECONDS erneut prüfen statt erst beim nächsten regulären Durchlauf. */
+    private static void retrySoon(Board board) {
+        if (scheduler == null || !retryPlanned.add(board)) return;
+        scheduler.schedule(() -> {
+            retryPlanned.remove(board);
+            checkLogged(board);
+        }, RETRY_SECONDS, TimeUnit.SECONDS);
     }
 
     /**
      * Fragt die Version des ESP ab und stößt ein Update an, wenn sie nicht passt.
      */
     public static void check(Board board) throws IOException {
-        // Ein Neustart des Scanners würde den Summer abschalten.
-        if (Main.getInstance().isAlarm()) {
+        // Ein Neustart des Scanners würde den Summer abschalten. Die anderen
+        // Geräte nicht aufhalten - sonst käme z.B. eine Ausgabe, die Fehlalarme
+        // auslöst, nie an ihre Korrektur.
+        if (board == Board.SCANNER && Main.getInstance().isAlarm()) {
             LOG.info("ESP-Update " + board.folder + " verschoben: Alarm läuft");
+            retrySoon(board);
             return;
         }
         String target = manifest(board).version();
@@ -197,11 +223,33 @@ public final class EspUpdateManager {
             LOG.info("ESP-Update " + board.folder + ": /version antwortet mit " + installed.status());
             return;
         }
-        if (target.equals(installed.body().trim())) return;
+        String current = installed.body().trim();
+        if (target.equals(current)) {
+            if (attempts.remove(board) != null) {
+                LOG.info("ESP-Update " + board.folder + ": Version " + target + " läuft");
+            }
+            lastTarget.remove(board);
+            return;
+        }
+        int tries = target.equals(lastTarget.get(board)) ? attempts.getOrDefault(board, 0) : 0;
+        if (tries > 0) {
+            // Update lief schon, Gerät ist aber wieder auf der alten Version:
+            // die neue startete nicht und wurde zurückgerollt (esp/common/boot.py).
+            LOG.warning("ESP-Update " + board.folder + ": nach " + tries + " Versuch(en) immer noch " + current
+                    + " statt " + target + " - die neue Version startet vermutlich nicht und wurde"
+                    + " zurückgerollt. Ausgabe des ESP per USB ansehen.");
+        }
         Response answer = get(base + "/update");
-        LOG.info("ESP-Update " + board.folder + ": " + installed.body().trim() + " -> " + target
-                + ", Antwort: " + answer.body().trim());
-        if ("ok".equals(answer.body().trim())) pingWhileOnTrial(board);
+        String reply = answer.body().trim();
+        LOG.info("ESP-Update " + board.folder + ": " + current + " -> " + target + ", Antwort: " + reply);
+        if ("ok".equals(reply)) {
+            lastTarget.put(board, target);
+            attempts.put(board, tries + 1);
+            pingWhileOnTrial(board);
+        } else if ("busy".equals(reply) || "läuft schon".equals(reply)) {
+            // Ausgabe läuft gerade bzw. Update läuft schon - gleich nochmal.
+            retrySoon(board);
+        }
     }
 
     /**
