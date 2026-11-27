@@ -132,6 +132,18 @@ def dispense(x):
 queue = []
 queue_lock = _thread.allocate_lock()
 
+# Gesperrt, solange der Motor dreht. Die Schrittimpulse kommen aus einer
+# Python-Schleife mit 5-ms-Pausen; jeder andere Thread, der in der Zeit rechnet
+# oder in einer kurzen Pause wartet, hält die Interpreter-Sperre (GIL) und
+# verzögert einzelne Schritte - der Motor läuft dann unrund. Deshalb warten
+# Lichtschranken-Überwachung und Meldungen hier, ohne Rechenzeit zu brauchen.
+motor_lock = _thread.allocate_lock()
+
+
+def wait_motor_idle():
+    motor_lock.acquire()
+    motor_lock.release()
+
 
 def enqueue(nr):
     queue_lock.acquire()
@@ -154,13 +166,16 @@ def worker():
             continue
         state["busy"] = True
         log("Gebe Fach", nr, "aus")
+        motor_lock.acquire()
         try:
             ok = dispense(nr)
         except Exception as e:
             log("Motorfehler:", e)
             ok = False
-        state["last_end"] = time.ticks_ms()
-        state["busy"] = False
+        finally:
+            state["last_end"] = time.ticks_ms()
+            state["busy"] = False
+            motor_lock.release()
         if ok:
             report("/dispense/success", nr)
         else:
@@ -193,6 +208,10 @@ def http_post(host, port, path, body, headers, timeout=5):
 # Ausgabe noch die Überwachung der Lichtschranken auf das Netz.
 outbox = []
 outbox_lock = _thread.allocate_lock()
+# Frei = es liegt etwas in outbox. Der Thread wartet darauf, statt alle 50 ms
+# nachzusehen (siehe motor_lock).
+outbox_ready = _thread.allocate_lock()
+outbox_ready.acquire()
 
 
 def report(path, nr):
@@ -201,6 +220,10 @@ def report(path, nr):
         outbox.append((path, nr))
     finally:
         outbox_lock.release()
+    try:
+        outbox_ready.release()
+    except RuntimeError:
+        pass  # schon frei - der Thread holt alles auf einmal ab
 
 
 def send_report(path, nr):
@@ -210,6 +233,8 @@ def send_report(path, nr):
         return
     body = ujson.dumps({"nr": nr})
     for attempt in range(3):
+        # Nicht senden, während der Motor dreht (z.B. nächstes Fach in der Warteschlange).
+        wait_motor_idle()
         try:
             headers = signing.headers(config.HMAC_KEY_ID, config.HMAC_KEY, body)
             headers["Content-Type"] = "application/json"
@@ -225,18 +250,19 @@ def send_report(path, nr):
 
 def reporter():
     while True:
-        outbox_lock.acquire()
-        try:
-            item = outbox.pop(0) if outbox else None
-        finally:
-            outbox_lock.release()
-        if item is None:
-            time.sleep_ms(50)
-            continue
-        try:
-            send_report(item[0], item[1])
-        except Exception as e:
-            log("Meldung fehlgeschlagen:", e)
+        outbox_ready.acquire()
+        while True:
+            outbox_lock.acquire()
+            try:
+                item = outbox.pop(0) if outbox else None
+            finally:
+                outbox_lock.release()
+            if item is None:
+                break
+            try:
+                send_report(item[0], item[1])
+            except Exception as e:
+                log("Meldung fehlgeschlagen:", e)
 
 
 # ---------------------------------------------------------------------------
@@ -443,6 +469,9 @@ def main():
     # Lichtschranken überwachen und das WLAN im Blick behalten.
     last_wlan_check = time.ticks_ms()
     while True:
+        # Während der Motor dreht, gibt es nichts zu überwachen (dispensing()) -
+        # hier warten, ohne dem Motor Rechenzeit wegzunehmen.
+        wait_motor_idle()
         if config.ALARM_ENABLED:
             try:
                 check_sensors()
